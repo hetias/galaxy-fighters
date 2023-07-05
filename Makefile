@@ -5,10 +5,10 @@ OBJS = main.o
 CC = g++
 
 #INCLUDE_PATHS specifies additional include paths we'll need
-INCLUDE_PATHS = -IC:\matias\sdl2\include
+INCLUDE_PATHS = -IC:\libraries\sdl2\include
 
 #LIBRARY_PATHS specifies additional libraries
-LIBRARY_PATHS = -LC:\matias\sdl2\lib
+LIBRARY_PATHS = -LC:\libraries\sdl2\lib
 
 #COMPILER_FLAGS specifies additional compilitaion options
 COMPILER_FLAGS = -w -Wl, -subsystem,windows
