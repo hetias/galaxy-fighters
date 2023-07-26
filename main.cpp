@@ -1,8 +1,10 @@
 #include<iostream>
 #include<vector>
+#include<string>
 
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
+#include<SDL2/SDL_ttf.h>
 
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 600
@@ -35,10 +37,14 @@ void free_sdl(void);
 bool load_resources(void);
 void free_resources(void);
 
+void draw_text(const char*, SDL_Point, SDL_Color);
+
 std::vector<SDL_Texture*> g_textures;
 
 player_t player_ship;
 
+
+TTF_Font* g_font = nullptr;
 SDL_Window* g_window = nullptr;
 SDL_Renderer* g_renderer = nullptr;
 bool g_isGameRunning = true;
@@ -46,11 +52,13 @@ bool g_isGameRunning = true;
 int main(int argc, char* argv[]){
 
   //start game
-  if(initialize_sdl()){
+  if( initialize_sdl() ){
     return EXIT_FAILURE;
   }
   
-  load_resources();
+  if( load_resources() ){
+    return EXIT_FAILURE;
+  }
   
   player_t* bluePlayer = player_create();
   
@@ -64,8 +72,12 @@ int main(int argc, char* argv[]){
 }
 
 void game_loop(player_t* bluePlayer){
-
+  
   while(g_isGameRunning){
+    
+    //fps count start
+    Uint32 fps_start = SDL_GetTicks();
+
     //events
     SDL_Event e;
     while(SDL_PollEvent(&e)){
@@ -88,17 +100,29 @@ void game_loop(player_t* bluePlayer){
       g_isGameRunning = false;
     }
 
+    //player
     player_update(bluePlayer, KeyboardState);
+
+    //frame end count
+    Uint32 fps_end = SDL_GetTicks();
+    
+    double fps_elapsed = double(fps_end - fps_start) / 1000.0f;
     
     //render
     SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 0);
     SDL_RenderClear(g_renderer);
-
-    player_draw(bluePlayer);
     
-    //SDL_RenderCopy(g_renderer, g_textures.at(TXT_BG_DARKPURPLE), NULL, NULL);
+    SDL_RenderCopy(g_renderer, g_textures.at(TXT_BG_DARKPURPLE), NULL, NULL);
+
+    //draw_text(std::to_string(fps_elapsed).c_str(), {0, 0}, {255, 255, 255});
+    
+    player_draw(bluePlayer);
 
     SDL_RenderPresent(g_renderer);
+
+    //fps capping
+    SDL_Delay(floor(16.666f - fps_elapsed));
+    
   }
 
   
@@ -112,7 +136,7 @@ bool initialize_sdl(void){
     return EXIT_FAILURE;
   }
 
-  g_window = SDL_CreateWindow("title",
+  g_window = SDL_CreateWindow("Galaxy Fighters",
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
 			      WINDOW_WIDTH, WINDOW_HEIGHT,
@@ -134,6 +158,12 @@ bool initialize_sdl(void){
     return EXIT_FAILURE;
   }
 
+  if(TTF_Init() < 0)
+  {
+    std::cout<<"couldnt initiazlie sdl_ttf"<<std::endl;
+    return EXIT_FAILURE;
+  }
+  
   return EXIT_SUCCESS;
 }
 
@@ -142,11 +172,18 @@ void free_sdl(void){
   SDL_DestroyWindow(g_window);
   SDL_Quit();
   IMG_Quit();
+  TTF_Quit();
 }
 
 bool load_resources(void){
   SDL_Texture* tmp_texture = nullptr;
 
+  g_font = TTF_OpenFont("resources/fonts/font.ttf", 24);
+  if (!g_font){
+    std::cout<<SDL_GetError()<<std::endl;
+    return EXIT_FAILURE;
+  }
+  
   tmp_texture = IMG_LoadTexture(g_renderer, "resources/sprites/backgrounds/black.png");
   if(!tmp_texture){
     std::cout<<SDL_GetError()<<std::endl;
@@ -191,6 +228,9 @@ bool load_resources(void){
 }
 
 void free_resources(){
+
+  TTF_CloseFont(g_font);
+  
   for(auto it : g_textures){
     SDL_DestroyTexture(it);
     it = nullptr;
@@ -240,6 +280,12 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
     //shoot projectile
   }
 
+
+  //normalizing vector
+  float magnitud = sqrt(_player->direction.x * _player->direction.x + _player->direction.y * _player->direction.y);
+  _player->direction.x = (_player->direction.x != 0.0) ? _player->direction.x / magnitud : 0.0f;
+  _player->direction.y = (_player->direction.y != 0.0) ? _player->direction.y / magnitud : 0.0f;
+  
   //move
   _player->position.x += _player->direction.x * _player->speed;
   _player->position.y += _player->direction.y * _player->speed;
@@ -259,3 +305,24 @@ void player_draw(player_t* _player){
     SDL_RenderCopyF(g_renderer, _player->sprite, NULL, &_player->hitbox);
   }
 }
+
+void draw_text(const char* _text, SDL_Point _position, SDL_Color _color){
+
+  SDL_Surface* text_surface = NULL;
+  SDL_Texture* text_texture = NULL;
+
+  text_surface = TTF_RenderText_Solid(g_font, _text, _color );
+  if(text_surface){
+    text_texture = SDL_CreateTextureFromSurface(g_renderer, text_surface);
+    if(text_surface){
+      SDL_Rect dstrect = {_position.x, _position.y, text_surface->w, text_surface->h};
+      SDL_RenderCopy(g_renderer, text_texture, NULL, &dstrect );
+
+      SDL_FreeSurface(text_surface);
+      SDL_DestroyTexture(text_texture);
+    }
+    
+  }
+  
+}
+

@@ -5,16 +5,16 @@ OBJS = main.o
 CC = g++
 
 #INCLUDE_PATHS specifies additional include paths we'll need
-INCLUDE_PATHS = -IC:\libraries\sdl2\include
+INCLUDE_PATHS = -I`sdl2-config --cflags`
 
 #LIBRARY_PATHS specifies additional libraries
-LIBRARY_PATHS = -LC:\libraries\sdl2\lib
+LIBRARY_PATHS = -L
 
 #COMPILER_FLAGS specifies additional compilitaion options
-COMPILER_FLAGS = -w -Wl, -subsystem,windows
+COMPILER_FLAGS = 
 
 #LINKER_FLAGS specifies the libraries we're linking to
-LINKER_FLAGS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -std=c++14
+LINKER_FLAGS = -lSDL2main `sdl2-config --static-libs` -lSDL2_image -lSDL2_ttf -std=c++14
 
 #OBJ_NAME = specifies the name of the executable
 OBJ_NAME = main
