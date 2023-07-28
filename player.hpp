@@ -8,11 +8,11 @@
 
 //global game textures vector
 //found in main.cpp
-extern std::vector<SDL_Texture*> g_textures;
+extern std::vector<SDL_Texture*> gTextures;
 
 //global SDL_Renderer object
 //found in main.cpp
-extern SDL_Renderer* g_renderer;
+extern SDL_Renderer* gRenderer;
 
 //global texture name references
 extern int player_texture;

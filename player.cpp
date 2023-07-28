@@ -14,7 +14,7 @@ player_t* player_create(SDL_Texture* _shipTexture){
                    &dims.y);
   
   tmp_player->hp        = 5;
-  tmp_player->position  = {300.0f, 300.0f};
+  tmp_player->position  = {300.0f, 600.0f - dims.y};
   tmp_player->direction = {0};
   tmp_player->hitbox    = {tmp_player->position.x,
                            tmp_player->position.y,
@@ -72,8 +72,8 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
   _player->position.x += _player->direction.x * _player->speed;
   _player->position.y += _player->direction.y * _player->speed;
 
-  _player->hitbox.x = _player->position.x;
-  _player->hitbox.y = _player->position.y;
+  _player->hitbox.x = _player->position.x - (_player->hitbox.w / 2);
+  _player->hitbox.y = _player->position.y - (_player->hitbox.h / 2);
 }
 
 
@@ -84,16 +84,13 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
 void player_draw(player_t* _player){
   if(_player->sprite){
 
-    //actual position
-    SDL_SetRenderDrawColor(g_renderer, 0, 0, 255, 255);
-    SDL_RenderDrawPointF(g_renderer, _player->position.x,_player->position.y);
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+    SDL_RenderDrawPointF(gRenderer, _player->position.x,_player->position.y);
 
-    //hitbox centered
-    SDL_SetRenderDrawColor(g_renderer, 255, 0, 0 ,255);
-    SDL_RenderDrawRectF(g_renderer, &_player->hitbox);
+    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0 ,255);
+    SDL_RenderDrawRectF(gRenderer, &_player->hitbox);
 
-    //texture centered
-    SDL_RenderCopyF(g_renderer, _player->sprite, NULL, &_player->hitbox);
+    SDL_RenderCopyF(gRenderer, _player->sprite, NULL, &_player->hitbox);
   }
 }
 

@@ -11,13 +11,39 @@
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 600
 
+typedef struct enemy_s{
+  SDL_FPoint position;
+  SDL_FRect hitbox;
+  SDL_Texture* sprite;
+  int hp;
+}enemy_t;
+
+enemy_t* enemy_create(SDL_Texture*);
+void enemy_update(enemy_t*);
+void enemy_draw(enemy_t*);
+
 enum ETextures{
+  //background
   TXT_BG_BLACK,
   TXT_BG_PURPLE,
   TXT_BG_BLUE,
   TXT_BG_DARKPURPLE,
+  //player
   TXT_PLAYER_BLUE,
+  //enemy
+  TXT_ENEMY1_BLACK,
+  //vector final size
   TXT_VECSIZE
+};
+
+const char* gTexturesPaths[] =
+{
+  "resources/sprites/backgrounds/black.png",
+  "resources/sprites/backgrounds/purple.png",
+  "resources/sprites/backgrounds/blue.png",
+  "resources/sprites/backgrounds/darkPurple.png",
+  "resources/sprites/player/player_blue.png",
+  "resources/sprites/enemies/enemyBlack1.png"
 };
 
 bool initialize_sdl(void);
@@ -30,14 +56,16 @@ void free_resources(void);
 void draw_text(const char*, SDL_Point, SDL_Color);
 
 //GLOBAL VARS
-TTF_Font* g_font = nullptr;
-SDL_Window* g_window = nullptr;
-SDL_Renderer* g_renderer = nullptr;
-bool g_isGameRunning = true;
+TTF_Font* gFont = nullptr;
+SDL_Window* gWindow = nullptr;
+SDL_Renderer* gRenderer = nullptr;
+bool gIsGameRunning = true;
 
-std::vector<SDL_Texture*> g_textures;
+std::vector<SDL_Texture*> gTextures;
+std::vector<enemy_t*> gEnemies;
 
 Uint32 scene_tick = 0;
+
 
 
 //
@@ -62,8 +90,11 @@ int main(int argc, char* argv[]){
   //
   //CREATE NEEDED ENTITIES AND OBJECTS
   //
-  player_t* bluePlayer = player_create(g_textures.at(TXT_PLAYER_BLUE));
+  player_t* bluePlayer = player_create(gTextures.at(TXT_PLAYER_BLUE));
+  enemy_t*  enemy      = enemy_create(gTextures.at(TXT_ENEMY1_BLACK));
 
+  gEnemies.push_back(enemy);
+  
   //
   //START GAME LOOP
   //
@@ -74,6 +105,11 @@ int main(int argc, char* argv[]){
   //
   player_destroy(bluePlayer);
 
+  for(auto enemy : gEnemies)
+  {
+    delete enemy;
+    enemy = NULL;
+  }
   //
   //FREE GAME RESOURCES
   //
@@ -82,9 +118,14 @@ int main(int argc, char* argv[]){
   return EXIT_SUCCESS;
 }
 
+
+
+//
+//MAIN GAME LOOP
+//
 void game_loop(player_t* bluePlayer){
   
-  while(g_isGameRunning){
+  while(gIsGameRunning){
     //fps count start
     Uint32 fps_start = SDL_GetTicks();
 
@@ -96,7 +137,7 @@ void game_loop(player_t* bluePlayer){
       switch(e.type){
       
       case SDL_QUIT:
-	g_isGameRunning = false;
+	gIsGameRunning = false;
 	break;
       
       }//end switch
@@ -107,12 +148,17 @@ void game_loop(player_t* bluePlayer){
     const Uint8* KeyboardState = SDL_GetKeyboardState(NULL);
 
     if(KeyboardState[SDL_SCANCODE_ESCAPE]){
-      g_isGameRunning = false;
+      gIsGameRunning = false;
     }
 
-    //player
+    //update
     player_update(bluePlayer, KeyboardState);
 
+    for(auto enemy : gEnemies)
+    {
+      enemy_update(enemy);
+    }
+    
     scene_tick++;
     
     //frame end count
@@ -121,19 +167,24 @@ void game_loop(player_t* bluePlayer){
     double fps_elapsed = double(fps_end - fps_start) / 1000.0f;
     
     //render
-    SDL_SetRenderDrawColor(g_renderer, 0, 0, 0, 0);
-    SDL_RenderClear(g_renderer);
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
+    SDL_RenderClear(gRenderer);
 
     /*background elements*/
-    SDL_RenderCopy(g_renderer, g_textures.at(TXT_BG_DARKPURPLE), NULL, NULL);
+    SDL_RenderCopy(gRenderer, gTextures.at(TXT_BG_DARKPURPLE), NULL, NULL);
 
     /*important elements*/
     player_draw(bluePlayer);
 
+    for(auto enemy : gEnemies)
+    {
+      enemy_draw(enemy);
+    }
+
     /*UI elements */
     draw_text(std::to_string(scene_tick).c_str(), {0, 0}, {255, 255, 255});
 
-    SDL_RenderPresent(g_renderer);
+    SDL_RenderPresent(gRenderer);
 
     //fps capping
     SDL_Delay(floor(16.666f - fps_elapsed));
@@ -143,83 +194,71 @@ void game_loop(player_t* bluePlayer){
   
 }
 
+
+
+//INITIALIZE SDL2 AND OTHER LIBRARIES
 bool initialize_sdl(void){
-  //
-  //INITIALIZE SDL EVERYTHING
-  //
   if(SDL_Init(SDL_INIT_EVERYTHING) != 0){
     std::cout<<"coudlnt initialize sdl2: "<<SDL_GetError()<<std::endl;
 
     return EXIT_FAILURE;
   }
 
-
-  
-  //
-  //CREATE WINDOW
-  //
-  g_window = SDL_CreateWindow("Galaxy Fighters",
+  gWindow = SDL_CreateWindow("Galaxy Fighters",
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
 			      WINDOW_WIDTH, WINDOW_HEIGHT,
                               SDL_WINDOW_SHOWN);
-  if(g_window == nullptr){
+  if(gWindow == nullptr){
     std::cout<<"coudlnt crete window: "<<SDL_GetError()<<std::endl;
     return EXIT_FAILURE;
   }
 
-
-  
-  //
-  //CREATE RENDERER
-  //    
-  g_renderer = SDL_CreateRenderer(g_window, -1, SDL_RENDERER_ACCELERATED );
-  if(g_renderer == nullptr){
+  gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED );
+  if(gRenderer == nullptr){
     std::cout<<"coudlnt crete SDL2 renderer: "<<SDL_GetError()<<std::endl;
     return EXIT_FAILURE;
   }
 
-
-  
-  //
-  //INITIALIZE SDL IMAGE
-  //
   if(IMG_Init(IMG_INIT_PNG) != IMG_INIT_PNG)
   {
     std::cout<<"coudlnt initialize sdl_image"<<std::endl;
     return EXIT_FAILURE;
   }
 
-
-
-  //
-  //INITIALIZE SDL TTF
-  //
   if(TTF_Init() < 0)
   {
     std::cout<<"couldnt initiazlie sdl_ttf"<<std::endl;
     return EXIT_FAILURE;
   }
-
-
   
   return EXIT_SUCCESS;
 }
 
+
+
+//
+//FREE SDL2 OBJECTS AND QUIT SDL2 SUBSYSTEMS AND LIBS
+//
 void free_sdl(void){
-  SDL_DestroyRenderer(g_renderer);
-  SDL_DestroyWindow(g_window);
+  SDL_DestroyRenderer(gRenderer);
+  SDL_DestroyWindow(gWindow);
   SDL_Quit();
   IMG_Quit();
   TTF_Quit();
 }
 
+
+
+//
+//LOAD ALL GAME RESOURCES
+//
 bool load_resources(void){
-  SDL_Texture* tmp_texture = nullptr;
+  SDL_Texture* _tmpTexture = nullptr;
 
   //OPEN GAME FONT
-  g_font = TTF_OpenFont("resources/fonts/font.ttf", 24);
-  if (!g_font){
+  gFont = TTF_OpenFont("resources/fonts/font.ttf", 24);
+  if (!gFont){
     std::cout<<SDL_GetError()<<std::endl;
     return EXIT_FAILURE;
   }
@@ -227,59 +266,34 @@ bool load_resources(void){
   //
   //LOOAD TEXTURES
   //
-  tmp_texture = IMG_LoadTexture(g_renderer, "resources/sprites/backgrounds/black.png");
-  if(!tmp_texture){
-    std::cout<<SDL_GetError()<<std::endl;
-    return EXIT_FAILURE;
-  }
-  g_textures.push_back(tmp_texture);
-  tmp_texture = nullptr;
 
-  tmp_texture = IMG_LoadTexture(g_renderer, "resources/sprites/backgrounds/purple.png");
-  if(!tmp_texture){
-    std::cout<<SDL_GetError()<<std::endl;
-    return EXIT_FAILURE;
-  }
-  g_textures.push_back(tmp_texture);
-  tmp_texture = nullptr;
+  for(auto path : gTexturesPaths)
+  {
+    _tmpTexture = IMG_LoadTexture(gRenderer,
+                                  path);
+    if(!_tmpTexture){
+      std::cout<<SDL_GetError()<<std::endl;
+      return EXIT_FAILURE;
+    }
+    gTextures.push_back(_tmpTexture);
 
-  tmp_texture = IMG_LoadTexture(g_renderer, "resources/sprites/backgrounds/blue.png");
-  if(!tmp_texture){
-    std::cout<<SDL_GetError()<<std::endl;
-    return EXIT_FAILURE;
+    //std::cout<<path<<std::endl;
   }
-  g_textures.push_back(tmp_texture);
-  tmp_texture = nullptr;
 
-  tmp_texture = IMG_LoadTexture(g_renderer, "resources/sprites/backgrounds/darkPurple.png");
-  if(!tmp_texture){
-    std::cout<<SDL_GetError()<<std::endl;
-    return EXIT_FAILURE;
-  }
-  g_textures.push_back(tmp_texture);
-  tmp_texture = nullptr;
-
-    tmp_texture = IMG_LoadTexture(g_renderer, "resources/sprites/player/player_blue.png");
-  if(!tmp_texture){
-    std::cout<<SDL_GetError()<<std::endl;
-    return EXIT_FAILURE;
-  }
-  g_textures.push_back(tmp_texture);
-  tmp_texture = nullptr;
   
   return EXIT_SUCCESS;
 }
 
 void free_resources(){
 
-  TTF_CloseFont(g_font);
+  TTF_CloseFont(gFont);
   
-  for(auto it : g_textures){
+  for(auto it : gTextures){
     SDL_DestroyTexture(it);
     it = nullptr;
   }
   
-  g_textures.clear();
+  gTextures.clear();
 }
 
 void draw_text(const char* _text, SDL_Point _position, SDL_Color _color){
@@ -287,12 +301,12 @@ void draw_text(const char* _text, SDL_Point _position, SDL_Color _color){
   SDL_Surface* text_surface = NULL;
   SDL_Texture* text_texture = NULL;
 
-  text_surface = TTF_RenderText_Solid(g_font, _text, _color );
+  text_surface = TTF_RenderText_Solid(gFont, _text, _color );
   if(text_surface){
-    text_texture = SDL_CreateTextureFromSurface(g_renderer, text_surface);
+    text_texture = SDL_CreateTextureFromSurface(gRenderer, text_surface);
     if(text_surface){
       SDL_Rect dstrect = {_position.x, _position.y, text_surface->w, text_surface->h};
-      SDL_RenderCopy(g_renderer, text_texture, NULL, &dstrect );
+      SDL_RenderCopy(gRenderer, text_texture, NULL, &dstrect );
 
       SDL_FreeSurface(text_surface);
       SDL_DestroyTexture(text_texture);
@@ -302,3 +316,67 @@ void draw_text(const char* _text, SDL_Point _position, SDL_Color _color){
   
 }
 
+enemy_t* enemy_create(SDL_Texture* _enemyTexture)
+{
+  if(!_enemyTexture) return nullptr;
+
+  enemy_t* _tmp = new enemy_t;
+  
+  _tmp->position = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
+
+    //get texture dimensions
+  SDL_Point dimensions = {0};
+  SDL_QueryTexture(_enemyTexture,
+                   NULL,
+                   NULL,
+                   &dimensions.x,
+                   &dimensions.y);
+
+  _tmp->hitbox   = {_tmp->position.x,
+                  _tmp->position.y,
+                  (float)dimensions.x,
+                  (float)dimensions.y};
+  _tmp->sprite   = _enemyTexture;
+  _tmp->hp       = 4;
+
+  return _tmp;  
+}
+
+void enemy_update(enemy_t* _enemy)
+{
+  _enemy->hitbox.x = _enemy->position.x - _enemy->hitbox.w / 2;
+  _enemy->hitbox.y = _enemy->position.y - _enemy->hitbox.h / 2;
+}
+
+void enemy_draw(enemy_t* _enemy)
+{  
+  if(_enemy){
+
+    SDL_RenderCopyF(gRenderer,
+                   _enemy->sprite,
+                   NULL,
+                   &_enemy->hitbox
+                   );
+  }
+  /*
+   
+  SDL_FRect _positionSquare = {_enemy->position.x - 5.0f,
+    _enemy->position.y - 5.0f,
+    10.0f,
+    10.0f,
+  };
+  
+  //draw centered cube
+  SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+  SDL_RenderDrawRectF(gRenderer, &_positionSquare);
+
+  //draw hitbox
+  SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+  SDL_RenderDrawRectF(gRenderer, &_enemy->hitbox);
+
+  //draw position point
+  SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+  SDL_RenderDrawPointF(gRenderer, _enemy->position.x, _enemy->position.y);
+  */
+  
+}
