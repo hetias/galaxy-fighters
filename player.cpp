@@ -5,14 +5,23 @@
 //
 //PLAYER CREATION
 //
-player_t* player_create(){
+player_t* player_create(SDL_Texture* _shipTexture){
   player_t* tmp_player = new player_t();
+
+  SDL_Point dims = {0, 0};
+  SDL_QueryTexture(_shipTexture, NULL, NULL,
+                   &dims.x,
+                   &dims.y);
+  
   tmp_player->hp        = 5;
   tmp_player->position  = {300.0f, 300.0f};
   tmp_player->direction = {0};
-  tmp_player->hitbox    = {0.0f, 0.0f, 99.0f, 75.0f};  
+  tmp_player->hitbox    = {tmp_player->position.x,
+                           tmp_player->position.y,
+                           (float)dims.x,
+                           (float)dims.y};
   tmp_player->speed     = 5.0f;
-  tmp_player->sprite    = g_textures.at(player_texture);
+  tmp_player->sprite    = _shipTexture;
 
   return tmp_player;
 }
@@ -74,12 +83,16 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
 //
 void player_draw(player_t* _player){
   if(_player->sprite){
+
+    //actual position
     SDL_SetRenderDrawColor(g_renderer, 0, 0, 255, 255);
     SDL_RenderDrawPointF(g_renderer, _player->position.x,_player->position.y);
 
+    //hitbox centered
     SDL_SetRenderDrawColor(g_renderer, 255, 0, 0 ,255);
     SDL_RenderDrawRectF(g_renderer, &_player->hitbox);
 
+    //texture centered
     SDL_RenderCopyF(g_renderer, _player->sprite, NULL, &_player->hitbox);
   }
 }
