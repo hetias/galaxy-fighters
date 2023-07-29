@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.o player.o
+OBJS = main.o projectile.o player.o
 
 #CC specifies used compiler
 CC = g++
@@ -25,5 +25,11 @@ all: $(OBJS)
 main.o: main.cpp
 	$(CC) $(INCLUDE_PATHS) -c main.cpp
 
+projectile.o: projectile.hpp projectile.cpp
+	$(CC) $(INCLUDE_PATH) -c projectile.cpp
+
 player.o: player.hpp player.cpp
 	$(CC) $(INCLUDE_PATH) -c player.cpp
+
+clean:
+	rm *.o

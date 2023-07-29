@@ -18,33 +18,9 @@ typedef struct enemy_s{
   int hp;
 }enemy_t;
 
-enemy_t* enemy_create(SDL_Texture*);
+enemy_t* enemy_create();
 void enemy_update(enemy_t*);
 void enemy_draw(enemy_t*);
-
-enum ETextures{
-  //background
-  TXT_BG_BLACK,
-  TXT_BG_PURPLE,
-  TXT_BG_BLUE,
-  TXT_BG_DARKPURPLE,
-  //player
-  TXT_PLAYER_BLUE,
-  //enemy
-  TXT_ENEMY1_BLACK,
-  //vector final size
-  TXT_VECSIZE
-};
-
-const char* gTexturesPaths[] =
-{
-  "resources/sprites/backgrounds/black.png",
-  "resources/sprites/backgrounds/purple.png",
-  "resources/sprites/backgrounds/blue.png",
-  "resources/sprites/backgrounds/darkPurple.png",
-  "resources/sprites/player/player_blue.png",
-  "resources/sprites/enemies/enemyBlack1.png"
-};
 
 bool initialize_sdl(void);
 void game_loop(player_t*);
@@ -61,10 +37,22 @@ SDL_Window* gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
 bool gIsGameRunning = true;
 
+std::vector<projectile_t*> gProjectiles;
 std::vector<SDL_Texture*> gTextures;
 std::vector<enemy_t*> gEnemies;
 
 Uint32 scene_tick = 0;
+
+const char* gTexturesPaths[] =
+{
+  "resources/sprites/backgrounds/black.png",
+  "resources/sprites/backgrounds/purple.png",
+  "resources/sprites/backgrounds/blue.png",
+  "resources/sprites/backgrounds/darkPurple.png",
+  "resources/sprites/player/player_blue.png",
+  "resources/sprites/enemies/enemyBlack1.png",
+  "resources/sprites/lasers/laserBlue.png"
+};
 
 
 
@@ -90,8 +78,8 @@ int main(int argc, char* argv[]){
   //
   //CREATE NEEDED ENTITIES AND OBJECTS
   //
-  player_t* bluePlayer = player_create(gTextures.at(TXT_PLAYER_BLUE));
-  enemy_t*  enemy      = enemy_create(gTextures.at(TXT_ENEMY1_BLACK));
+  player_t* bluePlayer = player_create();
+  enemy_t*  enemy      = enemy_create();
 
   gEnemies.push_back(enemy);
   
@@ -158,6 +146,11 @@ void game_loop(player_t* bluePlayer){
     {
       enemy_update(enemy);
     }
+
+    for(auto prj : gProjectiles)
+    {
+      projectile_update(prj);
+    }
     
     scene_tick++;
     
@@ -179,6 +172,11 @@ void game_loop(player_t* bluePlayer){
     for(auto enemy : gEnemies)
     {
       enemy_draw(enemy);
+    }
+
+    for(auto prj : gProjectiles)
+    {
+      projectile_draw(prj);
     }
 
     /*UI elements */
@@ -316,17 +314,15 @@ void draw_text(const char* _text, SDL_Point _position, SDL_Color _color){
   
 }
 
-enemy_t* enemy_create(SDL_Texture* _enemyTexture)
+enemy_t* enemy_create()
 {
-  if(!_enemyTexture) return nullptr;
-
   enemy_t* _tmp = new enemy_t;
   
   _tmp->position = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
 
     //get texture dimensions
   SDL_Point dimensions = {0};
-  SDL_QueryTexture(_enemyTexture,
+  SDL_QueryTexture(gTextures.at(TXT_ENEMY1_BLACK),
                    NULL,
                    NULL,
                    &dimensions.x,
@@ -336,7 +332,7 @@ enemy_t* enemy_create(SDL_Texture* _enemyTexture)
                   _tmp->position.y,
                   (float)dimensions.x,
                   (float)dimensions.y};
-  _tmp->sprite   = _enemyTexture;
+  _tmp->sprite   = gTextures.at(TXT_ENEMY1_BLACK);
   _tmp->hp       = 4;
 
   return _tmp;  

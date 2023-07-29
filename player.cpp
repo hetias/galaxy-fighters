@@ -5,11 +5,11 @@
 //
 //PLAYER CREATION
 //
-player_t* player_create(SDL_Texture* _shipTexture){
+player_t* player_create(){
   player_t* tmp_player = new player_t();
 
   SDL_Point dims = {0, 0};
-  SDL_QueryTexture(_shipTexture, NULL, NULL,
+  SDL_QueryTexture(gTextures.at(TXT_PLAYER_BLUE), NULL, NULL,
                    &dims.x,
                    &dims.y);
   
@@ -20,8 +20,10 @@ player_t* player_create(SDL_Texture* _shipTexture){
                            tmp_player->position.y,
                            (float)dims.x,
                            (float)dims.y};
-  tmp_player->speed     = 5.0f;
-  tmp_player->sprite    = _shipTexture;
+  tmp_player->shootDelay = 15;
+  tmp_player->currentShootDelay = 15;
+  tmp_player->speed     = 6.0f;
+  tmp_player->sprite    = gTextures.at(TXT_PLAYER_BLUE);
 
   return tmp_player;
 }
@@ -33,6 +35,8 @@ player_t* player_create(SDL_Texture* _shipTexture){
 //
 void player_update(player_t* _player, const Uint8* _keyboardState){
   //get inputs
+
+  //move vertically
   if(_keyboardState[SDL_SCANCODE_W]){
     if(_player->direction.y >= 0){
       _player->direction.y -= 1;
@@ -45,6 +49,7 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
     _player->direction.y = 0;
   }
 
+  //move horizontally
   if(_keyboardState[SDL_SCANCODE_A]){
     if(_player->direction.x >= 0){
       _player->direction.x -= 1;
@@ -57,9 +62,17 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
     _player->direction.x = 0;
   }
 
-    
-  if(_keyboardState[SDL_SCANCODE_J]){
-    //shoot projectile
+  //shoot projectile
+  if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
+  {
+    projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f});      
+    gProjectiles.push_back(tmp_prj);
+
+    _player->currentShootDelay = _player->shootDelay;
+  }
+  else
+  {
+    _player->currentShootDelay--;
   }
 
 
