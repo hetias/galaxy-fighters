@@ -1,5 +1,6 @@
 #include<iostream>
 #include<vector>
+#include<list>
 #include<string>
 
 #include<SDL2/SDL.h>
@@ -21,6 +22,7 @@ typedef struct enemy_s{
 enemy_t* enemy_create();
 void enemy_update(enemy_t*);
 void enemy_draw(enemy_t*);
+void enemy_destroy(enemy_t*);
 
 bool initialize_sdl(void);
 void game_loop(player_t*);
@@ -37,7 +39,7 @@ SDL_Window* gWindow = nullptr;
 SDL_Renderer* gRenderer = nullptr;
 bool gIsGameRunning = true;
 
-std::vector<projectile_t*> gProjectiles;
+std::list<projectile_t*> gProjectiles;
 std::vector<SDL_Texture*> gTextures;
 std::vector<enemy_t*> gEnemies;
 
@@ -93,10 +95,14 @@ int main(int argc, char* argv[]){
   //
   player_destroy(bluePlayer);
 
-  for(auto enemy : gEnemies)
+  for(auto _enemy : gEnemies)
   {
-    delete enemy;
-    enemy = NULL;
+    enemy_destroy(_enemy);
+  }
+
+  for(auto _prj : gProjectiles)
+  {
+     
   }
   //
   //FREE GAME RESOURCES
@@ -375,4 +381,13 @@ void enemy_draw(enemy_t* _enemy)
   SDL_RenderDrawPointF(gRenderer, _enemy->position.x, _enemy->position.y);
   */
   
+}
+
+void enemy_destroy(enemy_t* _enemy)
+{
+  if(_enemy)
+  {
+    delete _enemy;
+    _enemy = NULL;
+  }
 }

@@ -1,18 +1,11 @@
 #pragma once
 #include<iostream>
 #include<vector>
+#include<list>
 
 #include<SDL2/SDL.h>
 
 #include"definitions.hpp"
-
-//global game textures vector
-//found in main.cpp
-extern std::vector<SDL_Texture*> gTextures;
-
-//global SDL_Renderer object
-//found in main.cpp
-extern SDL_Renderer* gRenderer;
 
 typedef struct projectile_s{
   SDL_FPoint position;
@@ -22,6 +15,18 @@ typedef struct projectile_s{
   float speed;
   bool isFriendly;
 }projectile_t;
+
+//global game textures vector
+//found in main.cpp
+extern std::vector<SDL_Texture*> gTextures;
+
+//global SDL_Renderer object
+//found in main.cpp
+extern SDL_Renderer* gRenderer;
+
+//global projectiles vector.
+//found in main.cpp
+extern std::list<projectile_t*> gProjectiles;
 
 projectile_t* projectile_create(SDL_FPoint, SDL_FPoint);
 void projectile_update(projectile_t*);

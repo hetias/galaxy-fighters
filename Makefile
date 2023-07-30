@@ -11,7 +11,7 @@ INCLUDE_PATHS = -I`sdl2-config --cflags`
 LIBRARY_PATHS = -L
 
 #COMPILER_FLAGS specifies additional compilitaion options
-COMPILER_FLAGS = 
+COMPILER_FLAGS = -g
 
 #LINKER_FLAGS specifies the libraries we're linking to
 LINKER_FLAGS = -lSDL2main `sdl2-config --static-libs` -lSDL2_image -lSDL2_ttf -std=c++14

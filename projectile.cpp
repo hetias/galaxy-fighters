@@ -6,9 +6,10 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction)
 
   tmp->position = _position;
   tmp->direction = _direction;
-  tmp->hitbox = {13.0f, 13.0f};
+  tmp->hitbox = {tmp->position.x, tmp->position.y,
+                 13.0f,           54.0f};
   tmp->sprite = gTextures.at(TXT_LASER_BLUE);
-  tmp->speed = 8.0f;
+  tmp->speed = 1.0f;
   tmp->isFriendly = false;
 
   return tmp;
@@ -16,33 +17,40 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction)
 
 void projectile_update(projectile_t* _prj)
 {
-  //prj->position.x += prj->direction.x * prj->speed;
-  //prj->position.y += prj->direction.y * prj->speed;
+
+  //on bounds check
+  if(_prj->position.x > 600 || _prj->position.x < 0 ||
+     _prj->position.y > 600 || _prj->position.y < 0)
+  {
+    //projectile_destroy(_prj);
+  }else
+  {
+    _prj->position.x += _prj->direction.x * _prj->speed;
+    _prj->position.y += _prj->direction.y * _prj->speed;
+
+    _prj->hitbox.x = _prj->position.x - (_prj->hitbox.w / 2);
+    _prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);
+  }
 }
 
 void projectile_draw(projectile_t* _prj)
 {
-  SDL_FRect dst = {
-    _prj->position.x,
-    _prj->position.y,
-    13.0f,
-    54.0f};
-
   //drawing projectile
-  SDL_RenderCopyF(gRenderer, _prj->sprite, NULL, &dst);
-
-  //drawing dst
-  SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-  SDL_RenderDrawRectF(gRenderer, &dst);
+  SDL_FRect smallerHitbox = _prj->hitbox;
+  smallerHitbox.h = _prj->hitbox.h / 3.0f;
+  
+  SDL_RenderCopyF(gRenderer, _prj->sprite, NULL, &_prj->hitbox);
 
   //drawing hitbox
-  SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-  SDL_RenderDrawRectF(gRenderer, &_prj->hitbox);
+  //SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
+  //SDL_RenderDrawRectF(gRenderer, &smallerHitbox);
   
 }
 
-void projectiles_destroy(projectile_t* _prj)
+void projectile_destroy(projectile_t* _prj)
 {
+  std::cout<<"Projectile destroy"<<std::endl;
+  
   if(_prj)
   {
     delete _prj;

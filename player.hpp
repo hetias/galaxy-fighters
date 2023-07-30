@@ -1,12 +1,33 @@
 #pragma once
 
 #include<iostream>
+#include<list>
 #include<vector>
 
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
 
 #include"projectile.hpp"
+
+//player definition
+typedef struct player_s{
+  SDL_FPoint position;
+  SDL_FPoint direction;
+  SDL_FRect hitbox;
+  int shootDelay;
+  int currentShootDelay;
+  int hp;
+  float speed;
+  SDL_Texture* sprite;
+}player_t;
+
+
+
+//
+//EXTERN VARIABLES
+//
+
+
 
 //global game textures vector
 //found in main.cpp
@@ -20,19 +41,15 @@ extern SDL_Renderer* gRenderer;
 //extern int player_texture;
 
 //global projectiles container
-extern std::vector<projectile_t*> gProjectiles;
+extern std::list<projectile_t*> gProjectiles;
 
-//player definition
-typedef struct player_s{
-  SDL_FPoint position;
-  SDL_FPoint direction;
-  SDL_FRect hitbox;
-  int shootDelay;
-  int currentShootDelay;
-  int hp;
-  float speed;
-  SDL_Texture* sprite;
-}player_t;
+
+
+//
+//FUNCTION DEFINITIONS
+//
+
+
 
 //creation of player entity.
 //argument it's the texture to use
