@@ -1,5 +1,8 @@
 #pragma once
 
+#define WINDOW_WIDTH 600
+#define WINDOW_HEIGHT 600
+
 enum ETextures{
   //background
   TXT_BG_BLACK,

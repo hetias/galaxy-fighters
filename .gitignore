@@ -1,4 +1,2 @@
-main.exe
-player.o
-main.o
+*.o
 main

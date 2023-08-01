@@ -21,8 +21,6 @@ typedef struct player_s{
   SDL_Texture* sprite;
 }player_t;
 
-
-
 //
 //EXTERN VARIABLES
 //
@@ -37,13 +35,9 @@ extern std::vector<SDL_Texture*> gTextures;
 //found in main.cpp
 extern SDL_Renderer* gRenderer;
 
-//global texture name references
-//extern int player_texture;
-
 //global projectiles container
+//found in main.cpp
 extern std::list<projectile_t*> gProjectiles;
-
-
 
 //
 //FUNCTION DEFINITIONS
