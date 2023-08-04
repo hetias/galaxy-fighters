@@ -33,13 +33,13 @@ Uint32 scene_tick = 0;
 
 const char* gTexturesPaths[] =
 {
-  "resources/sprites/backgrounds/black.png",
-  "resources/sprites/backgrounds/purple.png",
-  "resources/sprites/backgrounds/blue.png",
-  "resources/sprites/backgrounds/darkPurple.png",
-  "resources/sprites/player/player_blue.png",
-  "resources/sprites/enemies/enemyBlack1.png",
-  "resources/sprites/lasers/laserBlue.png"
+  "../resources/sprites/backgrounds/black.png",
+  "../resources/sprites/backgrounds/purple.png",
+  "../resources/sprites/backgrounds/blue.png",
+  "../resources/sprites/backgrounds/darkPurple.png",
+  "../resources/sprites/player/player_blue.png",
+  "../resources/sprites/enemies/enemyBlack1.png",
+  "../resources/sprites/lasers/laserBlue.png"
 };
 
 
@@ -82,14 +82,14 @@ int main(int argc, char* argv[]){
   player_destroy(bluePlayer);
 
   for(auto _enemy : gEnemies)
-  {
     enemy_destroy(_enemy);
-  }
+  gEnemies.clear();
 
   for(auto _prj : gProjectiles)
-  {
-     
-  }
+    projectile_destroy(_prj);
+  gProjectiles.clear();
+
+  
   //
   //FREE GAME RESOURCES
   //
@@ -104,10 +104,10 @@ int main(int argc, char* argv[]){
 //MAIN GAME LOOP
 //
 void game_loop(player_t* bluePlayer){
-  
+  //fps count start
+  Uint32 fps_start = SDL_GetTicks();
+    
   while(gIsGameRunning){
-    //fps count start
-    Uint32 fps_start = SDL_GetTicks();
 
     //events
     SDL_Event e;
@@ -134,14 +134,16 @@ void game_loop(player_t* bluePlayer){
     //update
     player_update(bluePlayer, KeyboardState);
 
-    for(auto enemy : gEnemies)
+    for(auto _enemy : gEnemies)
     {
-      enemy_update(enemy);
+      enemy_update(_enemy);
     }
 
-    for(auto prj : gProjectiles)
+    for(auto _prj = gProjectiles.begin(); _prj != gProjectiles.end(); _prj++)
     {
-      projectile_update(prj);
+      if(projectile_update(*_prj)){
+        _prj = gProjectiles.erase(_prj);
+      }
     }
     
     scene_tick++;
@@ -149,7 +151,9 @@ void game_loop(player_t* bluePlayer){
     //frame end count
     Uint32 fps_end = SDL_GetTicks();
     
-    double fps_elapsed = double(fps_end - fps_start) / 1000.0f;
+    Uint32 fps_elapsed = fps_end - fps_start;
+
+    fps_start = fps_elapsed;
     
     //render
     SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
@@ -177,7 +181,7 @@ void game_loop(player_t* bluePlayer){
     SDL_RenderPresent(gRenderer);
 
     //fps capping
-    SDL_Delay(floor(16.666f - fps_elapsed));
+    SDL_Delay(floor(16.666f - (fps_elapsed / 1000.0f)));
     
   }
 
@@ -247,7 +251,7 @@ bool load_resources(void){
   SDL_Texture* _tmpTexture = nullptr;
 
   //OPEN GAME FONT
-  gFont = TTF_OpenFont("resources/fonts/font.ttf", 24);
+  gFont = TTF_OpenFont("../resources/fonts/font.ttf", 24);
   if (!gFont){
     std::cout<<SDL_GetError()<<std::endl;
     return EXIT_FAILURE;

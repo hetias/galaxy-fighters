@@ -22,7 +22,7 @@ player_t* player_create(){
                            (float)dims.y};
   tmp_player->shootDelay = 15;
   tmp_player->currentShootDelay = 15;
-  tmp_player->speed     = 6.0f;
+  tmp_player->speed     = 8.5f;
   tmp_player->sprite    = gTextures.at(TXT_PLAYER_BLUE);
 
   return tmp_player;

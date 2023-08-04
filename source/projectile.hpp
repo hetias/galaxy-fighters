@@ -29,6 +29,6 @@ extern SDL_Renderer* gRenderer;
 extern std::list<projectile_t*> gProjectiles;
 
 projectile_t* projectile_create(SDL_FPoint, SDL_FPoint);
-void projectile_update(projectile_t*);
+int projectile_update(projectile_t*);
 void projectile_draw(projectile_t*);
 void projectile_destroy(projectile_t*);
