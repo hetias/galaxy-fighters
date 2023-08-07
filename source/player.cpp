@@ -65,7 +65,7 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
   //shoot projectile
   if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
   {
-    projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f});      
+    projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true);
     gProjectiles.push_back(tmp_prj);
 
     _player->currentShootDelay = _player->shootDelay;

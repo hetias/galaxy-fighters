@@ -30,7 +30,8 @@ void enemy_update(enemy_t* _enemy)
 {
   if(_enemy->currentDelay < 0){
     projectile_t* tmp_prj = projectile_create(_enemy->position,
-                                              {0.0, 1.0});
+                                              {0.0, 1.0},
+                                              false);
     gProjectiles.push_back(tmp_prj);
 
     _enemy->currentDelay = _enemy->shootDelay;

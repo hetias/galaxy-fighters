@@ -33,13 +33,18 @@ Uint32 scene_tick = 0;
 
 const char* gTexturesPaths[] =
 {
+  //background
   "../resources/sprites/backgrounds/black.png",
   "../resources/sprites/backgrounds/purple.png",
   "../resources/sprites/backgrounds/blue.png",
   "../resources/sprites/backgrounds/darkPurple.png",
+  //Player
   "../resources/sprites/player/player_blue.png",
+  //Enemy
   "../resources/sprites/enemies/enemyBlack1.png",
-  "../resources/sprites/lasers/laserBlue.png"
+  //Lasers
+  "../resources/sprites/lasers/laserBlue.png",
+  "../resources/sprites/lasers/laserRed.png"
 };
 
 
