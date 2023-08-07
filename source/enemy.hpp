@@ -14,6 +14,8 @@ typedef struct enemy_s{
   SDL_FRect hitbox;
   SDL_Texture* sprite;
   int hp;
+  int shootDelay;
+  int currentDelay;
 }enemy_t;
 
 //

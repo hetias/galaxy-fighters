@@ -15,6 +15,7 @@ enum ETextures{
   TXT_ENEMY1_BLACK,
   //lasers
   TXT_LASER_BLUE,
+  TXT_LASER_RED,
   //vector final size
   TXT_VECSIZE
 };

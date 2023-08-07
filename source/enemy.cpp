@@ -20,12 +20,23 @@ enemy_t* enemy_create()
                   (float)dimensions.y};
   _tmp->sprite   = gTextures.at(TXT_ENEMY1_BLACK);
   _tmp->hp       = 4;
-
+  _tmp->shootDelay = 15;
+  _tmp->currentDelay = _tmp->shootDelay;
+  
   return _tmp;  
 }
 
 void enemy_update(enemy_t* _enemy)
 {
+  if(_enemy->currentDelay < 0){
+    projectile_t* tmp_prj = projectile_create(_enemy->position,
+                                              {0.0, 1.0});
+    gProjectiles.push_back(tmp_prj);
+
+    _enemy->currentDelay = _enemy->shootDelay;
+  }else{
+    _enemy->currentDelay--;
+  }
   _enemy->hitbox.x = _enemy->position.x - _enemy->hitbox.w / 2;
   _enemy->hitbox.y = _enemy->position.y - _enemy->hitbox.h / 2;
 }

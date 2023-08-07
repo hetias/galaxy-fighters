@@ -9,7 +9,7 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction)
   tmp->hitbox = {tmp->position.x, tmp->position.y,
                  13.0f,           54.0f};
   tmp->sprite = gTextures.at(TXT_LASER_BLUE);
-  tmp->speed = 15.0f;
+  tmp->speed = SLOW_PRJ_SPEED;
   tmp->isFriendly = false;
 
   return tmp;
@@ -52,8 +52,6 @@ void projectile_draw(projectile_t* _prj)
 
 void projectile_destroy(projectile_t* _prj)
 {
-  std::cout<<"Projectile destroy"<<std::endl;
-  
   if(_prj)
   {
     delete _prj;
