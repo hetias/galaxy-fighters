@@ -43,12 +43,26 @@ int projectile_update(projectile_t* _prj)
 void projectile_draw(projectile_t* _prj)
 {
   //drawing projectile
-  SDL_FRect smallerHitbox = _prj->hitbox;
-  smallerHitbox.h = _prj->hitbox.h / 3.0f;
-  
-  SDL_RenderCopyF(gRenderer, _prj->sprite, NULL, &_prj->hitbox);
-
-  //drawing hitbox
+  if(_prj->isFriendly){
+    SDL_RenderCopyExF(gRenderer,
+                      _prj->sprite,
+                      NULL,
+                      &_prj->hitbox,
+                      0.0,
+                      NULL,
+                      SDL_FLIP_NONE);
+  }else{
+    SDL_RenderCopyExF(gRenderer,
+                      _prj->sprite,
+                      NULL,
+                      &_prj->hitbox,
+                      180.0,
+                      NULL,
+                      SDL_FLIP_NONE);
+  }
+    //drawing hitbox
+  //SDL_FRect smallerHitbox = _prj->hitbox;
+  //smallerHitbox.h = _prj->hitbox.h / 3.0f;
   //SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
   //SDL_RenderDrawRectF(gRenderer, &smallerHitbox);
   
