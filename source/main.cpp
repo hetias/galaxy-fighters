@@ -9,6 +9,7 @@
 
 #include"player.hpp"
 #include"enemy.hpp"
+#include"spline.hpp"
 
 bool initialize_sdl(void);
 void game_loop(player_t*);
@@ -47,6 +48,19 @@ const char* gTexturesPaths[] =
   "../resources/sprites/lasers/laserRed.png"
 };
 
+spline mySpline =
+{
+  //vector points
+  {
+    //x   //y
+    {0.0f            , WINDOW_HEIGHT / 2},    
+    {100.0f          , WINDOW_HEIGHT / 3},
+    {200.0f          , WINDOW_HEIGHT / 3},
+    {300.0f          , WINDOW_HEIGHT / 2}
+  },
+  //is looped?
+  false
+};
 
 
 //
@@ -109,6 +123,11 @@ int main(int argc, char* argv[]){
 //MAIN GAME LOOP
 //
 void game_loop(player_t* bluePlayer){
+
+  for(auto point : mySpline.points){
+    std::cout<<point.x<<" "<<point.y<<std::endl;
+  }
+  
   //fps count start
   Uint32 fps_start = SDL_GetTicks();
     
@@ -168,6 +187,8 @@ void game_loop(player_t* bluePlayer){
     SDL_RenderCopy(gRenderer, gTextures.at(TXT_BG_DARKPURPLE), NULL, NULL);
 
     /*important elements*/
+    spline_draw(mySpline);
+    
     player_draw(bluePlayer);
 
     for(auto enemy : gEnemies)
@@ -179,7 +200,7 @@ void game_loop(player_t* bluePlayer){
     {
       projectile_draw(prj);
     }
-
+    
     /*UI elements */
     draw_text(std::to_string(scene_tick).c_str(), {0, 0}, {255, 255, 255});
 

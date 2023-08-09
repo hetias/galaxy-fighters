@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.o projectile.o player.o enemy.o
+OBJS = main.o projectile.o player.o enemy.o spline.o
 
 #CC specifies used compiler
 CC = g++
@@ -33,6 +33,9 @@ player.o: player.hpp player.cpp
 
 enemy.o: enemy.hpp enemy.cpp
 	$(CC) $(INCLUDE_PATH) -c enemy.cpp
+
+spline.o: spline.hpp spline.cpp
+	$(CC) $(INCLUDE_PATH) -c spline.cpp
 
 clean:
 	rm *.o
