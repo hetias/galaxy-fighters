@@ -5,11 +5,11 @@
 //
 //PLAYER CREATION
 //
-player_t* player_create(){
+player_t* player_create(SDL_Texture* _sprite){
   player_t* tmp_player = new player_t();
 
   SDL_Point dims = {0, 0};
-  SDL_QueryTexture(gTextures.at(TXT_PLAYER_BLUE), NULL, NULL,
+  SDL_QueryTexture(_sprite, NULL, NULL,
                    &dims.x,
                    &dims.y);
   
@@ -23,8 +23,13 @@ player_t* player_create(){
   tmp_player->shootDelay = 15;
   tmp_player->currentShootDelay = 15;
   tmp_player->speed     = 8.5f;
-  tmp_player->sprite    = gTextures.at(TXT_PLAYER_BLUE);
 
+  if(_sprite != NULL){
+      tmp_player->sprite = _sprite;
+  }else{
+    return NULL;
+  }
+  
   return tmp_player;
 }
 
@@ -33,7 +38,7 @@ player_t* player_create(){
 //
 //PLAYER LOGIC UPDATE
 //
-void player_update(player_t* _player, const Uint8* _keyboardState){
+void player_update(player_t* _player, const Uint8* _keyboardState, std::list<projectile_t*>* _projectilesList){
   //get inputs
 
   //move vertically
@@ -66,7 +71,7 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
   if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
   {
     projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true);
-    gProjectiles.push_back(tmp_prj);
+    _projectilesList->push_back(tmp_prj);
 
     _player->currentShootDelay = _player->shootDelay;
   }
@@ -94,16 +99,16 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
 //
 //PLAYER DRAW
 //
-void player_draw(player_t* _player){
+void player_draw(player_t* _player, SDL_Renderer* _renderer){
   if(_player->sprite){
 
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-    SDL_RenderDrawPointF(gRenderer, _player->position.x,_player->position.y);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);
+    SDL_RenderDrawPointF(_renderer, _player->position.x,_player->position.y);
 
-    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0 ,255);
-    SDL_RenderDrawRectF(gRenderer, &_player->hitbox);
+    SDL_SetRenderDrawColor(_renderer, 255, 0, 0 ,255);
+    SDL_RenderDrawRectF(_renderer, &_player->hitbox);
 
-    SDL_RenderCopyF(gRenderer, _player->sprite, NULL, &_player->hitbox);
+    SDL_RenderCopyF(_renderer, _player->sprite, NULL, &_player->hitbox);
   }
 }
 

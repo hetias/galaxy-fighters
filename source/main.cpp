@@ -85,7 +85,7 @@ int main(int argc, char* argv[]){
   //
   //CREATE NEEDED ENTITIES AND OBJECTS
   //
-  player_t* bluePlayer = player_create();
+  player_t* bluePlayer = player_create(gTextures.at(TXT_PLAYER_BLUE));
   enemy_t*  enemy      = enemy_create();
 
   gEnemies.push_back(enemy);
@@ -156,7 +156,7 @@ void game_loop(player_t* bluePlayer){
     }
 
     //update
-    player_update(bluePlayer, KeyboardState);
+    player_update(bluePlayer, KeyboardState, &gProjectiles);
 
     for(auto _enemy : gEnemies)
     {
@@ -189,7 +189,7 @@ void game_loop(player_t* bluePlayer){
     /*important elements*/
     spline_draw(mySpline);
     
-    player_draw(bluePlayer);
+    player_draw(bluePlayer, gRenderer);
 
     for(auto enemy : gEnemies)
     {
