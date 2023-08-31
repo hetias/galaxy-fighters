@@ -1,14 +1,18 @@
 #include"enemy.hpp"
 
-enemy_t* enemy_create()
+enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector)
 {
+  if(!_texturesVector){
+    std::cout<<""<<std::endl;
+  }
+  
   enemy_t* _tmp = new enemy_t;
   
   _tmp->position = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
 
     //get texture dimensions
   SDL_Point dimensions = {0};
-  SDL_QueryTexture(gTextures.at(TXT_ENEMY1_BLACK),
+  SDL_QueryTexture(_texturesVector->at(TXT_ENEMY1_BLACK),
                    NULL,
                    NULL,
                    &dimensions.x,
@@ -18,7 +22,8 @@ enemy_t* enemy_create()
                   _tmp->position.y,
                   (float)dimensions.x,
                   (float)dimensions.y};
-  _tmp->sprite   = gTextures.at(TXT_ENEMY1_BLACK);
+  _tmp->sprite   = _texturesVector->at(TXT_ENEMY1_BLACK);
+  _tmp->projectile_texture   = _texturesVector->at(TXT_LASER_RED);
   _tmp->hp       = 4;
   _tmp->shootDelay = 15;
   _tmp->currentDelay = _tmp->shootDelay;
@@ -26,13 +31,14 @@ enemy_t* enemy_create()
   return _tmp;  
 }
 
-void enemy_update(enemy_t* _enemy)
+void enemy_update(enemy_t* _enemy, std::list<projectile_t*>* _projectileList)
 {
   if(_enemy->currentDelay < 0){
     projectile_t* tmp_prj = projectile_create(_enemy->position,
                                               {0.0, 1.0},
-                                              false);
-    gProjectiles.push_back(tmp_prj);
+                                              false,
+                                              _enemy->projectile_texture);
+    _projectileList->push_back(tmp_prj);
 
     _enemy->currentDelay = _enemy->shootDelay;
   }else{
@@ -42,11 +48,11 @@ void enemy_update(enemy_t* _enemy)
   _enemy->hitbox.y = _enemy->position.y - _enemy->hitbox.h / 2;
 }
 
-void enemy_draw(enemy_t* _enemy)
+void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer)
 {  
   if(_enemy){
 
-    SDL_RenderCopyF(gRenderer,
+    SDL_RenderCopyF(_renderer,
                    _enemy->sprite,
                    NULL,
                    &_enemy->hitbox

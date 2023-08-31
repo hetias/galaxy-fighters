@@ -85,8 +85,8 @@ int main(int argc, char* argv[]){
   //
   //CREATE NEEDED ENTITIES AND OBJECTS
   //
-  player_t* bluePlayer = player_create(gTextures.at(TXT_PLAYER_BLUE));
-  enemy_t*  enemy      = enemy_create();
+  player_t* bluePlayer = player_create(&gTextures);
+  enemy_t*  enemy      = enemy_create(&gTextures);
 
   gEnemies.push_back(enemy);
   
@@ -160,7 +160,7 @@ void game_loop(player_t* bluePlayer){
 
     for(auto _enemy : gEnemies)
     {
-      enemy_update(_enemy);
+      enemy_update(_enemy, &gProjectiles);
     }
 
     for(auto _prj = gProjectiles.begin(); _prj != gProjectiles.end(); _prj++)
@@ -193,12 +193,12 @@ void game_loop(player_t* bluePlayer){
 
     for(auto enemy : gEnemies)
     {
-      enemy_draw(enemy);
+      enemy_draw(enemy, gRenderer);
     }
 
     for(auto prj : gProjectiles)
     {
-      projectile_draw(prj);
+      projectile_draw(prj, gRenderer);
     }
     
     /*UI elements */

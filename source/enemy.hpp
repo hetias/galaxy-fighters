@@ -13,27 +13,13 @@ typedef struct enemy_s{
   SDL_FPoint position;
   SDL_FRect hitbox;
   SDL_Texture* sprite;
+  SDL_Texture* projectile_texture;
   int hp;
   int shootDelay;
   int currentDelay;
 }enemy_t;
 
-//
-//EXTERN VARIABLES
-//
 
-
-
-//global SDL_Renderer object
-//found in main.cpp
-extern SDL_Renderer* gRenderer;
-
-//global game textures vector
-//found in main.cpp
-extern std::vector<SDL_Texture*> gTextures;
-
-//global projectiles container
-extern std::list<projectile_t*> gProjectiles;
 
 //
 //FUNCTION DEFINITIONS
@@ -41,7 +27,7 @@ extern std::list<projectile_t*> gProjectiles;
 
 
 
-enemy_t* enemy_create();
-void enemy_update(enemy_t*);
-void enemy_draw(enemy_t*);
+enemy_t* enemy_create(std::vector<SDL_Texture*>*);
+void enemy_update(enemy_t*, std::list<projectile_t*>*);
+void enemy_draw(enemy_t*, SDL_Renderer*);
 void enemy_destroy(enemy_t*);

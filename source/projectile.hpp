@@ -20,19 +20,7 @@ typedef struct projectile_s{
   bool isFriendly;
 }projectile_t;
 
-//global game textures vector
-//found in main.cpp
-extern std::vector<SDL_Texture*> gTextures;
-
-//global SDL_Renderer object
-//found in main.cpp
-extern SDL_Renderer* gRenderer;
-
-//global projectiles vector.
-//found in main.cpp
-extern std::list<projectile_t*> gProjectiles;
-
-projectile_t* projectile_create(SDL_FPoint, SDL_FPoint, bool);
+projectile_t* projectile_create(SDL_FPoint, SDL_FPoint, bool, SDL_Texture*);
 int projectile_update(projectile_t*);
-void projectile_draw(projectile_t*);
+void projectile_draw(projectile_t*, SDL_Renderer*);
 void projectile_destroy(projectile_t*);

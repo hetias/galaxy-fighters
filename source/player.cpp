@@ -5,11 +5,12 @@
 //
 //PLAYER CREATION
 //
-player_t* player_create(SDL_Texture* _sprite){
+player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
+
   player_t* tmp_player = new player_t();
 
   SDL_Point dims = {0, 0};
-  SDL_QueryTexture(_sprite, NULL, NULL,
+  SDL_QueryTexture(_texturesVector->at(TXT_PLAYER_BLUE), NULL, NULL,
                    &dims.x,
                    &dims.y);
   
@@ -24,12 +25,9 @@ player_t* player_create(SDL_Texture* _sprite){
   tmp_player->currentShootDelay = 15;
   tmp_player->speed     = 8.5f;
 
-  if(_sprite != NULL){
-      tmp_player->sprite = _sprite;
-  }else{
-    return NULL;
-  }
-  
+  tmp_player->sprite = _texturesVector->at(TXT_PLAYER_BLUE);
+  tmp_player->projectile_sprite = _texturesVector->at(TXT_LASER_BLUE);
+
   return tmp_player;
 }
 
@@ -70,7 +68,7 @@ void player_update(player_t* _player, const Uint8* _keyboardState, std::list<pro
   //shoot projectile
   if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
   {
-    projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true);
+    projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true, _player->projectile_sprite);
     _projectilesList->push_back(tmp_prj);
 
     _player->currentShootDelay = _player->shootDelay;

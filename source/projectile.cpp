@@ -1,6 +1,6 @@
 #include"projectile.hpp"
 
-projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, bool _isFriendly)
+projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, bool _isFriendly, SDL_Texture* _sprite)
 {
   projectile_t* tmp = new projectile_t;
 
@@ -8,11 +8,7 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
   tmp->direction = _direction;
   tmp->hitbox = {tmp->position.x, tmp->position.y,
                  13.0f,           54.0f};
-  if(_isFriendly){
-      tmp->sprite = gTextures.at(TXT_LASER_BLUE);
-  }else{
-      tmp->sprite = gTextures.at(TXT_LASER_RED);
-  }
+  tmp->sprite = _sprite;
   tmp->speed = SLOW_PRJ_SPEED;
   tmp->isFriendly = _isFriendly;
 
@@ -40,11 +36,11 @@ int projectile_update(projectile_t* _prj)
   }
 }
 
-void projectile_draw(projectile_t* _prj)
+void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
 {
   //drawing projectile
   if(_prj->isFriendly){
-    SDL_RenderCopyExF(gRenderer,
+    SDL_RenderCopyExF(_renderer,
                       _prj->sprite,
                       NULL,
                       &_prj->hitbox,
@@ -52,7 +48,7 @@ void projectile_draw(projectile_t* _prj)
                       NULL,
                       SDL_FLIP_NONE);
   }else{
-    SDL_RenderCopyExF(gRenderer,
+    SDL_RenderCopyExF(_renderer,
                       _prj->sprite,
                       NULL,
                       &_prj->hitbox,
