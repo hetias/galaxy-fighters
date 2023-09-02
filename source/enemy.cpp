@@ -27,12 +27,16 @@ enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector)
   _tmp->hp       = 4;
   _tmp->shootDelay = 15;
   _tmp->currentDelay = _tmp->shootDelay;
+  _tmp->path_time = 0.0f;
+  _tmp->path = NULL;
   
   return _tmp;  
 }
 
 void enemy_update(enemy_t* _enemy, std::list<projectile_t*>* _projectileList)
 {
+
+  //shootin'
   if(_enemy->currentDelay < 0){
     projectile_t* tmp_prj = projectile_create(_enemy->position,
                                               {0.0, 1.0},
@@ -44,8 +48,17 @@ void enemy_update(enemy_t* _enemy, std::list<projectile_t*>* _projectileList)
   }else{
     _enemy->currentDelay--;
   }
+
+  //movin'
+  enemy_update_path(_enemy, _enemy->path);
+  
+  //hitbox repositioning
   _enemy->hitbox.x = _enemy->position.x - _enemy->hitbox.w / 2;
   _enemy->hitbox.y = _enemy->position.y - _enemy->hitbox.h / 2;
+}
+
+void enemy_change_path(enemy_t* _enemy, spline* _spline){
+  _enemy->path = _spline;
 }
 
 void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer)
@@ -88,4 +101,26 @@ void enemy_destroy(enemy_t* _enemy)
     delete _enemy;
     _enemy = NULL;
   }
+}
+
+void enemy_update_path(enemy_t* _enemy, spline* _spline){
+
+  if(_enemy->path != NULL){
+    
+    if(_enemy->path->loop){
+      
+    }else{
+      //if it's not a loop, update position until it's bigger than 1
+      if(_enemy->path_time <= 1.0f){
+        SDL_FPoint new_pos = spline_get_point(*_spline, _enemy->path_time);
+        _enemy->position = new_pos;
+        _enemy->path_time += 0.01;
+        
+      }
+
+    }
+    
+  }
+
+  
 }

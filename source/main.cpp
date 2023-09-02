@@ -88,6 +88,8 @@ int main(int argc, char* argv[]){
   player_t* bluePlayer = player_create(&gTextures);
   enemy_t*  enemy      = enemy_create(&gTextures);
 
+  enemy_change_path(enemy, &mySpline);
+  
   gEnemies.push_back(enemy);
   
   //
@@ -98,12 +100,16 @@ int main(int argc, char* argv[]){
   //
   //DELETE ALL INTITIES AND OBJECTS
   //
+
+  std::cout<<"player delete"<<std::endl;
   player_destroy(bluePlayer);
 
+  std::cout<<"enemies delete"<<std::endl;
   for(auto _enemy : gEnemies)
     enemy_destroy(_enemy);
   gEnemies.clear();
 
+  std::cout<<"enemies delete"<<std::endl;
   for(auto _prj : gProjectiles)
     projectile_destroy(_prj);
   gProjectiles.clear();
@@ -124,9 +130,9 @@ int main(int argc, char* argv[]){
 //
 void game_loop(player_t* bluePlayer){
 
-  for(auto point : mySpline.points){
-    std::cout<<point.x<<" "<<point.y<<std::endl;
-  }
+  // for(auto point : mySpline.points){
+  //   std::cout<<point.x<<" "<<point.y<<std::endl;
+  // }
   
   //fps count start
   Uint32 fps_start = SDL_GetTicks();
