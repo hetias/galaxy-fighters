@@ -1,5 +1,14 @@
 #include"projectile.hpp"
 
+/**
+ *Allocates memory for a new projectile structure
+ *@params _position Initial enemy position on creation
+ *@params _direction Initial enemy direction
+ *@params _isFriendly Describes if the projectile should damage the player
+ *@params _sprite Pointer to an SDL_Texture used for drawing the projectile
+ *@return Pointer to an player structure.
+ */
+
 projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, bool _isFriendly, SDL_Texture* _sprite)
 {
   projectile_t* tmp = new projectile_t;
@@ -14,6 +23,12 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
 
   return tmp;
 }
+
+/**
+ *Updates the projectile position and state.
+ *@params _prj The projectile to update.
+ *@return In case of deletion return 1.
+ */
 
 int projectile_update(projectile_t* _prj)
 {
@@ -35,6 +50,12 @@ int projectile_update(projectile_t* _prj)
     return 0;
   }
 }
+
+/**
+ *Draws the projectile on current renderer.
+ *@params _prj The projectile to draw.
+ *@params _renderer Pointer to SDL_Renderer where the projectile will be drawn.
+ */
 
 void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
 {
@@ -64,6 +85,10 @@ void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
   
 }
 
+/**
+ *Frees the projectile from memory.
+ *@params _prj The projectile to free
+ */
 void projectile_destroy(projectile_t* _prj)
 {
   if(_prj)

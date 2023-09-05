@@ -1,10 +1,12 @@
 #include"player.hpp"
 
 
+/**
+ *Allocates memory for an player structure.
+ *@params _texturesVector An vector of SDL_Textures pointers.
+ *@return Pointer to an player structure.
+ */
 
-//
-//PLAYER CREATION
-//
 player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
 
   player_t* tmp_player = new player_t();
@@ -32,10 +34,13 @@ player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
 }
 
 
+/**
+ *Updates player's internal state
+ *@params _player Pointer to the player structure to update
+ *@params _keyboardState Internal SDL2 array for keyboard input handling
+ *@params _projectileList An list containing all current projectiles
+ */
 
-//
-//PLAYER LOGIC UPDATE
-//
 void player_update(player_t* _player, const Uint8* _keyboardState, std::list<projectile_t*>* _projectilesList){
   //get inputs
 
@@ -94,9 +99,12 @@ void player_update(player_t* _player, const Uint8* _keyboardState, std::list<pro
 
 
 
-//
-//PLAYER DRAW
-//
+/**
+ *Updates player's internal state
+ *@params _player Pointer to the player structure to draw
+ *@params _renderer Pointer to an SDL_Renderer where the player will be drawn
+ */
+
 void player_draw(player_t* _player, SDL_Renderer* _renderer){
   if(_player->sprite){
 
@@ -109,6 +117,11 @@ void player_draw(player_t* _player, SDL_Renderer* _renderer){
     SDL_RenderCopyF(_renderer, _player->sprite, NULL, &_player->hitbox);
   }
 }
+
+/**
+ *Free's player resources 
+ *@params _player Pointer to the player to be freed
+ */
 
 void player_destroy(player_t* _player)
 {

@@ -1,7 +1,12 @@
 #include"enemy.hpp"
 
-enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector)
-{
+/**
+ *Allocates memory for an enemy structure.
+ *@params _texturesVector An vector of SDL_Textures pointers.
+ *@return Pointer to an enemy structure.
+ */
+
+enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector){
   if(!_texturesVector){
     std::cout<<""<<std::endl;
   }
@@ -33,11 +38,15 @@ enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector)
   return _tmp;  
 }
 
-void enemy_update(enemy_t* _enemy, std::list<projectile_t*>* _projectileList)
-{
+/**
+ *Updates internal enemy values.
+ *@params _projectileList A pointer to list containing all current game projectiles.
+ */
+
+void enemy_update(enemy_t* _enemy, std::list<projectile_t*>* _projectileList){
 
   //shootin'
-  if(_enemy->currentDelay < 0){
+  if(_enemy->currentDelay <= 0 && _enemy->shootDelay > 0){
     projectile_t* tmp_prj = projectile_create(_enemy->position,
                                               {0.0, 1.0},
                                               false,
@@ -50,19 +59,30 @@ void enemy_update(enemy_t* _enemy, std::list<projectile_t*>* _projectileList)
   }
 
   //movin'
-  enemy_update_path(_enemy, _enemy->path);
+  enemy_update_path(_enemy);
   
   //hitbox repositioning
   _enemy->hitbox.x = _enemy->position.x - _enemy->hitbox.w / 2;
   _enemy->hitbox.y = _enemy->position.y - _enemy->hitbox.h / 2;
 }
 
+/**
+ *Updates enemy position based on it's current path and timing.
+ *@params _enemy Pointer to the desired enemy to modify.
+ *@params _spline Pointer to the new spline to assign to enemy.
+ */
+
 void enemy_change_path(enemy_t* _enemy, spline* _spline){
   _enemy->path = _spline;
 }
 
-void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer)
-{  
+/**
+ *Draws the enemy texture to the game's renderer
+ *@params _enemy Pointer to enemy to draw
+ *@params _renderer Pointer to an SDL_Renderer where the player is drawn
+ */
+
+void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){  
   if(_enemy){
 
     SDL_RenderCopyF(_renderer,
@@ -72,6 +92,7 @@ void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer)
                    );
   }
   /*
+    DEBUG DRAWING
    
   SDL_FRect _positionSquare = {_enemy->position.x - 5.0f,
     _enemy->position.y - 5.0f,
@@ -94,8 +115,12 @@ void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer)
   
 }
 
-void enemy_destroy(enemy_t* _enemy)
-{
+/**
+ *Free's enemy resources from memory
+ *@params _enemy Pointer to enemy to be freed
+ */
+
+void enemy_destroy(enemy_t* _enemy){
   if(_enemy)
   {
     delete _enemy;
@@ -103,7 +128,12 @@ void enemy_destroy(enemy_t* _enemy)
   }
 }
 
-void enemy_update_path(enemy_t* _enemy, spline* _spline){
+/**
+ *Updates enemy position based on it's current path and timing.
+ *@params _enemy The desired enemy to update.
+ */
+
+void enemy_update_path(enemy_t* _enemy){
 
   if(_enemy->path != NULL){
     
@@ -111,8 +141,8 @@ void enemy_update_path(enemy_t* _enemy, spline* _spline){
       
     }else{
       //if it's not a loop, update position until it's bigger than 1
-      if(_enemy->path_time <= 1.0f){
-        SDL_FPoint new_pos = spline_get_point(*_spline, _enemy->path_time);
+      if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
+        SDL_FPoint new_pos = spline_get_point(*_enemy->path, _enemy->path_time);
         _enemy->position = new_pos;
         _enemy->path_time += 0.01;
         
