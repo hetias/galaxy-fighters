@@ -30,17 +30,16 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
  *@return In case of deletion return 1.
  */
 
-int projectile_update(projectile_t* _prj)
-{
-
+int projectile_update(projectile_t* _prj){
+  printf("update\n");
+  
   //on bounds check
   if(_prj->position.x > 600 || _prj->position.x < 0 ||
-     _prj->position.y > 600 || _prj->position.y < 0)
-  {
-    projectile_destroy(_prj);
+     _prj->position.y > 600 || _prj->position.y < 0){
+    
     return 1;
-  }else
-  {
+  }else{
+    
     _prj->position.x += _prj->direction.x * _prj->speed;
     _prj->position.y += _prj->direction.y * _prj->speed;
 

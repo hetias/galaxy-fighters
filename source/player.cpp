@@ -107,7 +107,6 @@ void player_update(player_t* _player, const Uint8* _keyboardState, std::list<pro
 
 void player_draw(player_t* _player, SDL_Renderer* _renderer){
   if(_player->sprite){
-
     SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);
     SDL_RenderDrawPointF(_renderer, _player->position.x,_player->position.y);
 
@@ -115,6 +114,8 @@ void player_draw(player_t* _player, SDL_Renderer* _renderer){
     SDL_RenderDrawRectF(_renderer, &_player->hitbox);
 
     SDL_RenderCopyF(_renderer, _player->sprite, NULL, &_player->hitbox);
+  }else{
+    printf("Player has no texture assigned!");
   }
 }
 
