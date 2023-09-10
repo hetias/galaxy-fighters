@@ -20,7 +20,7 @@ void scene_load_resources(scene_t*, const char**);
 void scene_update(scene_t*);
 void scene_draw(scene_t*, SDL_Renderer*);
 
-void scene_update_projectiles(scene_t*);
+void scene_update_projectiles(std::list<projectile_t*>*);
 void scene_update_enemies(scene_t*);
 
 void scene_draw_projectiles(scene_t*, SDL_Renderer*);

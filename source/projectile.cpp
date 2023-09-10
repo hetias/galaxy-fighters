@@ -31,7 +31,6 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
  */
 
 int projectile_update(projectile_t* _prj){
-  printf("update\n");
   
   //on bounds check
   if(_prj->position.x > 600 || _prj->position.x < 0 ||

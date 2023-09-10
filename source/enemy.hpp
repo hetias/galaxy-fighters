@@ -22,12 +22,23 @@ typedef struct enemy_s{
   float path_time;
 }enemy_t;
 
-
+typedef struct{
+  enemy_t** enemies;
+  int capacity;
+  int count;
+}enemies_container;
 
 //
 //FUNCTION DEFINITIONS
 //
 
+enemies_container* enemies_container_create();
+int enemies_container_add(enemies_container*, enemy_t*);
+int enemies_container_remove(enemies_container*, int);
+int enemies_container_clear(enemies_container*);
+int enemies_container_rearrenge(enemies_container*);
+int enemies_container_destroy(enemies_container*);
+bool enemies_container_is_empty(enemies_container*);
 
 
 enemy_t* enemy_create(std::vector<SDL_Texture*>*);

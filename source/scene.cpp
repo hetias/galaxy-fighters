@@ -19,7 +19,7 @@ scene_t* scene_create(const char** _texture_paths){
   new_scene->enemy_vector.clear();
   
   new_scene->tick = 0;
-    
+  
   return new_scene;
 }
 
@@ -61,8 +61,8 @@ void scene_update(scene_t* _scene){
   const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
   
   player_update(_scene->main_player, keyboardState, &_scene->projectile_list);
-  scene_update_projectiles(_scene);
-  // scene_update_enemies(_scene);
+  scene_update_projectiles(&_scene->projectile_list);
+  scene_update_enemies(_scene);
   
   _scene->tick++;
 }
@@ -71,33 +71,42 @@ void scene_update(scene_t* _scene){
  * Update all projectiles in a scene
  * @param _scene Scene containing a list of all projectiles
  */
-void scene_update_projectiles(scene_t* _scene){
-
-  for(std::list<projectile_t*>::iterator _prj = _scene->projectile_list.begin();
-      _prj != _scene->projectile_list.end();
+void scene_update_projectiles(std::list<projectile_t*> *_projectileList){
+  printf("scene_update\n");
+  
+  for(std::list<projectile_t*>::iterator _prj = _projectileList->begin();
+      _prj != _projectileList->end();
       _prj++){
     
     if(projectile_update(*_prj)){
-      auto delete_prj = _scene->projectile_list.erase(_prj);
+      printf("projectile update, size: %ld\n", _projectileList->size());
+      if(_projectileList->size() > 1){
+        printf("destroy \n");
+        projectile_destroy(*_prj);
+        printf("clear \n");
+        _projectileList->erase(_prj);
+      }else{
+        printf("destroy \n");
+        projectile_destroy(*_prj);
 
-      projectile_destroy(*delete_prj);
+        printf("clear \n");
+        _projectileList->clear();
+        break;
+      }
     }
-
-    if(_scene->projectile_list.empty()){
-      break;
-    }
+    
+    
   }
-
-
+  
 }
 
-// void scene_update_enemies(scene_t* _scene){
+void scene_update_enemies(scene_t* _scene){
   
-//   for(auto _enemy : _scene->enemy_vector){
-//     enemy_update(_enemy, _scene->projectile_list);
-//   }
+  for(auto _enemy : _scene->enemy_vector){
+    enemy_update(_enemy, &_scene->projectile_list);
+  }
   
-// }
+}
 
 /**
  * Draw on screen all present projectiles on a scene
@@ -112,26 +121,25 @@ void scene_draw_projectiles(scene_t* _scene, SDL_Renderer* _renderer){
 
 }
 
-// void scene_draw_enemies(scene_t* _scene){
+void scene_draw_enemies(scene_t* _scene, SDL_Renderer* _renderer){
 
-//   for(auto _enemy : _scene->enemy_vector){
-//     enemy_update(_enemy, _scene->projectile_list);
-//   }
+  for(auto _enemy : _scene->enemy_vector){
+    enemy_draw(_enemy, _renderer);
+  }
   
-// }
+}
 
 /**
  * Draw all scene entities and details
  * @param _scene 
  * @param _renderer
  */
-void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
-  // scene_draw_enemies(_scene, _renderer);
-  
+void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){  
   /*background elements*/
   SDL_RenderCopy(gRenderer, _scene->textures_vector.at(TXT_BG_DARKPURPLE), NULL, NULL);
 
   player_draw(_scene->main_player, _renderer);
+  scene_draw_enemies(_scene, _renderer);
   scene_draw_projectiles(_scene, _renderer);
 }
 

@@ -171,39 +171,6 @@ void free_sdl(void){
 
 
 
-//
-//LOAD ALL GAME RESOURCES
-//
-bool load_resources(void){
-  SDL_Texture* _tmpTexture = nullptr;
-
-  //OPEN GAME FONT
-  gFont = TTF_OpenFont("../resources/fonts/font.ttf", 24);
-  if (!gFont){
-    std::cout<<SDL_GetError()<<std::endl;
-    return EXIT_FAILURE;
-  }
-
-  //
-  //LOOAD TEXTURES
-  //
-
-  // for(auto path : gTexturesPaths)
-  // {
-  //   _tmpTexture = IMG_LoadTexture(gRenderer,
-  //                                 path);
-  //   if(!_tmpTexture){
-  //     std::cout<<SDL_GetError()<<std::endl;
-  //     return EXIT_FAILURE;
-  //   }
-  //   gTextures.push_back(_tmpTexture);
-  // }
-
-  
-  return EXIT_SUCCESS;
-}
-
-
 void draw_text(const char* _text, SDL_Point _position, SDL_Color _color){
 
   SDL_Surface* text_surface = NULL;
