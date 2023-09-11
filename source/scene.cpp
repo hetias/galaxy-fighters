@@ -16,8 +16,11 @@ scene_t* scene_create(const char** _texture_paths){
 
   //Clean lists
   new_scene->projectile_list.clear();
-  new_scene->enemy_vector.clear();
-  
+
+  //create enemy container
+  new_scene->enemies_array = enemies_container_create();
+
+  //start ticks
   new_scene->tick = 0;
   
   return new_scene;
@@ -59,10 +62,28 @@ void scene_update(scene_t* _scene){
 
   //input
   const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+
+  if(_scene->tick == 300){    
+    enemy_t* enemy1 = enemy_create(_scene->textures_vector);
+    enemies_container_add(_scene->enemies_array, enemy1);
+
+    enemy_t* enemy2 = enemy_create(_scene->textures_vector);
+    enemies_container_add(_scene->enemies_array, enemy2);
+
+    enemy_t* enemy3 = enemy_create(_scene->textures_vector);
+    enemies_container_add(_scene->enemies_array, enemy3);
+        
+    enemies_container_print(_scene->enemies_array);
+  }
+
+  if(_scene->tick == 800){
+    (enemies_container_remove(_scene->enemies_array, 2));
+    enemies_container_print(_scene->enemies_array); 
+  }
   
   player_update(_scene->main_player, keyboardState, &_scene->projectile_list);
   scene_update_projectiles(&_scene->projectile_list);
-  scene_update_enemies(_scene);
+  scene_update_enemies(&_scene->enemies_array);
   
   _scene->tick++;
 }
@@ -72,8 +93,6 @@ void scene_update(scene_t* _scene){
  * @param _scene Scene containing a list of all projectiles
  */
 void scene_update_projectiles(std::list<projectile_t*> *_projectileList){
-  printf("scene_update\n");
-  
   for(std::list<projectile_t*>::iterator _prj = _projectileList->begin();
       _prj != _projectileList->end();
       _prj++){
@@ -94,19 +113,47 @@ void scene_update_projectiles(std::list<projectile_t*> *_projectileList){
         break;
       }
     }
-    
-    
   }
   
 }
 
-void scene_update_enemies(scene_t* _scene){
-  
-  for(auto _enemy : _scene->enemy_vector){
-    enemy_update(_enemy, &_scene->projectile_list);
+int scene_update_enemies(enemies_container** _enemies_container){
+  if(_enemies_container == NULL || *_enemies_container == NULL)
+  {
+
+    return RETURN_NULL_POINTER;
   }
+  enemies_container* ec = *_enemies_container;
   
+  //printf("there are currently %d enemies\n", ec->count);
+
+  return RETURN_SUCCESS;
 }
+
+
+
+/**
+ * Draw all scene entities and background
+ * @param _scene 
+ * @param _renderer
+ */
+void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){  
+  /*background elements*/
+  SDL_RenderCopy(gRenderer, _scene->textures_vector.at(TXT_BG_DARKPURPLE), NULL, NULL);
+
+  //draw the player
+  player_draw(_scene->main_player, _renderer);
+
+  //draw the enemies
+  if(scene_draw_enemies(_scene->enemies_array, _renderer) < 0){
+    printf("Null reference on scene_draw_enemies\n");
+  }
+
+  //draw the projectiles
+  scene_draw_projectiles(_scene, _renderer);
+}
+
+
 
 /**
  * Draw on screen all present projectiles on a scene
@@ -121,26 +168,19 @@ void scene_draw_projectiles(scene_t* _scene, SDL_Renderer* _renderer){
 
 }
 
-void scene_draw_enemies(scene_t* _scene, SDL_Renderer* _renderer){
-
-  for(auto _enemy : _scene->enemy_vector){
-    enemy_draw(_enemy, _renderer);
+int scene_draw_enemies(enemies_container* _enemies_container, SDL_Renderer* _renderer){
+  if(_enemies_container == NULL || _renderer == NULL){
+    return RETURN_NULL_POINTER; 
   }
   
-}
+  for(int i = 0; i < _enemies_container->capacity; i++){
+    if(_enemies_container->array[i] == NULL)
+      continue;
 
-/**
- * Draw all scene entities and details
- * @param _scene 
- * @param _renderer
- */
-void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){  
-  /*background elements*/
-  SDL_RenderCopy(gRenderer, _scene->textures_vector.at(TXT_BG_DARKPURPLE), NULL, NULL);
+    enemy_draw(_enemies_container->array[i], _renderer);
+  }
 
-  player_draw(_scene->main_player, _renderer);
-  scene_draw_enemies(_scene, _renderer);
-  scene_draw_projectiles(_scene, _renderer);
+  return RETURN_SUCCESS;
 }
 
 
@@ -154,12 +194,9 @@ void scene_destroy(scene_t* _scene){
   player_destroy(_scene->main_player);
   
   //destroy all enemies
-  for(auto enemy : _scene->enemy_vector){
-    enemy_destroy(enemy);
-  }
-  _scene->enemy_vector.clear();
-
-  //destroy all enemies
+  enemies_container_destroy(&_scene->enemies_array);
+  
+  //destroy all projectiles
   for(auto prj : _scene->projectile_list){
     projectile_destroy(prj);
   }

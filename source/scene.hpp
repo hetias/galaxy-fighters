@@ -9,7 +9,8 @@
 typedef struct{
   Uint32 tick;
   player_t* main_player;
-  std::vector<enemy_t*>enemy_vector;
+  //std::vector<enemy_t*>enemy_vector;
+  enemies_container* enemies_array;
   std::list<projectile_t*>projectile_list;
   std::vector<SDL_Texture*> textures_vector;
 }scene_t;
@@ -21,9 +22,9 @@ void scene_update(scene_t*);
 void scene_draw(scene_t*, SDL_Renderer*);
 
 void scene_update_projectiles(std::list<projectile_t*>*);
-void scene_update_enemies(scene_t*);
+int scene_update_enemies(enemies_container**);
 
 void scene_draw_projectiles(scene_t*, SDL_Renderer*);
-void scene_draw_enemies(scene_t*, SDL_Renderer*);
+int scene_draw_enemies(enemies_container*, SDL_Renderer*);
 
 void scene_destroy(scene_t*);

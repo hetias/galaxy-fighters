@@ -6,18 +6,14 @@
  *@return Pointer to an enemy structure.
  */
 
-enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector){
-  if(!_texturesVector){
-    std::cout<<""<<std::endl;
-  }
-  
+enemy_t* enemy_create(std::vector<SDL_Texture*> _texturesVector){
   enemy_t* _tmp = new enemy_t;
   
   _tmp->position = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
 
     //get texture dimensions
   SDL_Point dimensions = {0};
-  SDL_QueryTexture(_texturesVector->at(TXT_ENEMY1_BLACK),
+  SDL_QueryTexture(_texturesVector.at(TXT_ENEMY1_BLACK),
                    NULL,
                    NULL,
                    &dimensions.x,
@@ -27,8 +23,8 @@ enemy_t* enemy_create(std::vector<SDL_Texture*>* _texturesVector){
                   _tmp->position.y,
                   (float)dimensions.x,
                   (float)dimensions.y};
-  _tmp->sprite   = _texturesVector->at(TXT_ENEMY1_BLACK);
-  _tmp->projectile_texture   = _texturesVector->at(TXT_LASER_RED);
+  _tmp->sprite   = _texturesVector.at(TXT_ENEMY1_BLACK);
+  _tmp->projectile_texture   = _texturesVector.at(TXT_LASER_RED);
   _tmp->hp       = 4;
   _tmp->shootDelay = 15;
   _tmp->currentDelay = _tmp->shootDelay;
@@ -162,9 +158,9 @@ void enemy_update_path(enemy_t* _enemy){
 enemies_container* enemies_container_create(){
   enemies_container* ec = new enemies_container;
 
-  ec->enemies = NULL;
+  ec->array = NULL;
   ec->count = 0;
-
+  ec->capacity = 0;
   return ec;
 }
 
@@ -176,52 +172,54 @@ enemies_container* enemies_container_create(){
  */
 int enemies_container_add(enemies_container* _container, enemy_t* _enemy){
   if(_container == NULL || _enemy == NULL){
-    return -1;
+    return RETURN_NULL_POINTER;
   }
   
   //if the container is empty
   if(enemies_container_is_empty(_container)){
+    printf("container is empty..adding first element\n");
     //allocate for the first element
-    _container->enemies = (enemy_t**)malloc(sizeof(enemy_t*));
+    _container->array = (enemy_t**)malloc(sizeof(enemy_t*));
     
     //if allocation successed the first element is added
-    if(_container->enemies != NULL){
-      _container->enemies[0] = _enemy;
+    if(_container->array != NULL){
+      _container->array[0] = _enemy;
       _container->count = 1;
       _container->capacity = 1;
     }
   }else{
+    printf("container is not empty..adding new element at end\n");    
     //we need to check if we need more space, in such case we double it
     if(_container->count == _container->capacity){
 
-      enemy_t** ec_realloc = (enemy_t**)realloc(_container->enemies, sizeof(enemy_t*) * (_container->capacity * 2));
+      enemy_t** ec_realloc = (enemy_t**)realloc(_container->array, sizeof(enemy_t*) * (_container->capacity * 2));
 
       //if realloc failes we exit
       if(ec_realloc == NULL){
-        return -1;
+        return RETURN_NULL_POINTER;
       }
 
       //update the new memory location and the capacity
-      _container->enemies = ec_realloc;
+      _container->array = ec_realloc;
       _container->capacity *= 2;
     }
     
     //add the new enemy at the end of the array
-    _container->enemies[_container->count + 1] = _enemy;
+    _container->array[_container->count + 1] = _enemy;
     _container->count += 1;
   }
 
   //if we don't have to realloc, search for an available memory space
   for(int i = 0; i < _container->capacity; i++){
 
-    if(_container->enemies[i] == NULL){
-      _container->enemies[i] == _enemy;
+    if(_container->array[i] == NULL){
+      _container->array[i] == _enemy;
       break;
     }
     
   }
 
-  return 0;
+  return RETURN_SUCCESS;
 }
 
 /**
@@ -232,14 +230,17 @@ int enemies_container_add(enemies_container* _container, enemy_t* _enemy){
  */
 int enemies_container_remove(enemies_container* _container, int _index){
 
-  if(_index < 0 || _index > _container->capacity || _container == NULL || _container->enemies[_index] == NULL)
-    return -1;
+  if(_index < 0 || _index > _container->capacity)
+    return RETURN_BAD_INDEX;
 
-    free(_container->enemies[_index]);
-    _container->enemies = NULL;
+  if(_container == NULL || _container->array[_index] == NULL)
+    return RETURN_NULL_POINTER;
+
+    free(_container->array[_index]);
+    _container->array[_index] = NULL;
     _container->count -= 1;
 
-    return 0;
+    return RETURN_SUCCESS;
 }
 
 /**
@@ -251,17 +252,17 @@ int enemies_container_remove(enemies_container* _container, int _index){
 
 int enemies_container_rearrenge(enemies_container* _container){
   if(_container == NULL)
-    return -1;
+    return RETURN_NULL_POINTER;
 
   //if we have unused space and the unused space is more than the 50% of the capacity
   if(_container->count < _container->capacity && _container->count < _container->capacity / 2){
 
     //put everything contiguosly
     for(int i = 0; i < _container->capacity; i++){
-      if(_container->enemies[i] == NULL){
+      if(_container->array[i] == NULL){
         for(int j = i + 1; j < _container->capacity; j++){
-          if(_container->enemies[j] != NULL){
-            _container->enemies[i] == _container->enemies[j];
+          if(_container->array[j] != NULL){
+            _container->array[i] == _container->array[j];
             break;
           }
         }
@@ -269,16 +270,16 @@ int enemies_container_rearrenge(enemies_container* _container){
     }
 
     //realloc to the correct size
-    enemy_t** ec_realloc = (enemy_t**)realloc(_container->enemies, _container->count);
+    enemy_t** ec_realloc = (enemy_t**)realloc(_container->array, _container->count);
 
     if(ec_realloc == NULL)
-      return -1;
+      return RETURN_NULL_POINTER;
 
-    _container->enemies = ec_realloc;
+    _container->array = ec_realloc;
     _container->capacity = _container->count;
   }
 
-  return 0;
+  return RETURN_SUCCESS;
 }
 
 /**
@@ -287,20 +288,20 @@ int enemies_container_rearrenge(enemies_container* _container){
  * @return Returns -1 in case of failure, otherwise return 0.
  */
 int enemies_container_clear(enemies_container* _container){
-  if(_container == NULL || _container->enemies == NULL)
-    return -1;
+  if(_container == NULL || _container->array == NULL)
+    return RETURN_NULL_POINTER;
 
   for(int i = 0; i < _container->capacity; i++){
-    if(_container->enemies == NULL)
+    if(_container->array == NULL)
       continue;
 
     enemies_container_remove(_container, i);
   }
 
-  free(_container->enemies);
-  _container->enemies = NULL;
+  free(_container->array);
+  _container->array = NULL;
   
-  return 0;
+  return RETURN_SUCCESS;
 }
 
 
@@ -312,16 +313,16 @@ int enemies_container_clear(enemies_container* _container){
  */
 int enemies_container_destroy(enemies_container** _container){
   if(_container == NULL || *_container == NULL)
-    return -1;
+    return RETURN_NULL_POINTER;
 
   enemies_container* ec = *_container;
-  if(ec->enemies != NULL)
+  if(ec->array != NULL)
     enemies_container_clear(ec);
 
   free(ec);
   ec = NULL;
 
-  return 0;
+  return RETURN_SUCCESS;
 }
 
 /**
@@ -330,5 +331,21 @@ int enemies_container_destroy(enemies_container** _container){
  * @return Returns true in case is empty, 0 otherwise.
  */
 bool enemies_container_is_empty(enemies_container* _container){
-  return (_container->count < 0);
+  return (_container->count <= 0);
+}
+
+/**
+ */
+void enemies_container_print(enemies_container* _container){
+  printf("current count: %d\n", _container->count);
+  printf("current capacity: %d\n", _container->capacity);
+
+  for(int i = 0; i < _container->capacity; i++){
+    if(_container->array[i] == NULL){
+      printf("0 - ");
+    }else{
+      printf("X - ");
+    }
+  }
+  printf("\n");
 }

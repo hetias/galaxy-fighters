@@ -19,3 +19,9 @@ enum ETextures{
   //vector final size
   TXT_VECSIZE
 };
+
+enum Eerrors{
+  RETURN_NULL_POINTER = -1,
+  RETURN_SUCCESS,
+  RETURN_BAD_INDEX
+};
