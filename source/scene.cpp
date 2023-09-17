@@ -15,7 +15,7 @@ scene_t* scene_create(const char** _texture_paths){
   new_scene->main_player = player_create(&new_scene->textures_vector);
 
   //Clean lists
-  new_scene->projectile_list.clear();
+  new_scene->projectiles = projectiles_list_create();
 
   //create enemy container
   new_scene->enemies_array = enemies_container_create();
@@ -57,66 +57,56 @@ void scene_load_resources(scene_t* _scene, const char** _textures_paths){
 /**
  * Update scenario and all it's current entities 
  * @param _scene Scene to update
+ * @return In case of succes returns RETURN_SUCCESS, in case pointers parameters are invalid returns RETURN_NULL_POINTER
  */
-void scene_update(scene_t* _scene){
+int scene_update(scene_t* _scene){
 
   //input
   const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
-  if(_scene->tick == 300){    
-    enemy_t* enemy1 = enemy_create(_scene->textures_vector);
-    enemies_container_add(_scene->enemies_array, enemy1);
-
-    enemy_t* enemy2 = enemy_create(_scene->textures_vector);
-    enemies_container_add(_scene->enemies_array, enemy2);
-
-    enemy_t* enemy3 = enemy_create(_scene->textures_vector);
-    enemies_container_add(_scene->enemies_array, enemy3);
-        
-    enemies_container_print(_scene->enemies_array);
-  }
-
-  if(_scene->tick == 800){
-    (enemies_container_remove(_scene->enemies_array, 2));
-    enemies_container_print(_scene->enemies_array); 
-  }
-  
-  player_update(_scene->main_player, keyboardState, &_scene->projectile_list);
-  scene_update_projectiles(&_scene->projectile_list);
-  scene_update_enemies(&_scene->enemies_array);
+  player_update(_scene->main_player, keyboardState, &_scene->projectiles);
+  scene_update_projectiles(&_scene->projectiles);
+  //scene_update_enemies(&_scene->enemies_array);
   
   _scene->tick++;
+
+  return RETURN_SUCCESS;
 }
 
 /**
  * Update all projectiles in a scene
  * @param _scene Scene containing a list of all projectiles
+ * @return In case of succes returns RETURN_SUCCESS, in case pointers parameters are invalid returns RETURN_NULL_POINTER
  */
-void scene_update_projectiles(std::list<projectile_t*> *_projectileList){
-  for(std::list<projectile_t*>::iterator _prj = _projectileList->begin();
-      _prj != _projectileList->end();
-      _prj++){
-    
-    if(projectile_update(*_prj)){
-      printf("projectile update, size: %ld\n", _projectileList->size());
-      if(_projectileList->size() > 1){
-        printf("destroy \n");
-        projectile_destroy(*_prj);
-        printf("clear \n");
-        _projectileList->erase(_prj);
-      }else{
-        printf("destroy \n");
-        projectile_destroy(*_prj);
+int scene_update_projectiles(projectiles_list* _projectilesList){
+  if(_projectilesList == NULL || _projectilesList->array == NULL)
+    return RETURN_NULL_POINTER;
 
-        printf("clear \n");
-        _projectileList->clear();
-        break;
+  projectiles_list_print(_projectilesList);
+  
+  for(int i = 0; i < _projectilesList->capacity; i++){
+    if(_projectilesList->array[i] == NULL){
+      printf("Null element...continue\n");
+    }else{
+
+      if(projectile_update(_projectilesList->array[i])){
+        printf("Element to deletion..\n");
+        projectiles_list_remove(_projectilesList, i);
       }
     }
   }
-  
+
+  //projectiles_list_print(_projectilesList);  
+  return RETURN_SUCCESS;
 }
 
+
+/**
+ * Update all enemies on the current scene
+ * @param enemies_container A pointer to the enemies_container structure
+where the enemies are located
+* @return Returns RETURN_SUCCESS on succes, in case there are invalid pointers it returns RETURN_NULL_POINTER
+ */
 int scene_update_enemies(enemies_container** _enemies_container){
   if(_enemies_container == NULL || *_enemies_container == NULL)
   {
@@ -136,8 +126,12 @@ int scene_update_enemies(enemies_container** _enemies_container){
  * Draw all scene entities and background
  * @param _scene 
  * @param _renderer
+* @return Returns RETURN_SUCCESS on succes, in case there are invalid pointers it returns RETURN_NULL_POINTER
  */
-void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){  
+int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){  
+  if(_scene == NULL || _renderer == NULL)
+    return RETURN_NULL_POINTER;
+  
   /*background elements*/
   SDL_RenderCopy(gRenderer, _scene->textures_vector.at(TXT_BG_DARKPURPLE), NULL, NULL);
 
@@ -150,7 +144,9 @@ void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
   }
 
   //draw the projectiles
-  scene_draw_projectiles(_scene, _renderer);
+  scene_draw_projectiles(_scene->projectiles, _renderer);
+
+  return RETURN_SUCCESS;
 }
 
 
@@ -159,15 +155,31 @@ void scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
  * Draw on screen all present projectiles on a scene
  * @param _scene Scene with a structure where all projectiles are stored
  * @param _renderer SDL2 renderer where everything will be drawn
+* @return Returns RETURN_SUCCESS on succes, in case there are invalid pointers it returns RETURN_NULL_POINTER
  */
-void scene_draw_projectiles(scene_t* _scene, SDL_Renderer* _renderer){
+int scene_draw_projectiles(projectiles_list _projectilesList, SDL_Renderer* _renderer){
+  if(_renderer == NULL)
+    return RETURN_NULL_POINTER;
 
-  for(auto _prj : _scene->projectile_list){
-    projectile_draw(_prj, _renderer);
+  projectile_t** _projectiles_array = _projectilesList.array;
+
+  for(int i = 0; i < _projectilesList.capacity; i++){
+    if(_projectiles_array[i] == NULL)
+      continue;
+
+    projectile_draw(_projectiles_array[i], _renderer);
   }
 
+  return RETURN_SUCCESS;
 }
 
+
+/**
+ * Draws all enemies on current scene
+ * @param _enemies_container A container structure where all enemies are located
+ * @param _renderer A SDL2 Renderer where everything will be drawn
+ * @return Returns RETURN_SUCCESS on succes, in case there are invalid pointers it returns RETURN_NULL_POINTER
+ */
 int scene_draw_enemies(enemies_container* _enemies_container, SDL_Renderer* _renderer){
   if(_enemies_container == NULL || _renderer == NULL){
     return RETURN_NULL_POINTER; 
@@ -187,8 +199,11 @@ int scene_draw_enemies(enemies_container* _enemies_container, SDL_Renderer* _ren
 /**
  * Destroy scene and free it's space
  * @param _scene Scene to free
+ * @return In case of succes returns RETURN_SUCCESS, in case pointers parameters are invalid returns RETURN_NULL_POINTER
  */
-void scene_destroy(scene_t* _scene){
+int scene_destroy(scene_t* _scene){
+  if(_scene == NULL)
+    return RETURN_NULL_POINTER;
   
   //destroy player
   player_destroy(_scene->main_player);
@@ -197,15 +212,13 @@ void scene_destroy(scene_t* _scene){
   enemies_container_destroy(&_scene->enemies_array);
   
   //destroy all projectiles
-  for(auto prj : _scene->projectile_list){
-    projectile_destroy(prj);
-  }
-  _scene->projectile_list.clear();
-
+  projectiles_list_clear(&_scene->projectiles);
+  
   //free resources
   for(auto texture : _scene->textures_vector){
     SDL_DestroyTexture(texture);
   }
   _scene->textures_vector.clear();
-  
+
+  return RETURN_SUCCESS;
 }

@@ -202,21 +202,20 @@ int enemies_container_add(enemies_container* _container, enemy_t* _enemy){
       //update the new memory location and the capacity
       _container->array = ec_realloc;
       _container->capacity *= 2;
-    }
-    
-    //add the new enemy at the end of the array
-    _container->array[_container->count + 1] = _enemy;
-    _container->count += 1;
-  }
 
-  //if we don't have to realloc, search for an available memory space
-  for(int i = 0; i < _container->capacity; i++){
-
-    if(_container->array[i] == NULL){
-      _container->array[i] == _enemy;
-      break;
-    }
     
+      //add the new enemy at the end of the array
+      _container->array[_container->count + 1] = _enemy;
+      _container->count += 1;
+    }else{
+      //if we don't have to realloc, search for an available memory space
+      for(int i = 0; i < _container->capacity; i++){
+        if(_container->array[i] == NULL){
+          _container->array[i] == _enemy;
+          break;
+        }
+      }
+    }
   }
 
   return RETURN_SUCCESS;

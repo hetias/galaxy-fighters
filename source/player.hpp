@@ -34,7 +34,7 @@ player_t* player_create(std::vector<SDL_Texture*>*);
 
 //player update.
 //arguments are a player_t* and a reference to SDL_KeyboardState
-void player_update(player_t*,  const Uint8*, std::list<projectile_t*>*);
+void player_update(player_t*,  const Uint8*, projectiles_list*);
 
 //player draw
 //Draw ship in player position

@@ -62,7 +62,7 @@ int main(int argc, char* argv[]){
 void game_loop(scene_t* _scene){
   
   //fps count start
-  Uint32 fps_start = SDL_GetTicks();
+  //Uint32 fps_start = SDL_GetTicks();
     
   while(gIsGameRunning){
 
@@ -93,11 +93,11 @@ void game_loop(scene_t* _scene){
     scene_update(_scene);
         
     //frame end count
-    Uint32 fps_end = SDL_GetTicks();
+    //Uint32 fps_end = SDL_GetTicks();
     
-    Uint32 fps_elapsed = fps_end - fps_start;
+    //Uint32 fps_elapsed = fps_end - fps_start;
 
-    fps_start = fps_elapsed;
+    //fps_start = fps_elapsed;
     
     //render
     SDL_SetRenderDrawColor(gRenderer, 0, 0, 0, 0);
@@ -107,8 +107,11 @@ void game_loop(scene_t* _scene){
 
     SDL_RenderPresent(gRenderer);
 
+    //printf("fps_elapsed: %d\n", fps_elapsed);
+    
     //fps capping
-    SDL_Delay(floor(16.666f - (fps_elapsed / 1000.0f)));
+    //SDL_Delay(floor(16.666f - (fps_elapsed / 1000.0f)));
+    SDL_Delay(16);
     
   }
 

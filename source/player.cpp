@@ -23,8 +23,8 @@ player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
                            tmp_player->position.y,
                            (float)dims.x,
                            (float)dims.y};
-  tmp_player->shootDelay = 15;
-  tmp_player->currentShootDelay = 15;
+  tmp_player->shootDelay = 5;
+  tmp_player->currentShootDelay = 5;
   tmp_player->speed     = 8.5f;
 
   tmp_player->sprite = _texturesVector->at(TXT_PLAYER_BLUE);
@@ -41,7 +41,7 @@ player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
  *@params _projectileList An list containing all current projectiles
  */
 
-void player_update(player_t* _player, const Uint8* _keyboardState, std::list<projectile_t*>* _projectilesList){
+void player_update(player_t* _player, const Uint8* _keyboardState, projectiles_list* _projectilesList){
   //get inputs
 
   //move vertically
@@ -74,8 +74,9 @@ void player_update(player_t* _player, const Uint8* _keyboardState, std::list<pro
   if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
   {
     projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true, _player->projectile_sprite);
-    _projectilesList->push_back(tmp_prj);
 
+    projectiles_list_add(_projectilesList, tmp_prj);
+    
     _player->currentShootDelay = _player->shootDelay;
   }
   else
