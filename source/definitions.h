@@ -17,7 +17,7 @@ enum ETextures{
   TXT_LASER_BLUE,
   TXT_LASER_RED,
   //vector final size
-  TXT_VECSIZE
+  TXT_TOTAL
 };
 
 enum Eerrors{

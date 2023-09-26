@@ -36,20 +36,23 @@ const char* gTexturesPaths[] ={
   "../resources/sprites/lasers/laserRed.png"
 };
 
+
 //
 //MAIN FUNCTION
 //
 int main(int argc, char* argv[]){
 
   if( initialize_sdl() ){
+    free_sdl();
     return EXIT_FAILURE;
   }
 
-  scene_t* game_scene = scene_create(gTexturesPaths);
+  scene_t* game_scene = NULL;
+  game_scene = scene_create(gTexturesPaths);
 
-  game_loop(game_scene);
-  
   scene_destroy(game_scene);
+
+  free_sdl();
   
   return EXIT_SUCCESS;
 }
@@ -62,7 +65,7 @@ int main(int argc, char* argv[]){
 void game_loop(scene_t* _scene){
   
   //fps count start
-  //Uint32 fps_start = SDL_GetTicks();
+  //32 fps_start = SDL_GetTicks();
     
   while(gIsGameRunning){
 
@@ -165,11 +168,12 @@ bool initialize_sdl(void){
 //FREE SDL2 OBJECTS AND QUIT SDL2 SUBSYSTEMS AND LIBS
 //
 void free_sdl(void){
-  SDL_DestroyRenderer(gRenderer);
-  SDL_DestroyWindow(gWindow);
-  SDL_Quit();
+
+  if(gRenderer) SDL_DestroyRenderer(gRenderer);
+  if(gWindow) SDL_DestroyWindow(gWindow);
   IMG_Quit();
   TTF_Quit();
+  SDL_Quit();  
 }
 
 

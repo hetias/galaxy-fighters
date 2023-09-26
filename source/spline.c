@@ -11,9 +11,9 @@ SDL_FPoint spline_get_point(spline _spline, float _t){
 
   if(_spline.loop){
     p1 = (int)_t;
-    p2 = (p1 + 1) % _spline.points.size();
-    p3 = (p2 + 1) % _spline.points.size();
-    p0 = p1 >= 1 ? p1 - 1 : _spline.points.size() -1;
+    p2 = (p1 + 1) % _spline.total_points;
+    p3 = (p2 + 1) % _spline.total_points;
+    p0 = p1 >= 1 ? p1 - 1 : _spline.total_points - 1;
   }else{
     p1 = (int)_t + 1;
     p2 = p1 + 1;
@@ -39,8 +39,30 @@ SDL_FPoint spline_get_point(spline _spline, float _t){
   return point;
 }
 
-void spline_draw(spline _spline){
+spline spline_create(bool _isLoop){
+  spline nw_spline;
 
+  nw_spline.total_points = 0;
+
+  nw_spline.points;
+  for(int i = 0; i < nw_spline.points; i++){
+    nw_spline.points[i] = {0.0, 0.0};
+  }
+
+  nw_loop = _isLoop;
+
+  return nw_spline;
+}
+
+void spline_add_point(spline *s, SDL_FPoint point){
+  if(s->total_points < MAX_POINTS){
+    s->points[total_points] = point;
+    s->total_points += 1;
+    printf("Warning: spline max points reached!\n");
+  }
+}
+
+void spline_draw(spline _spline, SDL_Renderer* renderer){
   float maxit = 0.0f;
   
   if(_spline.loop){
@@ -53,8 +75,16 @@ void spline_draw(spline _spline){
   for(float i = 0.0f; i < maxit; i += +0.01f){
     SDL_FPoint p = spline_get_point(_spline, i);
 
-    SDL_RenderDrawPointF(gRenderer, p.x, p.y);
+    SDL_RenderDrawPointF(renderer, p.x, p.y);
   }
   
 }
 
+void spline_clean(spline* s){
+  s->total_points = 0;
+  s->loop = 0;
+
+  for(int i = 0; i < MAX_POINTS; i++){
+    s->points[i] = {0.0, 0.0};
+  }
+}

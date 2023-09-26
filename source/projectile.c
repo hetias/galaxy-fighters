@@ -91,7 +91,6 @@ void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
  */
 void projectile_destroy(projectile_t** _prj)
 {
-  
   if(_prj || *_prj)
   {
     free(*_prj);
@@ -115,6 +114,7 @@ int projectiles_list_add(projectiles_list* _pl, projectile_t* _prj){
   if(_pl == NULL || _prj == NULL){
     return RETURN_NULL_POINTER;
   }
+  
   printf("projectiles_list_add\n");
   //if the list is empty 
   if(projectiles_list_is_empty(*_pl)){
@@ -139,25 +139,27 @@ int projectiles_list_add(projectiles_list* _pl, projectile_t* _prj){
     if(projectiles_list_no_capacity(*_pl)){
 
       printf("extending capacity\n");
-      projectile_t** pl_realloc = (projectile_t**)realloc(_pl->array, sizeof(projectile_t*) * (_pl->capacity * 2));
+      int new_capacity = _pl->capacity * 2;
+      projectile_t** pl_realloc = (projectile_t**)realloc(_pl->array, sizeof(projectile_t*) * new_capacity);
       
       if(pl_realloc == NULL)
         return RETURN_NULL_POINTER;
 
       //initialize new spaces
-      for(int i = _pl->capacity; i < (_pl->capacity * 2) - 1; i++){
+      for(int i = _pl->capacity; i < new_capacity - 1; i++){
         pl_realloc[i] = NULL;
       }
       
       //update the new memory location and the capacity
       _pl->array = pl_realloc;
-      _pl->capacity *= 2;
+      _pl->capacity = new_capacity;
 
-      //add the new enemy at the end of the array
+      //add the new projectile at the end of the array
+      _pl->array[_pl->count] = _prj;
       _pl->count += 1;
-      _pl->array[_pl->count - 1] = _prj;
       printf("added element on extended capacity, position: %d\n", _pl->count - 1);
     }else{
+
       //if we don't have to realloc, search for an available memory space
       printf("searching free space to add element\n");
       for(int i = 0; i < _pl->capacity; i++){
@@ -168,6 +170,7 @@ int projectiles_list_add(projectiles_list* _pl, projectile_t* _prj){
           break;
         }
       }
+      
     }
   }
 
@@ -184,14 +187,12 @@ int projectiles_list_remove(projectiles_list* _pl, int index){
   if(_pl == NULL || _pl->array == NULL || _pl->array[index] == NULL)
     return RETURN_NULL_POINTER;
 
-  printf("projectiles_list_remove\n");  
-
   projectile_destroy(&_pl->array[index]);
+  SDL_assert(_pl->array[index] == NULL);
 
-  _pl->array[index] = NULL;
   _pl->count -= 1;
 
-  printf("projectiles_list_remove\n");  
+  printf("projectiles_list_remove, elements count: %d\n", _pl->count);  
   return RETURN_SUCCESS;
 }
 

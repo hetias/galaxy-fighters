@@ -30,7 +30,7 @@ typedef struct player_s{
 //creation of player entity.
 //argument it's the texture to use
 //returns a player ready to use.
-player_t* player_create(std::vector<SDL_Texture*>*);
+player_t* player_create(SDL_Texture*[]);
 
 //player update.
 //arguments are a player_t* and a reference to SDL_KeyboardState

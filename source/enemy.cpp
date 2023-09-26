@@ -7,7 +7,8 @@
  */
 
 enemy_t* enemy_create(std::vector<SDL_Texture*> _texturesVector){
-  enemy_t* _tmp = new enemy_t;
+  enemy_t* _tmp = (enemy_t*)malloc(sizeof(enemy_t));
+  
   
   _tmp->position = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
 
@@ -119,7 +120,10 @@ void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){
 void enemy_destroy(enemy_t* _enemy){
   if(_enemy)
   {
-    delete _enemy;
+    _enemy->sprite = NULL;
+    _enemy->projectile_texture = NULL;
+    
+    free(_enemy);
     _enemy = NULL;
   }
 }
@@ -156,7 +160,7 @@ void enemy_update_path(enemy_t* _enemy){
  * @return Pointer to a new enemies_container
  */
 enemies_container* enemies_container_create(){
-  enemies_container* ec = new enemies_container;
+  enemies_container* ec = (enemies_container*)malloc(sizeof(enemies_container));
 
   ec->array = NULL;
   ec->count = 0;

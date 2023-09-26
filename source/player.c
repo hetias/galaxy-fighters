@@ -7,12 +7,12 @@
  *@return Pointer to an player structure.
  */
 
-player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
+player_t* player_create(SDL_Texture**_textures_vector){
 
-  player_t* tmp_player = new player_t();
+  player_t* tmp_player = (player_t*)malloc(sizeof(player_t));
 
   SDL_Point dims = {0, 0};
-  SDL_QueryTexture(_texturesVector->at(TXT_PLAYER_BLUE), NULL, NULL,
+  SDL_QueryTexture(_textures_vector[TXT_PLAYER_BLUE], NULL, NULL,
                    &dims.x,
                    &dims.y);
   
@@ -27,8 +27,8 @@ player_t* player_create(std::vector<SDL_Texture*>* _texturesVector){
   tmp_player->currentShootDelay = 5;
   tmp_player->speed     = 8.5f;
 
-  tmp_player->sprite = _texturesVector->at(TXT_PLAYER_BLUE);
-  tmp_player->projectile_sprite = _texturesVector->at(TXT_LASER_BLUE);
+  tmp_player->sprite = _textures_vector[TXT_PLAYER_BLUE];
+  tmp_player->projectile_sprite = _textures_vector[TXT_LASER_BLUE];
 
   return tmp_player;
 }
@@ -129,7 +129,10 @@ void player_destroy(player_t* _player)
 {
   if(_player)
   {
-    delete _player;
+    _player->sprite = NULL;
+    _player->projectile_sprite = NULL;
+    
+    free(_player);
     _player = nullptr;
   }
   
