@@ -1,13 +1,10 @@
 #pragma once
 
-#include<iostream>
-#include<list>
-#include<vector>
-
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
+#include"definitions.h"
 
-#include"projectile.hpp"
+//#include"projectile.hpp"
 
 //player definition
 typedef struct player_s{
@@ -34,7 +31,8 @@ player_t* player_create(SDL_Texture*[]);
 
 //player update.
 //arguments are a player_t* and a reference to SDL_KeyboardState
-void player_update(player_t*,  const Uint8*, projectiles_list*);
+//void player_update(player_t*,  const Uint8*, projectiles_list*);
+void player_update(player_t*,  const Uint8*);
 
 //player draw
 //Draw ship in player position

@@ -97,8 +97,8 @@ int init(){
   window = SDL_CreateWindow("window",
                             SDL_WINDOWPOS_CENTERED,
                             SDL_WINDOWPOS_CENTERED,
-                            300,
-                            300,
+                            WINDOW_WIDTH,
+                            WINDOW_HEIGHT,
                             SDL_WINDOW_SHOWN);
   if(window == NULL){
     printf("Failed on window creation\n");

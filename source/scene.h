@@ -3,13 +3,13 @@
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
 #include"definitions.h"
-//#include"player.h"
+#include"player.h"
 //#include"enemy.hpp"
 //#include"projectile.hpp"
 //#include"spline.h"
 
 typedef struct{
-  //player_t* main_player;
+  player_t* player;
   //enemies_container* enemies_array;
   //projectiles_list projectiles;
   int tick;  

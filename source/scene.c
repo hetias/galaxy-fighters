@@ -11,6 +11,8 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
   //Load resources
   scene_load_resources(new_scene, _texture_paths, _renderer);
 
+  new_scene->player = player_create(new_scene->textures_vector);
+
   //start ticks
   new_scene->tick = 0;
   
@@ -46,8 +48,9 @@ int scene_update(scene_t* _scene){
   //input
   const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
-  //player_update(_scene->main_player, keyboardState, &_scene->projectiles);
-  
+  // player_update(_scene->main_player, keyboardState, &_scene->projectiles);
+
+  player_update(_scene->player, keyboardState);
   _scene->tick++;
 
   return RETURN_SUCCESS;
@@ -116,7 +119,7 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
   SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
 
   //draw the player
-  //player_draw(_scene->main_player, _renderer);
+  player_draw(_scene->player, _renderer);
   
 
   return RETURN_SUCCESS;
@@ -187,7 +190,10 @@ int scene_destroy(scene_t* _scene){
     }
     
   }
-    
+
+  //destroy player
+  player_destroy(_scene->player);
+  
   free(_scene);
   
   return RETURN_SUCCESS;

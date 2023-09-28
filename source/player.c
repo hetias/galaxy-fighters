@@ -1,4 +1,4 @@
-#include"player.hpp"
+#include"player.h"
 
 
 /**
@@ -12,17 +12,24 @@ player_t* player_create(SDL_Texture**_textures_vector){
   player_t* tmp_player = (player_t*)malloc(sizeof(player_t));
 
   SDL_Point dims = {0, 0};
-  SDL_QueryTexture(_textures_vector[TXT_PLAYER_BLUE], NULL, NULL,
+  SDL_QueryTexture(_textures_vector[TXT_PLAYER_BLUE],
+                   NULL,
+                   NULL,
                    &dims.x,
                    &dims.y);
   
   tmp_player->hp        = 5;
-  tmp_player->position  = {300.0f, 600.0f - dims.y};
-  tmp_player->direction = {0};
-  tmp_player->hitbox    = {tmp_player->position.x,
-                           tmp_player->position.y,
-                           (float)dims.x,
-                           (float)dims.y};
+  
+  tmp_player->position = (SDL_FPoint) {300.0f, 600.0f - dims.y};
+    
+  tmp_player->direction = (SDL_FPoint){0};
+
+  tmp_player->hitbox    = (SDL_FRect){
+    tmp_player->position.x,
+    tmp_player->position.y,
+    (float)dims.x,
+    (float)dims.y};
+  
   tmp_player->shootDelay = 5;
   tmp_player->currentShootDelay = 5;
   tmp_player->speed     = 8.5f;
@@ -41,7 +48,8 @@ player_t* player_create(SDL_Texture**_textures_vector){
  *@params _projectileList An list containing all current projectiles
  */
 
-void player_update(player_t* _player, const Uint8* _keyboardState, projectiles_list* _projectilesList){
+//projectiles_list* _projectilesList
+void player_update(player_t* _player, const Uint8* _keyboardState){
   //get inputs
 
   //move vertically
@@ -73,9 +81,9 @@ void player_update(player_t* _player, const Uint8* _keyboardState, projectiles_l
   //shoot projectile
   if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
   {
-    projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true, _player->projectile_sprite);
+    //projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true, _player->projectile_sprite);
 
-    projectiles_list_add(_projectilesList, tmp_prj);
+    //projectiles_list_add(_projectilesList, tmp_prj);
     
     _player->currentShootDelay = _player->shootDelay;
   }
@@ -133,7 +141,7 @@ void player_destroy(player_t* _player)
     _player->projectile_sprite = NULL;
     
     free(_player);
-    _player = nullptr;
+    _player = NULL;
   }
   
 }
