@@ -1,3 +1,6 @@
+#ifndef SCENE_H
+#define SCENE_H
+
 #include<stdio.h>
 
 #include"SDL2/SDL.h"
@@ -5,12 +8,13 @@
 #include"definitions.h"
 #include"player.h"
 #include"enemy.h"
-//#include"projectile.hpp"
+#include"container.h"
 //#include"spline.h"
 
 typedef struct{
   player_t* player;
   enemy_t* enemy;
+  game_container projectiles_container;
   //enemies_container* enemies_array;
   //projectiles_list projectiles;
   int tick;  
@@ -30,3 +34,5 @@ int scene_draw(scene_t*, SDL_Renderer*);
 //int scene_draw_enemies(enemies_container*, SDL_Renderer*);
 
 int scene_destroy(scene_t*);
+
+#endif

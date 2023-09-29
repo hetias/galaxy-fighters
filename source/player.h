@@ -1,4 +1,5 @@
-#pragma once
+#ifndef PLAYER_H
+#define PLAYER_H
 
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
@@ -42,3 +43,5 @@ void player_draw(player_t*,  SDL_Renderer*);
 //Player_destroy
 //free player memory
 void player_destroy(player_t*);
+
+#endif

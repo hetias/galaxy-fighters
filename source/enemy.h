@@ -1,4 +1,6 @@
-#pragma once
+#ifndef ENEMY_H
+#define ENEMY_H
+
 #include<stdio.h>
 
 #include <SDL2/SDL.h>
@@ -20,12 +22,6 @@ typedef struct enemy_s{
   float path_time;
 }enemy_t;
 
-typedef struct{
-  enemy_t** array;
-  int capacity;
-  int count;
-}enemies_container;
-
 //
 //FUNCTION DEFINITIONS
 //
@@ -36,3 +32,4 @@ void enemy_draw(enemy_t*, SDL_Renderer*);
 void enemy_destroy(enemy_t*);
 void enemy_update_path(enemy_t*);
 
+#endif

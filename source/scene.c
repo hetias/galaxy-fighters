@@ -14,6 +14,8 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
   new_scene->player = player_create(new_scene->textures_vector);
 
   new_scene->enemy = enemy_create(new_scene->textures_vector);
+
+  new_scene->projectiles_container = container_create(32, CONTAINER_PROJECTILE);
   
   //start ticks
   new_scene->tick = 0;
@@ -197,6 +199,9 @@ int scene_destroy(scene_t* _scene){
     
   }
 
+  //destroy container
+  container_clear(&_scene->projectiles_container);
+  
   //destroy player
   player_destroy(_scene->player);
 

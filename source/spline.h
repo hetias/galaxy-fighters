@@ -1,4 +1,6 @@
-#pragma once
+#ifndef SPLINE_H
+#define SPLINE_H
+
 #include<stdio.h>
 #include<stdbool.h>
 
@@ -17,3 +19,5 @@ void spline_add_point(spline*, point);
 void spline_clean(spline*);
 SDL_FPoint spline_get_point(spline, float);
 void spline_draw(spline, SDL_Renderer*);
+
+#endif
