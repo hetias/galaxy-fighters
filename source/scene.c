@@ -13,6 +13,8 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
 
   new_scene->player = player_create(new_scene->textures_vector);
 
+  new_scene->enemy = enemy_create(new_scene->textures_vector);
+  
   //start ticks
   new_scene->tick = 0;
   
@@ -51,6 +53,8 @@ int scene_update(scene_t* _scene){
   // player_update(_scene->main_player, keyboardState, &_scene->projectiles);
 
   player_update(_scene->player, keyboardState);
+  enemy_update(_scene->enemy);
+
   _scene->tick++;
 
   return RETURN_SUCCESS;
@@ -120,7 +124,9 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
 
   //draw the player
   player_draw(_scene->player, _renderer);
-  
+
+  //draw enemies
+  enemy_draw(_scene->enemy, _renderer);
 
   return RETURN_SUCCESS;
 }
@@ -193,6 +199,9 @@ int scene_destroy(scene_t* _scene){
 
   //destroy player
   player_destroy(_scene->player);
+
+  //destroy enemies
+  enemy_destroy(_scene->enemy);
   
   free(_scene);
   
