@@ -22,7 +22,8 @@ int container_add(game_container*, void*);
 int container_remove(game_container*, int);
 int container_clear(game_container*);
 int container_rearrenge(game_container*);
-int container_empty(game_container);
+bool container_empty(game_container);
+bool container_full(game_container);
 int container_print(game_container);
 
 #endif

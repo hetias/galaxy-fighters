@@ -115,14 +115,12 @@ void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){
  * @params _enemy Pointer to enemy to be freed.
  */
 
-void enemy_destroy(enemy_t* _enemy){
-  if(_enemy)
-  {
-    _enemy->sprite = NULL;
-    _enemy->projectile_texture = NULL;
-    
-    free(_enemy);
-    _enemy = NULL;
+void enemy_destroy(enemy_t** enemy){
+  if(enemy == NULL && *enemy == NULL)  {
+    printf("Failede on 'enemy_destroy', void pointer passed\n");
+  }else{
+    free(*enemy);
+    *enemy = NULL;
   }
 }
 

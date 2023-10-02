@@ -16,7 +16,38 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
   new_scene->enemy = enemy_create(new_scene->textures_vector);
 
   new_scene->projectiles_container = container_create(32, CONTAINER_PROJECTILE);
+
+  printf("Adding elements on the container\n");
+  for(int i = 0; i < 32; i++){
+    projectile_t* proj = (projectile_t*)malloc(sizeof(projectile_t));
+    proj->position = (SDL_FPoint){i * 1, i * 1};
+    proj->direction = (SDL_FPoint){0, 1};
+    proj->hitbox = (SDL_FRect){20, 20};
+    proj->sprite = new_scene->textures_vector[TXT_LASER_RED];
+    proj->speed = 5.0f;
+    proj->isFriendly = false;
+
+    container_add(&new_scene->projectiles_container, (void*)proj);
+  }
+
+  /* printf("Container post additions\n"); */
+  /* container_print(new_scene->projectiles_container); */
   
+  /* getchar(); */
+  
+  /* printf("Container after additions\n"); */
+  /* container_print(new_scene->projectiles_container); */
+  /* for(int i = 0; i < new_scene->projectiles_container.count; i++){     */
+  /*   printf("Iteration number: %d\n", i); */
+  /*   if(i % 2 == 0) container_remove(&new_scene->projectiles_container, i); */
+  /*   container_print(new_scene->projectiles_container); */
+  /* } */
+
+  /* printf("Container post additions\n"); */
+  /* container_print(new_scene->projectiles_container); */
+  
+  //getchar();
+    
   //start ticks
   new_scene->tick = 0;
   
@@ -206,7 +237,7 @@ int scene_destroy(scene_t* _scene){
   player_destroy(_scene->player);
 
   //destroy enemies
-  enemy_destroy(_scene->enemy);
+  enemy_destroy(&_scene->enemy);
   
   free(_scene);
   

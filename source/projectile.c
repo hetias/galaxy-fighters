@@ -89,12 +89,12 @@ void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
  *Frees the projectile from memory.
  *@params _prj The projectile to free
  */
-void projectile_destroy(projectile_t** _prj)
-{
-  if(_prj || *_prj)
-  {
-    free(*_prj);
-    *_prj = NULL;
+void projectile_destroy(projectile_t** projectile){
+  if(projectile == NULL && *projectile == NULL){
+    printf("Failed to destroy projectiles\nFound void pointers on 'projectile_destroy'\n");    
+  }else{
+    free(*projectile);
+    *projectile = NULL;
   }
 }
 

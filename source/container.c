@@ -1,6 +1,12 @@
 #include"container.h"
 
 /**
+ * CONTAINER_H
+ * This container structure will work like a 
+ * basic stack
+ */
+
+/**
  */
 game_container container_create(size_t container_size, int container_type){
 
@@ -48,15 +54,106 @@ game_container container_create(size_t container_size, int container_type){
 }
 
 /**
+ * Here we infere the type of 'element' based on the container pased
+ * and then add it at the end of the list
  */
 int container_add(game_container* current_container, void* element){
-  
+
+  //Check if container pointer is valid
+  if(current_container == NULL){
+    printf("Pointer to container is null in 'container_add'\n");
+    return -1;
+  }  
+
+  //Check if container pointer is valid
+  if(element == NULL){
+    printf("Pointer to element is null in 'container_add'\n");
+    return -1;
+  }
+
+  //Check if it's not full
+  if(container_full(*current_container)){
+    printf("Failed on 'container_add' current container is full\n");
+    return -1;
+  }
+
+  //if we need to add 'element' to an enemy container
+  int last_index = (current_container->count);
+  if(current_container->type == CONTAINER_ENEMY){
+    current_container->array[last_index] = (enemy_t*)element;
+    current_container->count += 1;
+    printf("Element added on position: %d\n", last_index);
+  }  //if we need to add 'element' to an projectile container
+  else if(current_container->type == CONTAINER_PROJECTILE){
+    current_container->array[last_index] = (projectile_t*)element;
+    current_container->count += 1;
+    printf("Element added on position: %d\n", last_index);
+  }
+
+  return 0;
 }
 
 /**
+ * We swap the element selected with the last element(unless they are the same)
+ * and then delete the last element
 */
 int container_remove(game_container* current_container, int index){
-  
+
+  //check container existence
+  if(current_container == NULL){
+    printf("Invalid pointer on 'container_remove'\n");
+    return -1;
+  }
+
+  //check if index is on bounds
+  if(index < 0 || index > current_container->size){
+    printf("Invalid index on 'container_remove'");
+    return -1;
+  }
+
+  //check what we have to free
+  if(current_container->type == CONTAINER_ENEMY){
+    //check if index refers to the last element...
+    int last_index = current_container->count - 1; //this is just the index of the last element
+
+    if(index == last_index){
+      enemy_destroy((enemy_t**)(&current_container->array[last_index]));
+      current_container->count -= 1;
+    }else{
+
+      //a little of swapping
+      enemy_t* tmp = current_container->array[index];      
+      current_container->array[index] = current_container->array[last_index];
+      current_container->array[last_index] = tmp;
+      printf("Element from position %d swaped with element on: %d\n", index, last_index);
+      
+      //now delete the element
+      enemy_destroy((enemy_t**)(&current_container->array[last_index]));
+      current_container->count -= 1;
+      
+    }
+  }else if(current_container->type == CONTAINER_PROJECTILE){
+    //check if index refers to the last element...
+    int last_index = current_container->count - 1; //this is just the index of the last element
+
+    if(index == last_index){
+      projectile_destroy((projectile_t**)(&current_container->array[last_index]));
+      current_container->count -= 1;
+    }else{
+
+      //a little of swapping
+      projectile_t* tmp = current_container->array[index];      
+      current_container->array[index] = current_container->array[last_index];
+      current_container->array[last_index] = tmp;
+      printf("Element from position %d swaped with element on: %d\n", index, last_index);
+
+      //now delete the element
+      projectile_destroy((projectile_t**)(&current_container->array[last_index]));
+      current_container->count -= 1;
+    }
+  }
+
+  return 0;
 }
 
 /**
@@ -76,18 +173,18 @@ int container_clear(game_container* current_container){
   }
 
   //free each element in the array
-
   if(current_container->type == CONTAINER_ENEMY){
 
     for(int i = 0; i < current_container->size; i++){
-      enemy_destroy((enemy_t*)current_container->array[i]);
+      enemy_t* enemy =  (enemy_t*)(current_container->array[i]);
+      enemy_destroy(&enemy);
     }
  
   }else if(current_container->type == CONTAINER_PROJECTILE){
 
     for(int i = 0; i < current_container->size; i++){
-      projectile_t* prj = (projectile_t*)current_container->array[i];
-      projectile_destroy(&prj);
+      projectile_t* projectile = (projectile_t*)(current_container->array[i]);
+      projectile_destroy(&projectile);
     }
     
   }else{
@@ -112,20 +209,35 @@ int container_rearrenge(game_container* current_container){
 
 /**
  */
-int container_empty(game_container current_container){
-  
+bool container_empty(game_container current_container){
+  return (current_container.count == 0);
 }
 
 /**
  */
-int container_full(game_container current_container){
-  
+bool container_full(game_container current_container){
+  return (current_container.size == current_container.count);
 }
 
 /**
  */
 int container_print(game_container current_container){
-  
+
+  printf("\n\n---------------------------------------\n");
+  if(container_empty(current_container)){
+    printf("Container currently empty\n");
+  }
+
+  printf("|");
+  for(int i = 0; i < current_container.size; i++){
+    if(current_container.array[i] == NULL){
+      printf("0|");
+    }else{
+      printf("X|");
+    }
+  }
+  printf("|\n");
+  printf("size: %d - count: %d\n", current_container.size, current_container.count);
 }
 
 
