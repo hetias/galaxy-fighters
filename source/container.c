@@ -8,17 +8,7 @@
 
 /**
  */
-game_container container_create(size_t container_size, int container_type){
-
-  //check if size it's reasonable
-  if(container_size > MAX_CONTAINER){
-    printf("Container size exceds MAX_CONTAINER limit\n");
-    printf("MAX_CONTAINER = %d", MAX_CONTAINER);
-    printf("Desired size = %ld", container_size);
-
-    game_container bad_container = {NULL, 0, 0, 0};
-    return bad_container;        
-  }
+game_container container_create(int container_type){
 
   //check if typing is correct
   if(container_type != CONTAINER_ENEMY &&
@@ -38,15 +28,15 @@ game_container container_create(size_t container_size, int container_type){
   //create the array
   if(container_type == CONTAINER_ENEMY){
     
-    container.array = calloc(container_size, sizeof(enemy_t*));
-     
+    container.array = calloc(ENEMIES_CAP, sizeof(enemy_t*));
+    container.size = ENEMIES_CAP;
+    
   }else if(container_type == CONTAINER_PROJECTILE){
 
-    container.array = calloc(container_size, sizeof(projectile_t*));
-    
+    container.array = calloc(PROJECTILES_CAP, sizeof(projectile_t*));
+    container.size = PROJECTILES_CAP;
   }
 
-  container.size = container_size;
   container.count = 0;
   container.type = container_type;
 
@@ -82,12 +72,12 @@ int container_add(game_container* current_container, void* element){
   if(current_container->type == CONTAINER_ENEMY){
     current_container->array[last_index] = (enemy_t*)element;
     current_container->count += 1;
-    printf("Element added on position: %d\n", last_index);
+    //printf("Element added on position: %d\n", last_index);
   }  //if we need to add 'element' to an projectile container
   else if(current_container->type == CONTAINER_PROJECTILE){
     current_container->array[last_index] = (projectile_t*)element;
     current_container->count += 1;
-    printf("Element added on position: %d\n", last_index);
+    //printf("Element added on position: %d\n", last_index);
   }
 
   return 0;
@@ -125,7 +115,7 @@ int container_remove(game_container* current_container, int index){
       enemy_t* tmp = current_container->array[index];      
       current_container->array[index] = current_container->array[last_index];
       current_container->array[last_index] = tmp;
-      printf("Element from position %d swaped with element on: %d\n", index, last_index);
+      //printf("Element from position %d swaped with element on: %d\n", index, last_index);
       
       //now delete the element
       enemy_destroy((enemy_t**)(&current_container->array[last_index]));
@@ -145,7 +135,7 @@ int container_remove(game_container* current_container, int index){
       projectile_t* tmp = current_container->array[index];      
       current_container->array[index] = current_container->array[last_index];
       current_container->array[last_index] = tmp;
-      printf("Element from position %d swaped with element on: %d\n", index, last_index);
+      //printf("Element from position %d swaped with element on: %d\n", index, last_index);
 
       //now delete the element
       projectile_destroy((projectile_t**)(&current_container->array[last_index]));

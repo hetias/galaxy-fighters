@@ -48,8 +48,7 @@ player_t* player_create(SDL_Texture**_textures_vector){
  *@params _projectileList An list containing all current projectiles
  */
 
-//projectiles_list* _projectilesList
-void player_update(player_t* _player, const Uint8* _keyboardState){
+void player_update(player_t* _player, const Uint8* _keyboardState, game_container* projectiles_container){
   //get inputs
 
   //move vertically
@@ -81,9 +80,9 @@ void player_update(player_t* _player, const Uint8* _keyboardState){
   //shoot projectile
   if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
   {
-    //projectile_t* tmp_prj = projectile_create(_player->position, {0.0f, -1.0f}, true, _player->projectile_sprite);
+    projectile_t* tmp_prj = projectile_create(_player->position, (SDL_FPoint){0.0f, -1.0f}, true, _player->projectile_sprite);
 
-    //projectiles_list_add(_projectilesList, tmp_prj);
+    container_add(projectiles_container, (void*)tmp_prj);
     
     _player->currentShootDelay = _player->shootDelay;
   }

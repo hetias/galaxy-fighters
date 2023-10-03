@@ -44,7 +44,7 @@ int main(int argc, char* argv[]){
 
   if( initialize_sdl() ){
     free_sdl();
-    return EXIT_FAILURE;
+    return -1;
   }
 
   scene_t* game_scene = NULL;
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
 
   free_sdl();
   
-  return EXIT_SUCCESS;
+  return 0;
 }
 
 

@@ -6,7 +6,8 @@
 #include"enemy.h"
 #include"projectile.h"
 
-#define MAX_CONTAINER 128
+#define ENEMIES_CAP 32
+#define PROJECTILES_CAP 128
 
 enum CONTAINER_TYPE{CONTAINER_ENEMY = 1, CONTAINER_PROJECTILE = 2};
 
@@ -17,7 +18,7 @@ typedef struct{
   int  type;
 }game_container;
 
-game_container container_create(size_t, int);
+game_container container_create(int);
 int container_add(game_container*, void*);
 int container_remove(game_container*, int);
 int container_clear(game_container*);
