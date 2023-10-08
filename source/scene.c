@@ -14,11 +14,13 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
   //create the player
   new_scene->player = player_create(new_scene->textures_vector);
 
-  //create one enemy, just 4 now
-  new_scene->enemy = enemy_create(new_scene->textures_vector);
-
   //create container for projectiles
   new_scene->projectiles_container = container_create(CONTAINER_PROJECTILE);
+
+  //create enemy container
+  new_scene->enemies_container = container_create(CONTAINER_ENEMY);
+  enemy_t* e = enemy_create(new_scene->textures_vector);
+  container_add(&new_scene->enemies_container, e);
     
   //start ticks
   new_scene->tick = 0;
@@ -55,8 +57,11 @@ int scene_update(scene_t* _scene){
   //input
   const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 
+  //update player
   player_update(_scene->player, keyboardState, &_scene->projectiles_container);
-  enemy_update(_scene->enemy);
+
+  //update all enemies
+  scene_update_enemies(&_scene->enemies_container, &_scene->projectiles_container);
   
   //update projectiles
   scene_update_projectiles(&_scene->projectiles_container);
@@ -82,7 +87,6 @@ int scene_update_projectiles(game_container* projectiles_container){
     }
     
   }
-
   
   return 0;
 }
@@ -94,18 +98,19 @@ int scene_update_projectiles(game_container* projectiles_container){
 where the enemies are located
 * @return Returns 0 on succes, in case there are invalid pointers it returns -1
  */
-/* int scene_update_enemies(enemies_container** _enemies_container){ */
-/*   if(_enemies_container == NULL || *_enemies_container == NULL) */
-/*   { */
+int scene_update_enemies(game_container* _enemies_container, game_container* projectiles_container){
+  if(_enemies_container == NULL)
+  {
+    printf("NULL pointer at scene_update_enemes\n");
+    return -1;
+  }
 
-/*     return -1; */
-/*   } */
-/*   enemies_container* ec = *_enemies_container; */
+  for(int i = 0; i < _enemies_container->count; i++){
+    enemy_update(_enemies_container->array[i], projectiles_container);
+  }
   
-/*   //printf("there are currently %d enemies\n", ec->count); */
-
-/*   return 0; */
-/* } */
+  return 0;
+}
 
 
 
@@ -126,13 +131,10 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
   player_draw(_scene->player, _renderer);
 
   //draw enemies
-  //enemy_draw(_scene->enemy, _renderer);
-
+  scene_draw_enemies(&_scene->enemies_container, _renderer);
+  
   //draw projectiles
-  for(int i = 0; i < _scene->projectiles_container.count; i++){
-    projectile_draw(_scene->projectiles_container.array[i], _renderer);
-  }
-
+  scene_draw_projectiles(&_scene->projectiles_container, _renderer);
 
   return 0;
 }
@@ -150,9 +152,6 @@ int scene_draw_projectiles(game_container* projectiles_container, SDL_Renderer* 
     return -1;
 
   for(int i = 0; i < projectiles_container->count; i++){
-    if(projectiles_container->array[i] == NULL)
-      continue;
-
     projectile_draw(projectiles_container->array[i], _renderer);
   }
 
@@ -166,20 +165,17 @@ int scene_draw_projectiles(game_container* projectiles_container, SDL_Renderer* 
  * @param _renderer A SDL2 Renderer where everything will be drawn
  * @return Returns 0 on succes, in case there are invalid pointers it returns -1
  */
-/* int scene_draw_enemies(enemies_container* _enemies_container, SDL_Renderer* _renderer){ */
-/*   if(_enemies_container == NULL || _renderer == NULL){ */
-/*     return -1;  */
-/*   } */
+int scene_draw_enemies(game_container* _enemies_container, SDL_Renderer* _renderer){
+  if(_enemies_container == NULL || _renderer == NULL){
+    return -1;
+  }
   
-/*   for(int i = 0; i < _enemies_container->capacity; i++){ */
-/*     if(_enemies_container->array[i] == NULL) */
-/*       continue; */
+  for(int i = 0; i < _enemies_container->count; i++){
+    enemy_draw(_enemies_container->array[i], _renderer);
+  }
 
-/*     enemy_draw(_enemies_container->array[i], _renderer); */
-/*   } */
-
-/*   return 0; */
-/* } */
+  return 0;
+}
 
 
 /**
@@ -208,7 +204,7 @@ int scene_destroy(scene_t* _scene){
   player_destroy(_scene->player);
 
   //destroy enemies
-  enemy_destroy(&_scene->enemy);
+  container_clear(&_scene->enemies_container);
   
   free(_scene);
   

@@ -13,9 +13,8 @@
 
 typedef struct{
   player_t* player;
-  enemy_t* enemy;
   game_container projectiles_container;
-  //enemies_container* enemies_array;
+  game_container enemies_container;
   //projectiles_list projectiles;
   int tick;  
   SDL_Texture* textures_vector[TXT_TOTAL];
@@ -28,10 +27,10 @@ int scene_update(scene_t*);
 int scene_draw(scene_t*, SDL_Renderer*);
 
 int scene_update_projectiles(game_container*);
-//int scene_update_enemies(enemies_container**);
+int scene_update_enemies(game_container*, game_container*);
 
 int scene_draw_projectiles(game_container*, SDL_Renderer*);
-//int scene_draw_enemies(enemies_container*, SDL_Renderer*);
+int scene_draw_enemies(game_container*, SDL_Renderer*);
 
 int scene_destroy(scene_t*);
 

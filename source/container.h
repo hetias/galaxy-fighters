@@ -3,13 +3,6 @@
 
 #include<stdio.h>
 #include<stdlib.h>
-#include"enemy.h"
-#include"projectile.h"
-
-#define ENEMIES_CAP 32
-#define PROJECTILES_CAP 128
-
-enum CONTAINER_TYPE{CONTAINER_ENEMY = 1, CONTAINER_PROJECTILE = 2};
 
 typedef struct{
   void** array;
@@ -17,6 +10,14 @@ typedef struct{
   int count;
   int  type;
 }game_container;
+
+#include"enemy.h"
+#include"projectile.h"
+
+#define ENEMIES_CAP 32
+#define PROJECTILES_CAP 128
+
+enum CONTAINER_TYPE{CONTAINER_ENEMY = 1, CONTAINER_PROJECTILE = 2};
 
 game_container container_create(int);
 int container_add(game_container*, void*);

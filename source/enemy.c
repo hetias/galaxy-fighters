@@ -31,7 +31,6 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector){
   _tmp->currentDelay = _tmp->shootDelay;
   _tmp->path_time = 0.0f;
   //_tmp->path = NULL;
-  
   return _tmp;  
 }
 
@@ -39,14 +38,12 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector){
  *Updates internal enemy values.
  *@params _projectileList A pointer to list containing all current game projectiles.
  */
-
-//std::list<projectile_t*>* _projectileList
-void enemy_update(enemy_t* _enemy){
+void enemy_update(enemy_t* _enemy, game_container* projectiles_container){
 
   //shootin'
   if(_enemy->currentDelay <= 0 && _enemy->shootDelay > 0){
-    //projectile_t* tmp_prj = projectile_create(_enemy->position,{0.0, 1.0},false,_enemy->projectile_texture);
-  //_projectileList->push_back(tmp_prj);
+    projectile_t* tmp_prj = projectile_create(_enemy->position, (SDL_FPoint){0.0, 1.0},false,_enemy->projectile_texture);
+    container_add(projectiles_container, tmp_prj);
 
     _enemy->currentDelay = _enemy->shootDelay;
   }else{

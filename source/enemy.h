@@ -7,7 +7,8 @@
 
 #include"definitions.h"
 //#include"spline.hpp"
-//#include"projectile.hpp"
+#include"container.h"
+#include"projectile.h"
 
 //ENEMY DEFINITION
 typedef struct enemy_s{
@@ -26,10 +27,11 @@ typedef struct enemy_s{
 //FUNCTION DEFINITIONS
 //
 enemy_t* enemy_create(SDL_Texture**);
-void enemy_update(enemy_t*);
+void enemy_update(enemy_t*, game_container*);
 //void enemy_change_path(enemy_t*, spline*);
 void enemy_draw(enemy_t*, SDL_Renderer*);
 void enemy_destroy(enemy_t**);
 void enemy_update_path(enemy_t*);
+void enemy_path_ended(enemy_t*);
 
 #endif
