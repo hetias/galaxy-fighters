@@ -7,9 +7,9 @@
 
 #include"definitions.h"
 
-#define FAST_PRJ_SPEED 30
-#define NORMAL_PRJ_SPEED 15
-#define SLOW_PRJ_SPEED 5
+#define FAST_PRJ_SPEED 8.0f
+#define NORMAL_PRJ_SPEED 5.0f
+#define SLOW_PRJ_SPEED 2.0f
 
 typedef struct projectile_s{
   SDL_FPoint position;

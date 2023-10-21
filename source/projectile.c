@@ -18,7 +18,7 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
   tmp->hitbox = (SDL_FRect){tmp->position.x, tmp->position.y,
                  13.0f,           54.0f};
   tmp->sprite = _sprite;
-  tmp->speed = SLOW_PRJ_SPEED;
+  tmp->speed = NORMAL_PRJ_SPEED;
   tmp->isFriendly = _isFriendly;
 
   return tmp;

@@ -21,7 +21,6 @@ typedef struct player_s{
   SDL_Texture* projectile_sprite;
 }player_t;
 
-
 //
 //FUNCTION DEFINITIONS
 //

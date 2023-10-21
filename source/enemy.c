@@ -27,7 +27,7 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector){
   _tmp->sprite   = _texturesVector[TXT_ENEMY1_BLACK];
   _tmp->projectile_texture   = _texturesVector[TXT_LASER_RED];
   _tmp->hp       = 4;
-  _tmp->shootDelay = 15;
+  _tmp->shootDelay = SHOOT_SLOW;
   _tmp->currentDelay = _tmp->shootDelay;
   _tmp->path_time = 0.0f;
   //_tmp->path = NULL;
@@ -47,9 +47,9 @@ void enemy_update(enemy_t* _enemy, game_container* projectiles_container){
 
     _enemy->currentDelay = _enemy->shootDelay;
   }else{
-    _enemy->currentDelay--;
+    _enemy->currentDelay -= 1;
   }
-
+  
   //movin'
   enemy_update_path(_enemy);
   

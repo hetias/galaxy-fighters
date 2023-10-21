@@ -3,6 +3,11 @@
 #define WINDOW_WIDTH 600
 #define WINDOW_HEIGHT 600
 
+//definitions needed for player and enemy
+#define SHOOT_SLOW   30
+#define SHOOT_NORMAL 20
+#define SHOOT_FAST   10
+
 enum ETextures{
   //background
   TXT_BG_BLACK,
