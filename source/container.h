@@ -21,9 +21,9 @@ enum CONTAINER_TYPE{CONTAINER_ENEMY = 1, CONTAINER_PROJECTILE = 2};
 
 game_container container_create(int);
 int container_add(game_container*, void*);
-int container_remove(game_container*, int);
+void* container_remove(game_container*, int);
+int container_remove_destroy(game_container*, int);
 int container_clear(game_container*);
-int container_rearrenge(game_container*);
 bool container_empty(game_container);
 bool container_full(game_container);
 int container_print(game_container);

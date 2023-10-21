@@ -32,13 +32,13 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
 
 int projectile_update(projectile_t* _prj){
   if(_prj == NULL)
-    return 0;
+    return RET_FAILURE;
   
   //on bounds check
   if(_prj->position.x > 600 || _prj->position.x < 0 ||
      _prj->position.y > 600 || _prj->position.y < 0){
     
-    return 1;
+    return RET_DEAD;
   }else{
     
     _prj->position.x += _prj->direction.x * _prj->speed;
@@ -47,7 +47,7 @@ int projectile_update(projectile_t* _prj){
     _prj->hitbox.x = _prj->position.x - (_prj->hitbox.w / 2);
     _prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);
 
-    return 0;
+    return RET_ALIVE;
   }
 }
 
@@ -77,11 +77,13 @@ void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
                       NULL,
                       SDL_FLIP_NONE);
   }
-    //drawing hitbox
-  //SDL_FRect smallerHitbox = _prj->hitbox;
-  //smallerHitbox.h = _prj->hitbox.h / 3.0f;
-  //SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-  //SDL_RenderDrawRectF(gRenderer, &smallerHitbox);
+  //drawing hitbox
+  //FIX::The hitbox is correctly drawn for player projs but
+  //not enemy projs
+  /* SDL_FRect smallerHitbox = _prj->hitbox; */
+  /* smallerHitbox.h = _prj->hitbox.h / 3.0f; */
+  /* SDL_SetRenderDrawColor(_renderer, 0, 255, 0, 255); */
+  /* SDL_RenderDrawRectF(_renderer, &smallerHitbox); */
   
 }
 

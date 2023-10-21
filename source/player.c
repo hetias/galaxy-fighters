@@ -28,7 +28,7 @@ player_t* player_create(SDL_Texture**_textures_vector){
 	tmp_player->position.y,
 	(float)dims.x,
 	(float)dims.y};
-  
+    
     tmp_player->shootDelay = SHOOT_SLOW;
     tmp_player->currentShootDelay = tmp_player->shootDelay;
     tmp_player->speed     = 8.5f;
@@ -47,7 +47,16 @@ player_t* player_create(SDL_Texture**_textures_vector){
  *@params _projectileList An list containing all current projectiles
  */
 
-void player_update(player_t* _player, const Uint8* _keyboardState, game_container* projectiles_container){
+int  player_update(player_t* _player, const Uint8* _keyboardState, game_container* projectiles_container){
+
+    if(_player == NULL || _keyboardState == NULL || projectiles_container == NULL){
+	printf("Null pointer found at player_update\n");
+	return RET_FAILURE;
+    }
+    
+    if(_player->hp < 1){
+	return RET_DEAD;
+    }
     //get inputs
 
     //move vertically
@@ -90,6 +99,25 @@ void player_update(player_t* _player, const Uint8* _keyboardState, game_containe
 	_player->currentShootDelay--;
     }
 
+    //check collision with enemy projectiles
+    if(!container_empty(*projectiles_container)){
+	for(int i = 0; i < projectiles_container->count; i++){
+	    projectile_t *prj = projectiles_container->array[i];
+
+	    if(!prj->isFriendly){
+
+		//for some reason i cant make a call for SDL_HasIntersectionF...so a little bit of magic here...
+		//TODO::Make good use of the float values here, maybe just implementing an aabb collision check
+		SDL_Rect a = {(int)prj->hitbox.x, (int)prj->hitbox.y, (int)prj->hitbox.w, (int)prj->hitbox.h};
+		SDL_Rect b = {(int)_player->hitbox.x, (int)_player->hitbox.y, (int)_player->hitbox.w, (int)_player->hitbox.h};
+
+		if(SDL_HasIntersection(&a, &b)){
+		    _player->hp -= 1;
+		    container_remove_destroy(projectiles_container, i);
+		}
+	    }
+	}
+    }
 
     //normalizing vector
     float magnitud = sqrt(_player->direction.x * _player->direction.x + _player->direction.y * _player->direction.y);
@@ -102,6 +130,8 @@ void player_update(player_t* _player, const Uint8* _keyboardState, game_containe
 
     _player->hitbox.x = _player->position.x - (_player->hitbox.w / 2);
     _player->hitbox.y = _player->position.y - (_player->hitbox.h / 2);
+
+    return RET_ALIVE;
 }
 
 

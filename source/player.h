@@ -32,7 +32,7 @@ player_t* player_create(SDL_Texture*[]);
 
 //player update.
 //arguments are a player_t* and a reference to SDL_KeyboardState
-void player_update(player_t*,  const Uint8*, game_container*);
+int player_update(player_t*,  const Uint8*, game_container*);
 
 //player draw
 //Draw ship in player position
