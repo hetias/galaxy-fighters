@@ -77,8 +77,8 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
 		SDL_Rect b = {(int)_enemy->hitbox.x, (int)_enemy->hitbox.y, (int)_enemy->hitbox.w, (int)_enemy->hitbox.h};
 		if(SDL_HasIntersection(&a, &b)){
 		    _enemy->hp -= 1;
-		    if(_enemy->hp < 1)
-			container_remove_destroy(projectiles_container, i);
+		    container_remove_destroy(projectiles_container, i);		    
+		    if(_enemy->hp < 1)			
 			return RET_DEAD;
 		}
 	    }
@@ -180,4 +180,12 @@ void enemy_update_path(enemy_t* _enemy){
     /* } */
 
   
+}
+
+void enemy_set_can_shoot(enemy_t* enemy, bool can_shoot, int speed){
+    if(can_shoot){
+	enemy->shootDelay = speed;
+    }else{
+	enemy->shootDelay = 0;
+    }
 }

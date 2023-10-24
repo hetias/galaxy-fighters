@@ -28,6 +28,8 @@ enum ETextures{
   //lasers
   TXT_LASER_BLUE,
   TXT_LASER_RED,
+  //ui
+  TXT_UI_LIFE,
   //vector final size
   TXT_TOTAL
 };

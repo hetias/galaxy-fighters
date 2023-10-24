@@ -21,7 +21,7 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
     enemy_t* e = enemy_create(new_scene->textures_vector);
     container_add(&new_scene->enemies_container, e);
-    
+
     //start ticks
     new_scene->tick = 0;
   
@@ -129,16 +129,19 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
   
     /*background elements*/
     SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
-
-    //draw the player
-    player_draw(_scene->player, _renderer);
-
-    //draw enemies
-    scene_draw_enemies(&_scene->enemies_container, _renderer);
   
     //draw projectiles
     scene_draw_projectiles(&_scene->projectiles_container, _renderer);
 
+    //draw enemies
+    scene_draw_enemies(&_scene->enemies_container, _renderer);
+
+//draw the player
+    player_draw(_scene->player, _renderer);
+    
+    //draw ui
+    draw_ui(_scene->player, _scene->textures_vector,  _renderer);
+    
     return RET_SUCCESS;
 }
 

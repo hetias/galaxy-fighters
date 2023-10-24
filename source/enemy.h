@@ -34,4 +34,6 @@ void enemy_destroy(enemy_t**);
 void enemy_update_path(enemy_t*);
 void enemy_path_ended(enemy_t*);
 
+void enemy_set_can_shoot(enemy_t*, bool, int);
+
 #endif

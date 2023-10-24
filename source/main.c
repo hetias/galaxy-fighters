@@ -29,7 +29,9 @@ const char* gTexturesPaths[] ={
     "../resources/sprites/enemies/enemyBlack1.png",
     //Lasers
     "../resources/sprites/lasers/laserBlue.png",
-    "../resources/sprites/lasers/laserRed.png"
+    "../resources/sprites/lasers/laserRed.png",
+    //ui
+    "../resources/sprites/ui/lifeblue1.png"
 };
 
 int main(void){

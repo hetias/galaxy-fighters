@@ -1,5 +1,5 @@
 #OBJS specifies which files to compile as part of the project
-OBJS = main.o projectile.o player.o enemy.o scene.o container.o
+OBJS = main.o projectile.o player.o enemy.o scene.o container.o ui.o
 
 #projectile.o player.o enemy.o spline.o scene.o
 
@@ -44,6 +44,9 @@ enemy.o: enemy.h enemy.c
 
 scene.o: scene.c scene.h
 	$(CC) $(INCLUDE_PATH) -g -O0 -c scene.c
+
+ui.o: ui.c ui.h
+	$(CC) $(INCLUDE_PATH) -g -O0 -c ui.c
 
 clean:
 	rm *.o

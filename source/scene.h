@@ -6,18 +6,18 @@
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
 #include"definitions.h"
+#include"ui.h"
 #include"player.h"
 #include"enemy.h"
 #include"container.h"
 //#include"spline.h"
 
 typedef struct{
-  player_t* player;
-  game_container projectiles_container;
-  game_container enemies_container;
-  //projectiles_list projectiles;
-  int tick;  
-  SDL_Texture* textures_vector[TXT_TOTAL];
+    player_t* player;
+    game_container projectiles_container;
+    game_container enemies_container;
+    int tick;  
+    SDL_Texture* textures_vector[TXT_TOTAL];
 }scene_t;
 
 scene_t* scene_create(const char**, SDL_Renderer*);

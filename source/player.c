@@ -143,14 +143,15 @@ int  player_update(player_t* _player, const Uint8* _keyboardState, game_containe
  */
 
 void player_draw(player_t* _player, SDL_Renderer* _renderer){
-    if(_player->sprite){
-      
-	/* SDL_SetRenderDrawColor(_renderer, 255, 0, 0 ,255); */
-	/* SDL_RenderDrawRectF(_renderer, &_player->hitbox); */
-
+    if(_player->sprite == NULL){
+	printf("null pointer found at player_draw\n");
+	return;
+    }
+    
+    /* SDL_SetRenderDrawColor(_renderer, 255, 0, 0 ,255); */
+    /* SDL_RenderDrawRectF(_renderer, &_player->hitbox); */
+    if(_player->hp > 0){
 	SDL_RenderCopyF(_renderer, _player->sprite, NULL, &_player->hitbox);
-    }else{
-	printf("Player has no texture assigned!");
     }
 }
 
