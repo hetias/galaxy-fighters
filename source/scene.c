@@ -17,11 +17,18 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     //create container for projectiles
     new_scene->projectiles_container = container_create(CONTAINER_PROJECTILE);
 
+    //spline
+    new_scene->splines = spline_create(false);
+    spline_add_point(&new_scene->splines, (SDL_FPoint){0.0f, 0.0f});
+    spline_add_point(&new_scene->splines, (SDL_FPoint){100.0f, 100.0f});
+    spline_add_point(&new_scene->splines, (SDL_FPoint){400.0f, 200.0f});
+    spline_add_point(&new_scene->splines, (SDL_FPoint){300.0f, 400.0f});        
     //create enemy container
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
     enemy_t* e = enemy_create(new_scene->textures_vector);
+    enemy_change_path(e, &new_scene->splines);
     container_add(&new_scene->enemies_container, e);
-
+    
     //start ticks
     new_scene->tick = 0;
   
@@ -127,9 +134,12 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
     if(_scene == NULL || _renderer == NULL)
 	return RET_FAILURE;
   
-    /*background elements*/
+    //background
     SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
-  
+
+    //draw paths
+    spline_draw(_scene->splines, _renderer);
+
     //draw projectiles
     scene_draw_projectiles(&_scene->projectiles_container, _renderer);
 

@@ -12,12 +12,13 @@ typedef struct{
   size_t total_points;
   SDL_FPoint points[MAX_POINTS];
   bool loop;
-}spline;
+}spline_t;
 
-spline spline_create(bool);
-void spline_add_point(spline*, point);
-void spline_clean(spline*);
-SDL_FPoint spline_get_point(spline, float);
-void spline_draw(spline, SDL_Renderer*);
+spline_t spline_create(bool);
+void spline_add_point(spline_t*, SDL_FPoint);
+void spline_add_points(spline_t*, SDL_FPoint*);
+void spline_clean(spline_t*);
+SDL_FPoint spline_get_point(spline_t, float);
+void spline_draw(spline_t, SDL_Renderer*);
 
 #endif

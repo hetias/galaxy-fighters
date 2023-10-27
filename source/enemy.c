@@ -161,25 +161,22 @@ void enemy_destroy(enemy_t** enemy){
  */
 
 void enemy_update_path(enemy_t* _enemy){
-
-    /* if(_enemy->path != NULL){ */
-    
-    /*   if(_enemy->path->loop){ */
-      
-    /*   }else{ */
-    /*     //if it's not a loop, update position until it's bigger than 1 */
-    /*     if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){ */
-    /*       SDL_FPoint new_pos = spline_get_point(*_enemy->path, _enemy->path_time); */
-    /*       _enemy->position = new_pos; */
-    /*       _enemy->path_time += 0.01; */
+    if(_enemy->path != NULL){
+	if(_enemy->path->loop){
+	}else{
+	    //if it's not a loop, update position until it's bigger than 1
+	    if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
+		SDL_FPoint new_pos = spline_get_point(*_enemy->path, _enemy->path_time);
+		_enemy->position = new_pos;
+		_enemy->path_time += 0.01;
         
-    /*     } */
+	    }
+	}
+    }
+}
 
-    /*   } */
-    
-    /* } */
-
-  
+void enemy_change_path(enemy_t* _enemy, spline_t* _spline){
+    _enemy->path = _spline;
 }
 
 void enemy_set_can_shoot(enemy_t* enemy, bool can_shoot, int speed){

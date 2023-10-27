@@ -10,7 +10,7 @@
 #include"player.h"
 #include"enemy.h"
 #include"container.h"
-//#include"spline.h"
+#include"spline.h"
 
 typedef struct{
     player_t* player;
@@ -18,6 +18,7 @@ typedef struct{
     game_container enemies_container;
     int tick;  
     SDL_Texture* textures_vector[TXT_TOTAL];
+    spline_t splines;
 }scene_t;
 
 scene_t* scene_create(const char**, SDL_Renderer*);
