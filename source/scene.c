@@ -22,13 +22,11 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     spline_add_point(&new_scene->splines, (SDL_FPoint){0.0f, 0.0f});
     spline_add_point(&new_scene->splines, (SDL_FPoint){100.0f, 100.0f});
     spline_add_point(&new_scene->splines, (SDL_FPoint){400.0f, 200.0f});
-    spline_add_point(&new_scene->splines, (SDL_FPoint){300.0f, 400.0f});        
+    spline_add_point(&new_scene->splines, (SDL_FPoint){300.0f, 400.0f});
+    
     //create enemy container
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
-    enemy_t* e = enemy_create(new_scene->textures_vector);
-    enemy_change_path(e, &new_scene->splines);
-    container_add(&new_scene->enemies_container, e);
-    
+        
     //start ticks
     new_scene->tick = 0;
   
@@ -65,7 +63,7 @@ int scene_update(scene_t* _scene){
     }
     //input
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-
+    
     //update player
     player_update(_scene->player, keyboardState, &_scene->projectiles_container);
 
@@ -74,7 +72,13 @@ int scene_update(scene_t* _scene){
   
     //update projectiles
     scene_update_projectiles(&_scene->projectiles_container);
-  
+
+    if(_scene->tick == 300){
+	enemy_t* e = enemy_create(_scene->textures_vector);
+	enemy_change_path(e, &_scene->splines);
+	container_add(&_scene->enemies_container, (void*)e);
+    }
+    
     _scene->tick++;
 
     return RET_SUCCESS;

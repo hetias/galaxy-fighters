@@ -10,7 +10,7 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector){
     enemy_t* _tmp = (enemy_t*)malloc(sizeof(enemy_t));
   
   
-    _tmp->position = (SDL_FPoint){WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
+    _tmp->position = (SDL_FPoint){0.0f, 0.0f};
 
     //get texture dimensions
     SDL_Point dimensions = (SDL_Point){0};
@@ -30,7 +30,9 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector){
     _tmp->shootDelay = SHOOT_SLOW;
     _tmp->currentDelay = _tmp->shootDelay;
     _tmp->path_time = 0.0f;
-    //_tmp->path = NULL;
+    _tmp->path = NULL;
+    _tmp->path_state = PATH_STATE_FORWARD;
+    _tmp->path_type = PATH_REPEAT;
     return _tmp;  
 }
 
@@ -60,8 +62,11 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
     }
   
     //movin'
-    enemy_update_path(_enemy);
-
+    int up = enemy_update_path(_enemy);
+    if(up == PATH_STATE_END){
+	printf("On path end!\n");
+    }
+    
     //check collisions with projectiles
     if(!container_empty(*projectiles_container)){
 	projectile_t *prj = NULL;
@@ -160,17 +165,65 @@ void enemy_destroy(enemy_t** enemy){
  * @params _enemy The desired enemy to update.
  */
 
-void enemy_update_path(enemy_t* _enemy){
-    if(_enemy->path != NULL){
-	if(_enemy->path->loop){
-	}else{
-	    //if it's not a loop, update position until it's bigger than 1
-	    if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
-		SDL_FPoint new_pos = spline_get_point(*_enemy->path, _enemy->path_time);
-		_enemy->position = new_pos;
-		_enemy->path_time += 0.01;
-        
+PATH_STATE enemy_update_path(enemy_t* _enemy){
+
+    switch(_enemy->path_type){
+    case PATH_START_END:
+	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
+	    _enemy->path_time += 0.01;
+	    SDL_FPoint new_pos = spline_get_point(*_enemy->path,
+						  _enemy->path_time);
+	    _enemy->position = new_pos;
+
+	    if(_enemy->path_time >= 1.0f){
+		return PATH_STATE_END;
+	    }else if(_enemy->path_time <= 0.0f){
+		return PATH_STATE_START;
+	    }else{
+		return PATH_STATE_FORWARD;
 	    }
+	}		
+	break;
+    case PATH_REPEAT:
+	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
+	    if(_enemy->path_state == PATH_STATE_FORWARD){
+		_enemy->path_time += 0.01;
+		_enemy->position = spline_get_point(*_enemy->path,
+						    _enemy->path_time);
+		
+		if(_enemy->path_time >= 1.0f){
+		    _enemy->path_state = PATH_STATE_BACKWARD;
+		    _enemy->path_time = 1.0f;
+		    return PATH_STATE_END;
+		}
+	    }else if(_enemy->path_state == PATH_STATE_BACKWARD){
+		_enemy->path_time -= 0.01;
+		_enemy->position = spline_get_point(*_enemy->path,
+						    _enemy->path_time);
+		
+		if(_enemy->path_time <= 0.0f){
+		    _enemy->path_state = PATH_STATE_FORWARD;
+		    _enemy->path_time = 0.0f;
+		    return PATH_STATE_START;
+		}
+	    }break;
+	case PATH_LOOP:
+	    if(_enemy->path->loop && _enemy->path_type == PATH_LOOP){
+		if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
+		    _enemy->path_time += 0.01;
+		    SDL_FPoint new_pos = spline_get_point(*_enemy->path,
+							  _enemy->path_time);
+		    _enemy->position = new_pos;
+		    
+		    if(_enemy->path_time >= 1.0f){
+			return PATH_STATE_END;
+		    }else if(_enemy->path_time <= 0.0f){
+			return PATH_STATE_START;
+		    }else{
+			return PATH_STATE_FORWARD;
+		    }
+		}		
+	    }break;
 	}
     }
 }

@@ -52,10 +52,18 @@ int main(void){
 void game_loop(scene_t* game_scene){
 
     int curr = 0;
-  
+
+    Uint64 delta_now = SDL_GetPerformanceCounter();    
+    Uint64 delta_last = 0;
+    double delta_time = 0.0f;
+    
     //game running
     while(gIsGameRunning){
+	delta_last = delta_now;
+	delta_now = SDL_GetPerformanceCounter();
 
+	delta_time = (double)(delta_now - delta_last)*1000 / (double)SDL_GetPerformanceFrequency();
+	
 	//event loop
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
@@ -67,7 +75,6 @@ void game_loop(scene_t* game_scene){
     
 	//input
 	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-
 	if(keyboardState[SDL_SCANCODE_ESCAPE]){
 	    gIsGameRunning = false;
 	}
