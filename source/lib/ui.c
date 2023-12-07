@@ -1,4 +1,4 @@
-#include"ui.h"
+#include"../include/ui.h"
 
 void draw_ui(player_t* _player, SDL_Texture **textures, SDL_Renderer* renderer){
 

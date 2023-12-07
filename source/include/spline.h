@@ -5,6 +5,7 @@
 #include<stdbool.h>
 
 #include"SDL2/SDL.h"
+#include"definitions.h"
 
 #define MAX_POINTS 12
 
@@ -19,6 +20,8 @@ void spline_add_point(spline_t*, SDL_FPoint);
 void spline_add_points(spline_t*, SDL_FPoint*);
 void spline_clean(spline_t*);
 SDL_FPoint spline_get_point(spline_t, float);
+SDL_FPoint to_worldCoords(SDL_FPoint);
+SDL_FPoint to_fixedCoords(SDL_FPoint);
 void spline_draw(spline_t, SDL_Renderer*);
 
 #endif

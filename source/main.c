@@ -4,9 +4,9 @@
 
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
-#include"definitions.h"
+#include"include/definitions.h"
 
-#include"scene.h"
+#include"include/scene.h"
 
 int init();
 void deinit();

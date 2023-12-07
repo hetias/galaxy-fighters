@@ -23,6 +23,14 @@ typedef enum EPATH_TYPE{
     PATH_LOOP
 }PATH_TYPE;
 
+typedef enum{
+    ENEMY_TYPE_NORMAL,
+    ENEMY_TYPE_TRIPLE,
+    ENEMY_TYPE_HOMING,
+    ENEMY_TYPE_LASER,
+    ENEMY_TYPE_SHIELD,    
+}ENEMY_TYPE;
+
 //ENEMY DEFINITION
 typedef struct enemy_s{
     SDL_FPoint position;

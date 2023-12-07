@@ -1,4 +1,4 @@
-#include"spline.h"
+#include"../include/spline.h"
 
 /**
  *Get's a position based on a spline and float in the range of 0.0 to 1.0.
@@ -63,6 +63,21 @@ void spline_add_point(spline_t *s, SDL_FPoint point){
     }
 }
 
+SDL_FPoint to_worldCoords(SDL_FPoint point){
+    SDL_FPoint p = {
+	point.x * WINDOW_WIDTH,
+	point.y * WINDOW_HEIGHT};
+    return p;
+}
+
+SDL_FPoint to_fixedCoords(SDL_FPoint point){
+    SDL_FPoint p = {
+	point.x == 0 ? 0 : point.x / WINDOW_WIDTH,
+	point.y == 0 ? 0 : point.y / WINDOW_HEIGHT
+    };
+    return p;
+}
+
 void spline_add_points(spline_t *s, SDL_FPoint *point){
     
 }
@@ -80,7 +95,7 @@ void spline_draw(spline_t _spline, SDL_Renderer* renderer){
     }
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     for(float i = 0.0f; i < maxit; i += +0.01f){
-	SDL_FPoint p = spline_get_point(_spline, i);
+	SDL_FPoint p = to_worldCoords(spline_get_point(_spline, i));
 	SDL_RenderDrawPointF(renderer, p.x, p.y);
     }
   

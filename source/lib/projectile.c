@@ -1,4 +1,4 @@
-#include"projectile.h"
+#include"../include/projectile.h"
 
 /**
  *Allocates memory for a new projectile structure

@@ -1,4 +1,4 @@
-#include "scene.h"
+#include "../include/scene.h"
 
 /**
  * Allocates memory for a new scene structure
@@ -16,17 +16,17 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
 
     //create container for projectiles
     new_scene->projectiles_container = container_create(CONTAINER_PROJECTILE);
-
-    //spline
-    new_scene->splines = spline_create(false);
-    spline_add_point(&new_scene->splines, (SDL_FPoint){0.0f, 0.0f});
-    spline_add_point(&new_scene->splines, (SDL_FPoint){100.0f, 100.0f});
-    spline_add_point(&new_scene->splines, (SDL_FPoint){400.0f, 200.0f});
-    spline_add_point(&new_scene->splines, (SDL_FPoint){300.0f, 400.0f});
     
     //create enemy container
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
-        
+    
+    //scene actions
+    new_scene->keyframe_count = 2;
+    new_scene->current_keyframe = 0;
+    new_scene->spline_count = 0;
+
+    new_scene->keyframes[0] = (keyframe_t){50, KEYFRAME_ENEMY_ADD, 0, NULL};
+    new_scene->keyframes[1] = (keyframe_t){70, KEYFRAME_ENEMY_DESTROY, 0, NULL};        
     //start ticks
     new_scene->tick = 0;
   
@@ -63,6 +63,9 @@ int scene_update(scene_t* _scene){
     }
     //input
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+
+    //update scene
+    scene_next_action(_scene);
     
     //update player
     player_update(_scene->player, keyboardState, &_scene->projectiles_container);
@@ -72,12 +75,6 @@ int scene_update(scene_t* _scene){
   
     //update projectiles
     scene_update_projectiles(&_scene->projectiles_container);
-
-    if(_scene->tick == 300){
-	enemy_t* e = enemy_create(_scene->textures_vector);
-	enemy_change_path(e, &_scene->splines);
-	container_add(&_scene->enemies_container, (void*)e);
-    }
     
     _scene->tick++;
 
@@ -142,7 +139,7 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
     SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
 
     //draw paths
-    spline_draw(_scene->splines, _renderer);
+    //spline_draw(_scene->splines, _renderer);
 
     //draw projectiles
     scene_draw_projectiles(&_scene->projectiles_container, _renderer);
@@ -229,4 +226,34 @@ int scene_destroy(scene_t* _scene){
     free(_scene);
   
     return RET_SUCCESS;
+}
+
+void scene_next_action(scene_t* _scene){
+    /* SDL_assert(_scene->current_keyframe > _scene->keyframe_count); */
+    /* SDL_assert(_scene->keyframe_count < 0); */
+    
+    if(_scene->tick == _scene->keyframes[_scene->current_keyframe].tick){
+	switch(_scene->keyframes[_scene->current_keyframe].action){
+
+	case KEYFRAME_ENEMY_ADD:{
+	    printf("Enemy add on tick: %d\n", _scene->tick);
+	}break;
+
+	case KEYFRAME_ENEMY_CHANGE_PATH:{
+	    printf("Enemy path change on tick: %d\n", _scene->tick);
+	}break;
+
+	case KEYFRAME_ENEMY_DESTROY:{
+	    printf("Enemy destroy on tick: %d\n", _scene->tick);
+	}break;
+	    
+	default:{
+	    printf("Invalid action on tick: %d\n", _scene->tick);
+	};
+	    
+	}
+
+	_scene->current_keyframe += 1;
+    }
+    
 }

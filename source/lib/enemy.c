@@ -1,4 +1,4 @@
-#include"enemy.h"
+#include"../include/enemy.h"
 
 /**
  *Allocates memory for an enemy structure.
@@ -63,9 +63,6 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
   
     //movin'
     int up = enemy_update_path(_enemy);
-    if(up == PATH_STATE_END){
-	printf("On path end!\n");
-    }
     
     //check collisions with projectiles
     if(!container_empty(*projectiles_container)){
@@ -171,9 +168,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
     case PATH_START_END:
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
 	    _enemy->path_time += 0.01;
-	    SDL_FPoint new_pos = spline_get_point(*_enemy->path,
-						  _enemy->path_time);
-	    _enemy->position = new_pos;
+	    _enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 
 	    if(_enemy->path_time >= 1.0f){
 		return PATH_STATE_END;
@@ -188,8 +183,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
 	    if(_enemy->path_state == PATH_STATE_FORWARD){
 		_enemy->path_time += 0.01;
-		_enemy->position = spline_get_point(*_enemy->path,
-						    _enemy->path_time);
+		_enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 		
 		if(_enemy->path_time >= 1.0f){
 		    _enemy->path_state = PATH_STATE_BACKWARD;
@@ -198,8 +192,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 		}
 	    }else if(_enemy->path_state == PATH_STATE_BACKWARD){
 		_enemy->path_time -= 0.01;
-		_enemy->position = spline_get_point(*_enemy->path,
-						    _enemy->path_time);
+		_enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));		
 		
 		if(_enemy->path_time <= 0.0f){
 		    _enemy->path_state = PATH_STATE_FORWARD;
@@ -211,10 +204,8 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 	    if(_enemy->path->loop && _enemy->path_type == PATH_LOOP){
 		if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
 		    _enemy->path_time += 0.01;
-		    SDL_FPoint new_pos = spline_get_point(*_enemy->path,
-							  _enemy->path_time);
-		    _enemy->position = new_pos;
-		    
+		    _enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
+				
 		    if(_enemy->path_time >= 1.0f){
 			return PATH_STATE_END;
 		    }else if(_enemy->path_time <= 0.0f){

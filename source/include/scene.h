@@ -10,15 +10,29 @@
 #include"player.h"
 #include"enemy.h"
 #include"container.h"
+#include"keyframe.h"
 #include"spline.h"
 
+#define MAX_KEYFRAMES 10
+#define MAX_SPLINES   10
+
 typedef struct{
+    //entities and containers
     player_t* player;
     game_container projectiles_container;
     game_container enemies_container;
-    int tick;  
+
+    //resources
     SDL_Texture* textures_vector[TXT_TOTAL];
-    spline_t splines;
+
+    //scene and level data
+    int tick;
+    
+    int current_keyframe;
+    int keyframe_count;
+    keyframe_t keyframes[MAX_KEYFRAMES];
+    spline_t splines[MAX_SPLINES];
+    int spline_count;
 }scene_t;
 
 scene_t* scene_create(const char**, SDL_Renderer*);
@@ -34,5 +48,7 @@ int scene_draw_projectiles(game_container*, SDL_Renderer*);
 int scene_draw_enemies(game_container*, SDL_Renderer*);
 
 int scene_destroy(scene_t*);
+
+void scene_next_action(scene_t*);
 
 #endif
