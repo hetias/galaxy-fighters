@@ -229,7 +229,7 @@ void scene_next_action(scene_t* _scene){
     /* SDL_assert(_scene->current_keyframe > _scene->keyframe_count); */
     /* SDL_assert(_scene->keyframe_count < 0); */
     keyframe_t current_keyframe = _scene->keyframes[_scene->current_keyframe];
-    
+        
     if(_scene->tick == current_keyframe.tick){
 	switch(current_keyframe.action){
 
@@ -248,21 +248,16 @@ void scene_next_action(scene_t* _scene){
 	}break;
 	    
 	case KEYFRAME_ENEMY_DESTROY:{
-	    printf("Enemy destroy on tick: %d\n", _scene->tick);
 	    enemy_t** e = (enemy_t**)_scene->enemies_container.array;
-	    size_t indices = _scene->enemies_container.count - 1;
+	    int indices = _scene->enemies_container.count;
+	    printf("total enemies: %d\n", indices);
 	    
-	    while(indices >= 0){
-		printf("enemy[%d]\n", indices);
-		printf("enemy_id: %d - keyframe_id: %d\n", e[indices]->id, current_keyframe.params.id);		
-		if(e[indices]->id == current_keyframe.params.id){
-		    printf("enemy destroyed\n");
-		    container_remove_destroy(&_scene->enemies_container, indices);
+	    for(int i = 0; i < indices; i++){
+		if(e[i]->id == current_keyframe.params.id){
+		    container_remove_destroy(&_scene->enemies_container, i);
 		    break;
 		}
-		indices -= 1;
 	    }
-	    
 	}break;
 	    
 	default:{
@@ -287,8 +282,12 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
     _scene->spline_count     = 0;
     
     keyframe_params kf_cne   = {0, ENEMY_TYPE_NORMAL, NULL};
-    keyframe_params kf_de    = {1, 0, NULL;
+    keyframe_params kf_cnet   = {0, ENEMY_TYPE_NORMAL, NULL};
+    keyframe_params kf_de    = {1, 0, NULL};
+    keyframe_params kf_det    = {2, 0, NULL};
     _scene->keyframes[0]     = (keyframe_t){50 , KEYFRAME_ENEMY_ADD    , kf_cne};
-    _scene->keyframes[1]     = (keyframe_t){200, KEYFRAME_ENEMY_DESTROY, kf_de};
+    _scene->keyframes[1]     = (keyframe_t){75 , KEYFRAME_ENEMY_ADD    , kf_cnet};
+    _scene->keyframes[2]     = (keyframe_t){200, KEYFRAME_ENEMY_DESTROY, kf_de};
+    _scene->keyframes[3]     = (keyframe_t){300, KEYFRAME_ENEMY_DESTROY, kf_det};
     return 0;
 }
