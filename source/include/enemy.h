@@ -37,6 +37,7 @@ typedef struct enemy_s{
     SDL_FRect hitbox;
     SDL_Texture* sprite;
     SDL_Texture* projectile_texture;
+    int id;
     int hp;
     int shootDelay;
     int currentDelay;
@@ -49,7 +50,7 @@ typedef struct enemy_s{
 //
 //FUNCTION DEFINITIONS
 //
-enemy_t* enemy_create(SDL_Texture**);
+enemy_t* enemy_create(SDL_Texture**, int);
 int enemy_update(enemy_t*, game_container*);
 void enemy_change_path(enemy_t*, spline_t*);
 void enemy_draw(enemy_t*, SDL_Renderer*);

@@ -10,7 +10,7 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
 
     //Load resources
     scene_load_resources(new_scene, _texture_paths, _renderer);
-
+    
     //create the player
     new_scene->player = player_create(new_scene->textures_vector);
 
@@ -19,17 +19,13 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     
     //create enemy container
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
+    new_scene->max_enemy_id = 0;
     
     //scene actions
-    new_scene->keyframe_count = 2;
-    new_scene->current_keyframe = 0;
-    new_scene->spline_count = 0;
-
-    new_scene->keyframes[0] = (keyframe_t){50, KEYFRAME_ENEMY_ADD, 0, NULL};
-    new_scene->keyframes[1] = (keyframe_t){70, KEYFRAME_ENEMY_DESTROY, 0, NULL};        
+    scene_load_level("", new_scene);
+     
     //start ticks
     new_scene->tick = 0;
-  
     return new_scene;
 }
 
@@ -229,22 +225,44 @@ int scene_destroy(scene_t* _scene){
 }
 
 void scene_next_action(scene_t* _scene){
+    if(_scene == NULL) return;
     /* SDL_assert(_scene->current_keyframe > _scene->keyframe_count); */
     /* SDL_assert(_scene->keyframe_count < 0); */
+    keyframe_t current_keyframe = _scene->keyframes[_scene->current_keyframe];
     
-    if(_scene->tick == _scene->keyframes[_scene->current_keyframe].tick){
-	switch(_scene->keyframes[_scene->current_keyframe].action){
+    if(_scene->tick == current_keyframe.tick){
+	switch(current_keyframe.action){
 
 	case KEYFRAME_ENEMY_ADD:{
 	    printf("Enemy add on tick: %d\n", _scene->tick);
+	    //update max_enemy_id
+	    _scene->max_enemy_id += 1;
+
+	    //create enemy and assing max id to it
+	    enemy_t * e = enemy_create(_scene->textures_vector, _scene->max_enemy_id);
+	    container_add(&_scene->enemies_container, (void*)e);	    
 	}break;
 
 	case KEYFRAME_ENEMY_CHANGE_PATH:{
 	    printf("Enemy path change on tick: %d\n", _scene->tick);
 	}break;
-
+	    
 	case KEYFRAME_ENEMY_DESTROY:{
 	    printf("Enemy destroy on tick: %d\n", _scene->tick);
+	    enemy_t** e = (enemy_t**)_scene->enemies_container.array;
+	    size_t indices = _scene->enemies_container.count - 1;
+	    
+	    while(indices >= 0){
+		printf("enemy[%d]\n", indices);
+		printf("enemy_id: %d - keyframe_id: %d\n", e[indices]->id, current_keyframe.params.id);		
+		if(e[indices]->id == current_keyframe.params.id){
+		    printf("enemy destroyed\n");
+		    container_remove_destroy(&_scene->enemies_container, indices);
+		    break;
+		}
+		indices -= 1;
+	    }
+	    
 	}break;
 	    
 	default:{
@@ -256,4 +274,21 @@ void scene_next_action(scene_t* _scene){
 	_scene->current_keyframe += 1;
     }
     
+}
+
+bool scene_load_level(const char* file_path, scene_t *_scene){
+    printf("scene_load_file_path: %s\n", file_path);
+
+    //load paths
+
+    //load keyframes
+    _scene->keyframe_count   = 2;
+    _scene->current_keyframe = 0;
+    _scene->spline_count     = 0;
+    
+    keyframe_params kf_cne   = {0, ENEMY_TYPE_NORMAL, NULL};
+    keyframe_params kf_de    = {1, 0, NULL;
+    _scene->keyframes[0]     = (keyframe_t){50 , KEYFRAME_ENEMY_ADD    , kf_cne};
+    _scene->keyframes[1]     = (keyframe_t){200, KEYFRAME_ENEMY_DESTROY, kf_de};
+    return 0;
 }

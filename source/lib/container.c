@@ -85,7 +85,7 @@ int container_add(game_container* current_container, void* element){
 
 /**
  * We swap the element selected with the last element(unless they are the same)
- * and then delete the last element
+ * and then free the last element
  */
 int container_remove_destroy(game_container* current_container, int index){
 
@@ -147,6 +147,9 @@ int container_remove_destroy(game_container* current_container, int index){
 }
 
 
+/**
+ * We remove an element from the container and return it's reference
+ */
 void* container_remove(game_container* current_container, int index){
 
     //check container existence

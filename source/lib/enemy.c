@@ -6,10 +6,10 @@
  *@return Pointer to an enemy structure.
  */
 
-enemy_t* enemy_create(SDL_Texture** _texturesVector){
+enemy_t* enemy_create(SDL_Texture** _texturesVector, int _id){
     enemy_t* _tmp = (enemy_t*)malloc(sizeof(enemy_t));
-  
-  
+    
+    _tmp->id = _id;
     _tmp->position = (SDL_FPoint){0.0f, 0.0f};
 
     //get texture dimensions
@@ -163,7 +163,8 @@ void enemy_destroy(enemy_t** enemy){
  */
 
 PATH_STATE enemy_update_path(enemy_t* _enemy){
-
+    if(_enemy->path == NULL) return PATH_STATE_START;
+    
     switch(_enemy->path_type){
     case PATH_START_END:
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){

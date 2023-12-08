@@ -21,6 +21,7 @@ typedef struct{
     player_t* player;
     game_container projectiles_container;
     game_container enemies_container;
+    int max_enemy_id;
 
     //resources
     SDL_Texture* textures_vector[TXT_TOTAL];
@@ -35,9 +36,11 @@ typedef struct{
     int spline_count;
 }scene_t;
 
+//scene management
 scene_t* scene_create(const char**, SDL_Renderer*);
 void scene_load_resources(scene_t*, const char**, SDL_Renderer*);
 
+//scene functionalities
 int scene_update(scene_t*);
 int scene_draw(scene_t*, SDL_Renderer*);
 
@@ -49,6 +52,8 @@ int scene_draw_enemies(game_container*, SDL_Renderer*);
 
 int scene_destroy(scene_t*);
 
+//scene actions
+bool scene_load_level(const char*, scene_t*);
 void scene_next_action(scene_t*);
 
 #endif

@@ -4,18 +4,18 @@ CC = gcc
 
 INCLUDE_PATHS = -I`sdl2-config --cflags`
 
-LIBRARY_PATHS = -L
+LIBRARY_PATHS = -L`sdl2-config --static-libs`
 
 COMPILER_FLAGS = -Wall -Wextra
 
-LINKER_FLAGS = -lSDL2main `sdl2-config --static-libs` -lSDL2_image -lSDL2_ttf -std=c++14
+LINKER_FLAGS = -lSDL2main `sdl2-config --static-libs` -lSDL2_image -lSDL2_ttf
 
 OBJ_NAME = main
 
 all: $(OBJS)
 	$(CC) $(OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o $(OBJ_NAME)
 
-build/main.o: source/main.c
+main.o: source/main.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/main.c
 
 ui.o: source/include/ui.h

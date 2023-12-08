@@ -19,19 +19,19 @@ bool gIsGameRunning = true;
 
 const char* gTexturesPaths[] ={
     //background
-    "../resources/sprites/backgrounds/black.png",
-    "../resources/sprites/backgrounds/purple.png",
-    "../resources/sprites/backgrounds/blue.png",
-    "../resources/sprites/backgrounds/darkPurple.png",
+    "resources/sprites/backgrounds/black.png",
+    "resources/sprites/backgrounds/purple.png",
+    "resources/sprites/backgrounds/blue.png",
+    "resources/sprites/backgrounds/darkPurple.png",
     //Player
-    "../resources/sprites/player/player_blue.png",
+    "resources/sprites/player/player_blue.png",
     //Enemy
-    "../resources/sprites/enemies/enemyBlack1.png",
+    "resources/sprites/enemies/enemyBlack1.png",
     //Lasers
-    "../resources/sprites/lasers/laserBlue.png",
-    "../resources/sprites/lasers/laserRed.png",
+    "resources/sprites/lasers/laserBlue.png",
+    "resources/sprites/lasers/laserRed.png",
     //ui
-    "../resources/sprites/ui/lifeblue1.png"
+    "resources/sprites/ui/lifeblue1.png"
 };
 
 int main(void){
@@ -40,7 +40,7 @@ int main(void){
 	exit(-1);
 
     scene_t* scene = scene_create(gTexturesPaths, renderer);
-  
+    
     game_loop(scene);
 
     scene_destroy(scene);
@@ -78,10 +78,10 @@ void game_loop(scene_t* game_scene){
 	if(keyboardState[SDL_SCANCODE_ESCAPE]){
 	    gIsGameRunning = false;
 	}
-
+	
 	//update
-	scene_update(game_scene);
-    
+	scene_update(game_scene);   
+	    
 	//draw
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
