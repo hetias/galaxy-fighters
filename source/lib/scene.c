@@ -21,7 +21,7 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
     new_scene->max_enemy_id = 0;
     
-    //scene actions
+    //scene actions    
     scene_load_level("", new_scene);
      
     //start ticks
@@ -134,8 +134,21 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
     //background
     SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
 
+    //draw spline grid
+    if(false){
+	int n = 25; //number of grids
+	for(int i = 0; i < (WINDOW_WIDTH / n); i++){
+	    SDL_SetRenderDrawColor(_renderer, 0, 255, 0, 150);
+	    SDL_RenderDrawLine(_renderer,0, i * n, 600, i * n);
+
+	    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 150);
+	    SDL_RenderDrawLine(_renderer,i * n, 0, i * n, 600);
+	}
+    }        
     //draw paths
-    //spline_draw(_scene->splines, _renderer);
+    for(int i = 0; i < _scene->spline_count; i++){
+	spline_draw(_scene->splines[i], _renderer);	
+    }
 
     //draw projectiles
     scene_draw_projectiles(&_scene->projectiles_container, _renderer);
@@ -143,7 +156,7 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
     //draw enemies
     scene_draw_enemies(&_scene->enemies_container, _renderer);
 
-//draw the player
+    //draw the player
     player_draw(_scene->player, _renderer);
     
     //draw ui
@@ -234,7 +247,6 @@ void scene_next_action(scene_t* _scene){
 	switch(current_keyframe.action){
 
 	case KEYFRAME_ENEMY_ADD:{
-	    printf("Enemy add on tick: %d\n", _scene->tick);
 	    //update max_enemy_id
 	    _scene->max_enemy_id += 1;
 
@@ -244,13 +256,21 @@ void scene_next_action(scene_t* _scene){
 	}break;
 
 	case KEYFRAME_ENEMY_CHANGE_PATH:{
-	    printf("Enemy path change on tick: %d\n", _scene->tick);
+	    enemy_t** e = (enemy_t**)_scene->enemies_container.array;
+	    int indices = _scene->enemies_container.count;
+
+	    for(int i = 0; i < indices; i++){
+		if(e[i]->id == current_keyframe.params.id && current_keyframe.params.pathid >= 0 && current_keyframe.params.pathid < _scene->spline_count){
+		    enemy_change_path(e[i], &_scene->splines[current_keyframe.params.pathid]);
+		}
+	    }
+	    
+	    
 	}break;
 	    
 	case KEYFRAME_ENEMY_DESTROY:{
 	    enemy_t** e = (enemy_t**)_scene->enemies_container.array;
 	    int indices = _scene->enemies_container.count;
-	    printf("total enemies: %d\n", indices);
 	    
 	    for(int i = 0; i < indices; i++){
 		if(e[i]->id == current_keyframe.params.id){
@@ -272,22 +292,47 @@ void scene_next_action(scene_t* _scene){
 }
 
 bool scene_load_level(const char* file_path, scene_t *_scene){
-    printf("scene_load_file_path: %s\n", file_path);
-
-    //load paths
-
-    //load keyframes
-    _scene->keyframe_count   = 2;
-    _scene->current_keyframe = 0;
-    _scene->spline_count     = 0;
+    //open level file
+    if(_scene == NULL){
+	printf("Invalid pointer to scene\n");
+	return false;
+    }
     
-    keyframe_params kf_cne   = {0, ENEMY_TYPE_NORMAL, NULL};
-    keyframe_params kf_cnet   = {0, ENEMY_TYPE_NORMAL, NULL};
-    keyframe_params kf_de    = {1, 0, NULL};
-    keyframe_params kf_det    = {2, 0, NULL};
-    _scene->keyframes[0]     = (keyframe_t){50 , KEYFRAME_ENEMY_ADD    , kf_cne};
-    _scene->keyframes[1]     = (keyframe_t){75 , KEYFRAME_ENEMY_ADD    , kf_cnet};
-    _scene->keyframes[2]     = (keyframe_t){200, KEYFRAME_ENEMY_DESTROY, kf_de};
-    _scene->keyframes[3]     = (keyframe_t){300, KEYFRAME_ENEMY_DESTROY, kf_det};
+    //read data from level file
+
+    //path data
+    
+    //keyframes data
+    
+    //clean and load paths
+
+    //clean memory
+    _scene->spline_count = 0;
+    for(int i = 0; i < MAX_SPLINES; i++){
+	_scene->splines[i].total_points = 0;
+	memset(_scene->splines[i].points, 0, sizeof(SDL_FPoint) * MAX_POINTS);
+	_scene->splines[i].loop         = 0;
+    }
+    SDL_FPoint p[] = { {0.0f, 0.5f}, {0.25f, 0.5f}, {0.50f, 0.50f}, {0.75f, 0.50f} };
+    
+    if(spline_add_points(&_scene->splines[0], p, 5)){
+	_scene->spline_count += 1;
+    }
+    
+    //load keyframes
+    _scene->keyframe_count   = 0;
+    _scene->current_keyframe = 0;
+
+    scene_add_keyframe(_scene, keyframe_create_enemy(50, ENEMY_TYPE_NORMAL, -1));
+    scene_add_keyframe(_scene, keyframe_create_enemy(75, ENEMY_TYPE_NORMAL, -1));
+    scene_add_keyframe(_scene, keyframe_change_enemy_path(80, 1, 0));
+    scene_add_keyframe(_scene, keyframe_destroy_enemy(200, 1));
+    scene_add_keyframe(_scene, keyframe_destroy_enemy(300, 2));
+
     return 0;
+}
+
+void scene_add_keyframe(scene_t* _scene, keyframe_t keyframe){
+    _scene->keyframes[_scene->keyframe_count] = keyframe;
+    _scene->keyframe_count += 1;
 }

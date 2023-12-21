@@ -55,5 +55,6 @@ int scene_destroy(scene_t*);
 //scene actions
 bool scene_load_level(const char*, scene_t*);
 void scene_next_action(scene_t*);
+void scene_add_keyframe(scene_t*, keyframe_t);
 
 #endif

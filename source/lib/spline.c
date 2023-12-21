@@ -54,13 +54,31 @@ spline_t spline_create(bool _isLoop){
     return nw_spline;
 }
 
-void spline_add_point(spline_t *s, SDL_FPoint point){
+bool spline_add_point(spline_t *s, SDL_FPoint point){
     if(s->total_points < MAX_POINTS){
 	s->points[s->total_points] = point;
 	s->total_points += 1;
     }else{
 	printf("Warning: spline max points reached!\n");
+	return false;
     }
+
+    return true;
+}
+
+bool spline_add_points(spline_t *s, SDL_FPoint *points, int size){
+    //if spaces exist before and after adittions
+    if(s->total_points < MAX_POINTS && s->total_points + size <= MAX_POINTS){
+	for(int i = 0; i < size; i++){
+	    s->points[s->total_points] = points[i];
+	    s->total_points += 1;
+	}	
+    }else{
+	printf("Spline_add_points failed: trying to add more points than allowed");
+	return false;
+    }
+
+    return true;
 }
 
 SDL_FPoint to_worldCoords(SDL_FPoint point){
@@ -77,11 +95,6 @@ SDL_FPoint to_fixedCoords(SDL_FPoint point){
     };
     return p;
 }
-
-void spline_add_points(spline_t *s, SDL_FPoint *point){
-    
-}
-
 
 void spline_draw(spline_t _spline, SDL_Renderer* renderer){
     if(_spline.total_points < 4) return;
