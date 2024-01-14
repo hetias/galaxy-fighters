@@ -26,6 +26,7 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     //scene actions    
     scene_load_level("level.lvl", new_scene);
     printf("loaded %d paths from file\n", new_scene->spline_count);
+    printf("loaded %d keyframes from file\n", new_scene->keyframe_count);
      
     //start ticks
     new_scene->tick = 0;
@@ -301,10 +302,6 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 	printf("Invalid pointer to scene\n");
 	return false;
     }
-
-    //initialize paths info
-    memset(_scene->splines, 0, sizeof(_scene->splines));
-    _scene->spline_count = 0;
     
     //open file
     FILE* level_file = fopen(file_path, "rb");
@@ -313,6 +310,10 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 	return false;
     }
 
+    //initialize paths info
+    memset(_scene->splines, 0, sizeof(_scene->splines));
+    _scene->spline_count = 0;
+    
     //check PATHS section
     char buff[32];
     fread(buff, sizeof(char), 6, level_file);
@@ -325,8 +326,6 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
     //check for a new path
     char c = getc(level_file);
     while(c == 'P'){
-	printf("Found a new path\n");
-
 	//structure to fill
 	spline_t s = {0, {}, 0};
 
@@ -345,36 +344,42 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 	
 	c = getc(level_file);
     }
+
+    //check section separator
+    if(c == '\n'){
+	printf("Section separator found\n");
+    }
+    
+    //clean buffer
+    memset(buff, 0, sizeof(buff));
+
+    //initialize keyframe info
+    _scene->current_keyframe = 0;
+    _scene->keyframe_count = 0;
+    memset(_scene->keyframes, 0, sizeof(_scene->keyframes));
     
     //check for keyframe section
+    fread(buff, sizeof(char), 10, level_file);    
+    if(strcmp(buff, "KEYFRAMES\n") != 0){
+	printf("Keyframe section not found\n");
+	printf("c: %c\n", c);
+	printf("buff: %s\n", buff);
+    }
+
+    //extract all keyframes
+    c = getc(level_file);
+    while(c == 'K'){
+	keyframe_t k = {};
+	fread(&k, sizeof(keyframe_t), 1, level_file);
+
+	_scene->keyframes[_scene->keyframe_count] = k;
+	_scene->keyframe_count += 1;
+	
+	c = getc(level_file);
+    }
     
     fclose(level_file);
-
     return true;
-    
-    _scene->spline_count = 0;
-    for(int i = 0; i < MAX_SPLINES; i++){
-	_scene->splines[i].total_points = 0;
-	memset(_scene->splines[i].points, 0, sizeof(SDL_FPoint) * MAX_POINTS);
-	_scene->splines[i].loop         = 0;
-    }
-    SDL_FPoint p[] = { {0.0f, 0.5f}, {0.25f, 0.5f}, {0.50f, 0.50f}, {0.75f, 0.50f} };
-    
-    if(spline_add_points(&_scene->splines[0], p, 5)){
-	_scene->spline_count += 1;
-    }
-    
-    //load keyframes
-    _scene->keyframe_count   = 0;
-    _scene->current_keyframe = 0;
-
-    scene_add_keyframe(_scene, keyframe_create_enemy(50, ENEMY_TYPE_NORMAL, -1));
-    scene_add_keyframe(_scene, keyframe_create_enemy(75, ENEMY_TYPE_NORMAL, -1));
-    scene_add_keyframe(_scene, keyframe_change_enemy_path(80, 1, 1));
-    scene_add_keyframe(_scene, keyframe_destroy_enemy(200, 1));
-    scene_add_keyframe(_scene, keyframe_destroy_enemy(300, 2));
-
-    return 0;
 }
 
 void scene_add_keyframe(scene_t* _scene, keyframe_t keyframe){
