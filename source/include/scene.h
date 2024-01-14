@@ -28,10 +28,13 @@ typedef struct{
 
     //scene and level data
     int tick;
-    
+
+    //keyframes info
     int current_keyframe;
     int keyframe_count;
     keyframe_t keyframes[MAX_KEYFRAMES];
+
+    //splines info
     spline_t splines[MAX_SPLINES];
     int spline_count;
 }scene_t;

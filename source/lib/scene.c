@@ -1,4 +1,6 @@
 #include "../include/scene.h"
+#include <SDL2/SDL_render.h>
+#include<string.h>
 
 /**
  * Allocates memory for a new scene structure
@@ -22,7 +24,8 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     new_scene->max_enemy_id = 0;
     
     //scene actions    
-    scene_load_level("", new_scene);
+    scene_load_level("level.lvl", new_scene);
+    printf("loaded %d paths from file\n", new_scene->spline_count);
      
     //start ticks
     new_scene->tick = 0;
@@ -144,10 +147,6 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
 	    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 150);
 	    SDL_RenderDrawLine(_renderer,i * n, 0, i * n, 600);
 	}
-    }        
-    //draw paths
-    for(int i = 0; i < _scene->spline_count; i++){
-	spline_draw(_scene->splines[i], _renderer);	
     }
 
     //draw projectiles
@@ -161,6 +160,11 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
     
     //draw ui
     draw_ui(_scene->player, _scene->textures_vector,  _renderer);
+
+    //draw paths
+    for(int i = 0; i < _scene->spline_count; i++){
+	spline_draw(_scene->splines[i], _renderer);
+    }
     
     return RET_SUCCESS;
 }
@@ -292,21 +296,62 @@ void scene_next_action(scene_t* _scene){
 }
 
 bool scene_load_level(const char* file_path, scene_t *_scene){
-    //open level file
+    //scene exists
     if(_scene == NULL){
 	printf("Invalid pointer to scene\n");
 	return false;
     }
-    
-    //read data from level file
 
-    //path data
+    //initialize paths info
+    memset(_scene->splines, 0, sizeof(_scene->splines));
+    _scene->spline_count = 0;
     
-    //keyframes data
-    
-    //clean and load paths
+    //open file
+    FILE* level_file = fopen(file_path, "rb");
+    if(level_file == NULL){
+	printf("Failed opening level: %s", file_path);
+	return false;
+    }
 
-    //clean memory
+    //check PATHS section
+    char buff[32];
+    fread(buff, sizeof(char), 6, level_file);
+
+    if(strcmp(buff, "PATHS\n") != 0){
+	printf("Path section not found\n");
+	return false;
+    }
+
+    //check for a new path
+    char c = getc(level_file);
+    while(c == 'P'){
+	printf("Found a new path\n");
+
+	//structure to fill
+	spline_t s = {0, {}, 0};
+
+	//get total amount of points
+	fread(&s.total_points, sizeof(size_t), 1, level_file);
+
+	//get all the points in file
+	fread(s.points, sizeof(SDL_FPoint), s.total_points, level_file);
+
+	//get loop value
+	fread(&s.loop, sizeof(bool), 1, level_file);
+
+	//add path to array
+	_scene->splines[_scene->spline_count] = s;
+	_scene->spline_count += 1;
+	
+	c = getc(level_file);
+    }
+    
+    //check for keyframe section
+    
+    fclose(level_file);
+
+    return true;
+    
     _scene->spline_count = 0;
     for(int i = 0; i < MAX_SPLINES; i++){
 	_scene->splines[i].total_points = 0;
@@ -325,7 +370,7 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 
     scene_add_keyframe(_scene, keyframe_create_enemy(50, ENEMY_TYPE_NORMAL, -1));
     scene_add_keyframe(_scene, keyframe_create_enemy(75, ENEMY_TYPE_NORMAL, -1));
-    scene_add_keyframe(_scene, keyframe_change_enemy_path(80, 1, 0));
+    scene_add_keyframe(_scene, keyframe_change_enemy_path(80, 1, 1));
     scene_add_keyframe(_scene, keyframe_destroy_enemy(200, 1));
     scene_add_keyframe(_scene, keyframe_destroy_enemy(300, 2));
 

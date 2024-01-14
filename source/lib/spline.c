@@ -1,4 +1,5 @@
 #include"../include/spline.h"
+#include <string.h>
 
 /**
  *Get's a position based on a spline and float in the range of 0.0 to 1.0.
@@ -43,12 +44,7 @@ spline_t spline_create(bool _isLoop){
     spline_t nw_spline;
 
     nw_spline.total_points = 0;
-
-    nw_spline.points;
-    for(int i = 0; i < MAX_POINTS; i++){
-	nw_spline.points[i] = (SDL_FPoint){0.0, 0.0};
-    }
-
+    memset(nw_spline.points, 0, sizeof(nw_spline.points));
     nw_spline.loop = _isLoop;
 
     return nw_spline;
@@ -111,7 +107,6 @@ void spline_draw(spline_t _spline, SDL_Renderer* renderer){
 	SDL_FPoint p = to_worldCoords(spline_get_point(_spline, i));
 	SDL_RenderDrawPointF(renderer, p.x, p.y);
     }
-  
 }
 
 void spline_clean(spline_t *s){
