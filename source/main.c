@@ -4,18 +4,21 @@
 
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
-#include"include/definitions.h"
+#include"core/definitions.h"
 
-#include"include/scene.h"
+#include"scene.h"
 
 int init();
 void deinit();
-void game_loop(scene_t*);
+void game_loop();
 
 //TTF_Font* gFont = NULL;
-SDL_Renderer* renderer = NULL;
-SDL_Window* window = NULL;
-bool gIsGameRunning = true;
+SDL_Renderer *renderer = NULL;
+SDL_Window     *window = NULL;
+bool    gIsGameRunning = true;
+bool gPaused = false;
+
+scene_t *game_scene    = NULL;
 
 const char* gTexturesPaths[] ={
     //background
@@ -34,42 +37,65 @@ const char* gTexturesPaths[] ={
     "resources/sprites/ui/lifeblue1.png"
 };
 
+
+
 int main(void){
 
     if(init() < 0)
 	exit(-1);
 
-    scene_t* scene = scene_create(gTexturesPaths, renderer);
+    game_loop();
     
-    game_loop(scene);
-
-    scene_destroy(scene);
-  
     deinit();
     return 0;
 }
 
-void game_loop(scene_t* game_scene){
 
-    int curr = 0;
+    /* if(gAppState == APP_MAIN_MENU){ */
+    /* 	//draw main menu */
 
-    Uint64 delta_now = SDL_GetPerformanceCounter();    
-    Uint64 delta_last = 0;
-    double delta_time = 0.0f;
+    /* 	//get inputs */
+
+    /* 	if(level_start_bt("START", font, collider)){ */
+    /* 	    gAppState = APP_SCENE_START; */
+    /* 	} */
+
+    /* 	//scene */
+	
+    /* 	//draw */
+    /* } */
+
+    /* if(gAppState == APP_SCENE_START){ */
+    /* 	scene_t* scene = scene_create(gTexturesPaths, renderer); */
+    
+    /* 	game_loop(scene); */
+
+    /* 	scene_destroy(scene); */
+    /* } */
+    
+    /* if(gAppState == APP_EXIT){ */
+    /* 	//safe application exit */
+    /* } */
+
+
+void game_loop(void){
+
+    game_scene = scene_create(gTexturesPaths, renderer);
     
     //game running
-    while(gIsGameRunning){
-	delta_last = delta_now;
-	delta_now = SDL_GetPerformanceCounter();
-
-	delta_time = (double)(delta_now - delta_last)*1000 / (double)SDL_GetPerformanceFrequency();
-	
+    while(gIsGameRunning){	
 	//event loop
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
 	    switch(e.type){
 	    case SDL_QUIT:
 		gIsGameRunning = false;
+		break;
+	    case SDL_KEYUP:
+		if(e.key.keysym.scancode == SDL_SCANCODE_P){
+		    gPaused = !gPaused;
+		}
+		break;
 	    }
 	}
     
@@ -80,29 +106,41 @@ void game_loop(scene_t* game_scene){
 	}
 	
 	//update
-	scene_update(game_scene);   
-	    
+	if(!gPaused){
+	    scene_update(game_scene);
+	}else{
+	    printf("Game paused!\n");	    
+	}
+
 	//draw
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
-
+	
 	scene_draw(game_scene, renderer);
     
 	SDL_RenderPresent(renderer);
 	SDL_Delay(16);
     }
+
+    scene_destroy(game_scene);
   
 }
 
 int init(){
     int success = 0;
 
+    //
+    //INITIALIZE SDL
+    //
     success = SDL_Init(SDL_INIT_EVERYTHING);
     if(success != 0){
 	printf("Failed on initializing sdl2\n");
 	return -1;
     }
-  
+
+    //
+    //CREATE WINDOW
+    //
     window = SDL_CreateWindow("window",
 			      SDL_WINDOWPOS_CENTERED,
 			      SDL_WINDOWPOS_CENTERED,
@@ -115,6 +153,9 @@ int init(){
 	return -1;
     }
 
+    //
+    //CREATE RENDERER
+    //
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
     if(renderer == NULL){
 	printf("Failed on renderer creation\n");
@@ -123,6 +164,9 @@ int init(){
 	return -1;
     }
 
+    //
+    //INITIALIZE SDL IMAGE
+    //
     success = IMG_Init(IMG_INIT_PNG);
     if(success != IMG_INIT_PNG){
 	printf("Failed on initalizing IMG\n");
@@ -132,8 +176,24 @@ int init(){
 	SDL_DestroyRenderer(renderer);
 	SDL_DestroyWindow(window);
 	SDL_Quit();
+	return -1;
     }
 
+    //
+    //INITIALIZE SDL TTF
+    //
+    success = TTF_Init();
+    if(success < 0){
+	printf("Failed initializing SDL_TTF\n");
+	printf("%s\n", TTF_GetError());
+
+	SDL_DestroyRenderer(renderer);
+	SDL_DestroyWindow(window);
+	SDL_Quit();
+	IMG_Quit();	
+	return -1;
+    }
+    
     return 0;
 }
 
@@ -141,5 +201,6 @@ void deinit(){
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
+    TTF_Quit();
     SDL_Quit();
 }

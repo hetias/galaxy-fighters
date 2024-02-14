@@ -1,4 +1,4 @@
-#include"../include/enemy.h"
+#include"enemy.h"
 
 /**
  *Allocates memory for an enemy structure.
@@ -43,12 +43,7 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector, int _id){
 int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
     if(_enemy == NULL || projectiles_container == NULL){
 	printf("Found Null pointer on enemy_update\n");
-	return RET_FAILURE;
-    }
-
-    //check if alive
-    if(_enemy->hp < 1){
-	return RET_DEAD;
+	return -1;
     }
 
     //shootin'
@@ -79,9 +74,9 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
 		SDL_Rect b = {(int)_enemy->hitbox.x, (int)_enemy->hitbox.y, (int)_enemy->hitbox.w, (int)_enemy->hitbox.h};
 		if(SDL_HasIntersection(&a, &b)){
 		    _enemy->hp -= 1;
-		    container_remove_destroy(projectiles_container, i);		    
+		    //container_remove_destroy(projectiles_container, i); come one now
 		    if(_enemy->hp < 1)			
-			return RET_DEAD;
+			return -2;
 		}
 	    }
 	}
@@ -91,7 +86,7 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
     _enemy->hitbox.x = _enemy->position.x - _enemy->hitbox.w / 2;
     _enemy->hitbox.y = _enemy->position.y - _enemy->hitbox.h / 2;
 
-    return RET_ALIVE;
+    return 1;
 }
 
 /**
@@ -119,27 +114,27 @@ void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){
 			&_enemy->hitbox
 	    );
     }
-    /*
-      DEBUG DRAWING
+
+    #if DEBUG
    
-      SDL_FRect _positionSquare = {_enemy->position.x - 5.0f,
-      _enemy->position.y - 5.0f,
-      10.0f,
-      10.0f,
-      };
+    SDL_FRect _positionSquare = {_enemy->position.x - 5.0f,
+	_enemy->position.y - 5.0f,
+	10.0f,
+	10.0f,
+    };
   
-      //draw centered cube
-      SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-      SDL_RenderDrawRectF(gRenderer, &_positionSquare);
+    //draw centered cube
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+    SDL_RenderDrawRectF(gRenderer, &_positionSquare);
 
-      //draw hitbox
-      SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-      SDL_RenderDrawRectF(gRenderer, &_enemy->hitbox);
+    //draw hitbox
+    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+    SDL_RenderDrawRectF(gRenderer, &_enemy->hitbox);
 
-      //draw position point
-      SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-      SDL_RenderDrawPointF(gRenderer, _enemy->position.x, _enemy->position.y);
-    */
+    //draw position point
+    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+    SDL_RenderDrawPointF(gRenderer, _enemy->position.x, _enemy->position.y);
+    #endif
   
 }
 

@@ -5,7 +5,7 @@
 #include<stdbool.h>
 
 #include"SDL2/SDL.h"
-#include"definitions.h"
+#include"core/definitions.h"
 
 #define MAX_POINTS 12
 

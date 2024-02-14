@@ -1,4 +1,4 @@
-#include "../include/scene.h"
+#include "scene.h"
 #include <SDL2/SDL_render.h>
 #include<string.h>
 
@@ -50,6 +50,11 @@ void scene_load_resources(scene_t* _scene, const char** _textures_paths, SDL_Ren
 	    printf("Warning: failed to load: %s\n", _textures_paths[i]);
     }
 
+    _scene->game_font = TTF_OpenFont("resources/fonts/font.ttf", 24);
+    if(!_scene->game_font){
+	printf("Failed opening game font\n");
+	printf("%s\n", TTF_GetError());
+    }
 }
 
 /**
@@ -59,7 +64,7 @@ void scene_load_resources(scene_t* _scene, const char** _textures_paths, SDL_Ren
  */
 int scene_update(scene_t* _scene){
     if(_scene == NULL){
-	return RET_FAILURE;
+	return -1;
     }
     //input
     const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
@@ -68,17 +73,21 @@ int scene_update(scene_t* _scene){
     scene_next_action(_scene);
     
     //update player
-    player_update(_scene->player, keyboardState, &_scene->projectiles_container);
-
+    if(_scene->player->hp > 0){
+	player_update(_scene->player, keyboardState, &_scene->projectiles_container);	
+    }else{
+	
+    }
+    
     //update all enemies
     scene_update_enemies(&_scene->enemies_container, &_scene->projectiles_container);
   
     //update projectiles
-    scene_update_projectiles(&_scene->projectiles_container);
+    scene_update_projectiles(&_scene->projectiles_container, &_scene->enemies_container, _scene->player);
     
     _scene->tick++;
 
-    return RET_SUCCESS;
+    return 0;
 }
 
 /**
@@ -86,19 +95,22 @@ int scene_update(scene_t* _scene){
  * @param _scene Scene containing a list of all projectiles
  * @return In case of succes returns 0, in case pointers parameters are invalid returns -1
  */
-int scene_update_projectiles(game_container* projectiles_container){
-    if(projectiles_container == NULL || projectiles_container->array == NULL)
-	return RET_FAILURE;
+int scene_update_projectiles(game_container* _projectiles_container, game_container* _enemies_container, player_t* _player){
+    if(_projectiles_container == NULL || _projectiles_container->array == NULL)
+	return -1;
 
-    for(int i = 0; i < projectiles_container->count; i++){
+    for(int i = 0; i < _projectiles_container->count; i++){
+	projectile_t* _prj = (projectile_t*)_projectiles_container->array[i];
 
-	if( projectile_update(projectiles_container->array[i]) == RET_DEAD){
-	    container_remove_destroy(projectiles_container, i);
+	if(_prj->alive == false){
+	    printf("projectile removed\n");
+	    container_remove_destroy(_projectiles_container, i);
+	    continue;
 	}
-    
+ 
+	projectile_update(_prj, _enemies_container, _player);
     }
-  
-    return RET_SUCCESS;
+    return 0;
 }
 
 
@@ -111,12 +123,15 @@ int scene_update_projectiles(game_container* projectiles_container){
 int scene_update_enemies(game_container* _enemies_container, game_container* projectiles_container){
     if(_enemies_container == NULL || projectiles_container == NULL){
 	printf("NULL pointer at scene_update_enemes\n");
-	return RET_FAILURE;
+	return -1;
     }
 
     for(int i = 0; i < _enemies_container->count; i++){
-	if(enemy_update(_enemies_container->array[i], projectiles_container) == RET_DEAD){
-	    container_remove_destroy(_enemies_container, i);
+	enemy_t* _enm = (enemy_t*)_enemies_container->array[i];
+	enemy_update(_enm, projectiles_container);
+	
+	if(_enm->hp < 1){
+	    container_remove_destroy(_enemies_container, i);	    
 	}
     }
   
@@ -133,7 +148,7 @@ int scene_update_enemies(game_container* _enemies_container, game_container* pro
  */
 int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){  
     if(_scene == NULL || _renderer == NULL)
-	return RET_FAILURE;
+	return -1;
   
     //background
     SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
@@ -160,14 +175,18 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
     player_draw(_scene->player, _renderer);
     
     //draw ui
-    draw_ui(_scene->player, _scene->textures_vector,  _renderer);
+    //draw_ui(_scene->player, _scene->textures_vector,  _renderer);
 
     //draw paths
     for(int i = 0; i < _scene->spline_count; i++){
 	spline_draw(_scene->splines[i], _renderer);
     }
+
+    //text
+    SDL_Point p = {0.0, 0.0};
+    //draw_text(_renderer, p, _scene->game_font, "this is a text");
     
-    return RET_SUCCESS;
+    return 0;
 }
 
 
@@ -180,13 +199,13 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
  */
 int scene_draw_projectiles(game_container* projectiles_container, SDL_Renderer* _renderer){
     if(_renderer == NULL)
-	return RET_FAILURE;
-
+	return -1;
+    
     for(int i = 0; i < projectiles_container->count; i++){
-	projectile_draw(projectiles_container->array[i], _renderer);
+	projectile_draw((projectile_t*)projectiles_container->array[i], _renderer);
     }
 
-    return RET_SUCCESS;
+    return 0;
 }
 
 
@@ -198,14 +217,14 @@ int scene_draw_projectiles(game_container* projectiles_container, SDL_Renderer* 
  */
 int scene_draw_enemies(game_container* _enemies_container, SDL_Renderer* _renderer){
     if(_enemies_container == NULL || _renderer == NULL){
-	return RET_FAILURE;
+	return -1;
     }
   
     for(int i = 0; i < _enemies_container->count; i++){
 	enemy_draw(_enemies_container->array[i], _renderer);
     }
 
-    return RET_SUCCESS;
+    return 0;
 }
 
 
@@ -216,7 +235,7 @@ int scene_draw_enemies(game_container* _enemies_container, SDL_Renderer* _render
  */
 int scene_destroy(scene_t* _scene){
     if(_scene == NULL)
-	return RET_FAILURE;
+	return -1;
 
     //free resources
     for(int i = 0; i < TXT_TOTAL; i++){
@@ -239,7 +258,7 @@ int scene_destroy(scene_t* _scene){
   
     free(_scene);
   
-    return RET_SUCCESS;
+    return 0;
 }
 
 void scene_next_action(scene_t* _scene){

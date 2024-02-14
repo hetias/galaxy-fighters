@@ -5,24 +5,28 @@
 #include<stdbool.h>
 #include<SDL2/SDL.h>
 
-#include"definitions.h"
+#include"core/definitions.h"
+#include"core/container.h"
+#include"enemy.h"
+#include"player.h"
 
 #define FAST_PRJ_SPEED 8.0f
 #define NORMAL_PRJ_SPEED 5.0f
 #define SLOW_PRJ_SPEED 2.0f
 
 typedef struct projectile_s{
-  SDL_FPoint position;
-  SDL_FPoint direction;
-  SDL_FRect hitbox;
-  SDL_Texture* sprite;
-  float speed;
-  bool isFriendly;
+    SDL_FPoint position;
+    SDL_FPoint direction;
+    SDL_FRect hitbox;
+    SDL_Texture* sprite;
+    float speed;
+    bool isFriendly;
+    bool alive;
 }projectile_t;
 
 //projectile function definitions
 projectile_t* projectile_create(SDL_FPoint, SDL_FPoint, bool, SDL_Texture*);
-int projectile_update(projectile_t*);
+int projectile_update(projectile_t*, game_container*, player_t*);
 void projectile_draw(projectile_t*, SDL_Renderer*);
 void projectile_destroy(projectile_t**);
 

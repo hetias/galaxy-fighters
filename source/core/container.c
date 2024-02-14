@@ -1,4 +1,4 @@
-#include"../include/container.h"
+#include"container.h"
 
 /**
  * CONTAINER_H
@@ -219,13 +219,13 @@ int container_clear(game_container* current_container){
     //check if pointer is valid
     if(current_container == NULL){
 	printf("Invalid pointer on container_clear\n");
-	return RET_FAILURE;
+	return -1;
     }
 
     //check if container's array is valid
     if(current_container->array == NULL){
 	printf("Invalid array in container on container_clear\n");
-	return RET_FAILURE;
+	return -1;
     }
 
     //free each element in the array
@@ -254,7 +254,7 @@ int container_clear(game_container* current_container){
     current_container->count = 0;
     current_container->type = 0;
 
-    return RET_SUCCESS;
+    return 0;
 }
 
 /**

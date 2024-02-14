@@ -11,8 +11,8 @@ typedef struct{
   int  type;
 }game_container;
 
-#include"enemy.h"
-#include"projectile.h"
+#include"../enemy.h"
+#include"../projectile.h"
 
 #define ENEMIES_CAP 32
 #define PROJECTILES_CAP 128

@@ -1,4 +1,4 @@
-#include"../include/player.h"
+#include"player.h"
 
 
 /**
@@ -47,17 +47,15 @@ player_t* player_create(SDL_Texture**_textures_vector){
  *@params _projectileList An list containing all current projectiles
  */
 
-int  player_update(player_t* _player, const Uint8* _keyboardState, game_container* projectiles_container){
-
+int player_update(player_t* _player, const Uint8* _keyboardState, game_container* projectiles_container){
     if(_player == NULL || _keyboardState == NULL || projectiles_container == NULL){
 	printf("Null pointer found at player_update\n");
-	return RET_FAILURE;
+	return -1;
     }
-    
-    if(_player->hp < 1){
-	return RET_DEAD;
-    }
-    //get inputs
+
+    //check if dead
+    if(_player->hp < 1)
+	return 0;
 
     //move vertically
     if(_keyboardState[SDL_SCANCODE_W]){
@@ -100,21 +98,17 @@ int  player_update(player_t* _player, const Uint8* _keyboardState, game_containe
     }
 
     //check collision with enemy projectiles
-    if(!container_empty(*projectiles_container)){
+    if(container_empty(*projectiles_container) == false){
 	for(int i = 0; i < projectiles_container->count; i++){
 	    projectile_t *prj = projectiles_container->array[i];
 
-	    if(!prj->isFriendly){
+	    if(prj->isFriendly == false){
 
-		//for some reason i cant make a call for SDL_HasIntersectionF...so a little bit of magic here...
-		//TODO::Make good use of the float values here, maybe just implementing an aabb collision check
-		SDL_Rect a = {(int)prj->hitbox.x, (int)prj->hitbox.y, (int)prj->hitbox.w, (int)prj->hitbox.h};
-		SDL_Rect b = {(int)_player->hitbox.x, (int)_player->hitbox.y, (int)_player->hitbox.w, (int)_player->hitbox.h};
-
-		if(SDL_HasIntersection(&a, &b)){
+		if(SDL_HasIntersectionF(&prj->hitbox, &_player->hitbox)){
 		    _player->hp -= 1;
-		    container_remove_destroy(projectiles_container, i);
 		}
+
+		continue;
 	    }
 	}
     }
@@ -131,7 +125,7 @@ int  player_update(player_t* _player, const Uint8* _keyboardState, game_containe
     _player->hitbox.x = _player->position.x - (_player->hitbox.w / 2);
     _player->hitbox.y = _player->position.y - (_player->hitbox.h / 2);
 
-    return RET_ALIVE;
+    return 0;
 }
 
 

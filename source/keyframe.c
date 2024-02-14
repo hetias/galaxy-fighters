@@ -1,4 +1,4 @@
-#include"../include/keyframe.h"
+#include"keyframe.h"
 
 keyframe_t keyframe_create_enemy(int tick, int enemy_type, int path_id){
     return (keyframe_t){tick, KEYFRAME_ENEMY_ADD, (keyframe_params){-1, enemy_type, path_id}};

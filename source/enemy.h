@@ -5,9 +5,9 @@
 
 #include <SDL2/SDL.h>
 
-#include"definitions.h"
+#include"core/definitions.h"
 #include"spline.h"
-#include"container.h"
+#include"core/container.h"
 #include"projectile.h"
 
 typedef enum EPATH_STATE{

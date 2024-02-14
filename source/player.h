@@ -3,10 +3,7 @@
 
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
-#include"definitions.h"
-
-#include"container.h"
-#include"projectile.h"
+#include"core/definitions.h"
 
 //player definition
 typedef struct player_s{
@@ -20,6 +17,9 @@ typedef struct player_s{
   SDL_Texture* sprite;
   SDL_Texture* projectile_sprite;
 }player_t;
+
+#include"core/container.h"
+#include"projectile.h"
 
 //
 //FUNCTION DEFINITIONS

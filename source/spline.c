@@ -1,4 +1,4 @@
-#include"../include/spline.h"
+#include"spline.h"
 #include <string.h>
 
 /**

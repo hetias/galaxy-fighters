@@ -8,12 +8,7 @@
 #define SHOOT_NORMAL 20
 #define SHOOT_FAST   10
 
-enum Returns{
-    RET_ALIVE,
-    RET_DEAD,
-    RET_SUCCESS,
-    RET_FAILURE
-};
+#define DEBUG 0
 
 enum ETextures{
   //background

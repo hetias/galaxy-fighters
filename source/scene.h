@@ -5,11 +5,13 @@
 
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
-#include"definitions.h"
-#include"ui.h"
+
+#include"core/definitions.h"
+
+#include"core/ui.h"
 #include"player.h"
 #include"enemy.h"
-#include"container.h"
+#include"core/container.h"
 #include"keyframe.h"
 #include"spline.h"
 
@@ -25,6 +27,7 @@ typedef struct{
 
     //resources
     SDL_Texture* textures_vector[TXT_TOTAL];
+    TTF_Font*    game_font;
 
     //scene and level data
     int tick;
@@ -47,7 +50,7 @@ void scene_load_resources(scene_t*, const char**, SDL_Renderer*);
 int scene_update(scene_t*);
 int scene_draw(scene_t*, SDL_Renderer*);
 
-int scene_update_projectiles(game_container*);
+int scene_update_projectiles(game_container*, game_container*, player_t*);
 int scene_update_enemies(game_container*, game_container*);
 
 int scene_draw_projectiles(game_container*, SDL_Renderer*);
