@@ -9,9 +9,10 @@
 #include"core/definitions.h"
 
 #include"core/ui.h"
+#include"core/container.h"
+#include"resources.h"
 #include"player.h"
 #include"enemy.h"
-#include"core/container.h"
 #include"keyframe.h"
 #include"spline.h"
 
@@ -26,9 +27,8 @@ typedef struct{
     int max_enemy_id;
 
     //resources
-    SDL_Texture* textures_vector[TXT_TOTAL];
-    TTF_Font*    game_font;
-
+    resources_t *resources;
+    
     //scene and level data
     int tick;
 
@@ -43,8 +43,7 @@ typedef struct{
 }scene_t;
 
 //scene management
-scene_t* scene_create(const char**, SDL_Renderer*);
-void scene_load_resources(scene_t*, const char**, SDL_Renderer*);
+scene_t* scene_create(resources_t*);
 
 //scene functionalities
 int scene_update(scene_t*);

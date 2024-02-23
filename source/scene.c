@@ -7,14 +7,14 @@
  * @param _texture_paths
  * @return pointer to a new scene_t
  */
-scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
+scene_t* scene_create(resources_t *_resources){
     scene_t* new_scene = (scene_t*)malloc(sizeof(scene_t));
 
-    //Load resources
-    scene_load_resources(new_scene, _texture_paths, _renderer);
-    
+    //no resources loaded
+    new_scene->resources = _resources;
+
     //create the player
-    new_scene->player = player_create(new_scene->textures_vector);
+    new_scene->player = player_create(new_scene->resources->textures);
 
     //create container for projectiles
     new_scene->projectiles_container = container_create(CONTAINER_PROJECTILE);
@@ -31,30 +31,6 @@ scene_t* scene_create(const char** _texture_paths, SDL_Renderer* _renderer){
     //start ticks
     new_scene->tick = 0;
     return new_scene;
-}
-
-/**
- * Load game resources
- * @param _scene scene where the structures containing resources are present
- * @param _textures_path Path to game textures
- */
-void scene_load_resources(scene_t* _scene, const char** _textures_paths, SDL_Renderer* _renderer){
-
-    //load all resources
-    for(int i = 0; i < TXT_TOTAL; i++){
-
-	_scene->textures_vector[i] = NULL;
-	_scene->textures_vector[i] = IMG_LoadTexture(_renderer, _textures_paths[i]);
-
-	if(_scene->textures_vector[i] == NULL)
-	    printf("Warning: failed to load: %s\n", _textures_paths[i]);
-    }
-
-    _scene->game_font = TTF_OpenFont("resources/fonts/font.ttf", 24);
-    if(!_scene->game_font){
-	printf("Failed opening game font\n");
-	printf("%s\n", TTF_GetError());
-    }
 }
 
 /**
@@ -151,7 +127,7 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
 	return -1;
   
     //background
-    SDL_RenderCopy(_renderer, _scene->textures_vector[TXT_BG_DARKPURPLE], NULL, NULL);
+    SDL_RenderCopy(_renderer, _scene->resources->textures[TXT_BG_DARKPURPLE], NULL, NULL);
 
     //draw spline grid
     if(false){
@@ -240,9 +216,9 @@ int scene_destroy(scene_t* _scene){
     //free resources
     for(int i = 0; i < TXT_TOTAL; i++){
 
-	if(_scene->textures_vector[i] != NULL){
-	    SDL_DestroyTexture(_scene->textures_vector[i]);
-	    _scene->textures_vector[i] = NULL;
+	if(_scene->resources->textures[i] != NULL){
+	    SDL_DestroyTexture(_scene->resources->textures[i]);
+	    _scene->resources->textures[i] = NULL;
 	}
     
     }
@@ -275,7 +251,7 @@ void scene_next_action(scene_t* _scene){
 	    _scene->max_enemy_id += 1;
 
 	    //create enemy and assing max id to it
-	    enemy_t * e = enemy_create(_scene->textures_vector, _scene->max_enemy_id);
+	    enemy_t * e = enemy_create(_scene->resources->textures, _scene->max_enemy_id);
 	    container_add(&_scene->enemies_container, (void*)e);	    
 	}break;
 

@@ -6,14 +6,9 @@
 #include"SDL2/SDL_image.h"
 #include"core/definitions.h"
 
+#include"resources.h"
 #include"scene.h"
 #include"gg.h"
-
-typedef struct{
-    SDL_Texture *textures[TXT_TOTAL];
-    TTF_Font     *font;
-    
-}resources_t;
 
 enum APP_STATES{
     MAIN_MENU = 0,
@@ -24,23 +19,25 @@ enum APP_STATES{
     EXIT
 };
 
-resources_t game_resources = {};
+resources_t game_resources;
 
-int init();
-void deinit();
-void game_loop();
+int init(void);
+void deinit(void);
+void load_resources(void);
+void free_resources(void);
+void game_loop(void);
 
 //menu options
-void main_menu();
-void options_menu();
+void main_menu(void);
+void options_menu(void);
 
-//TTF_Font* gFont = NULL;
 SDL_Renderer *renderer = NULL;
 SDL_Window     *window = NULL;
 bool    gIsGameRunning = true;
-bool gPaused = false;
-int gAppState = MAIN_MENU;
+bool           gPaused = false;
+int          gAppState = MAIN_MENU;
 
+//
 scene_t *game_scene    = NULL;
 
 const char* gTexturesPaths[] ={
@@ -62,14 +59,16 @@ const char* gTexturesPaths[] ={
 
 TTF_Font *gFont = NULL;
 
-
-
 int main(void){
 
     if(init() < 0)
 	exit(-1);
+
+    load_resources();
     
     game_loop();
+
+    free_resources();
     
     deinit();
     return 0;
@@ -102,9 +101,14 @@ int main(void){
     /* 	//safe application exit */
     /* } */
 
-
+/**
+ * Main game loop of the application.
+ * Menus and gameplay logic happens here.
+ */
 void game_loop(void){
 
+    gg_init(renderer, game_resources.font);
+    
     //game running
     while(gIsGameRunning){	
 	//event loop
@@ -124,7 +128,7 @@ void game_loop(void){
 	    gg_events(e);
 	}
     
-	//input
+	//keyboard input
 	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 	if(keyboardState[SDL_SCANCODE_ESCAPE]){
 	    gIsGameRunning = false;
@@ -136,30 +140,26 @@ void game_loop(void){
 	}
 	
 	//draw
-	
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 
+	//we do depending on the Global Application State
 	switch(gAppState){
 	case MAIN_MENU:{
-	    printf("on main_menu\n");
 	    //bg
 	    	    
 	    //create main menu
 	    main_menu();
 	}break;
 	case OPTIONS_MENU:{
-	    printf("on options_menu\n");	    
 	    options_menu();
 	}break;
 	case SCENARIO:{
-	    printf("on scenario\n");	    	    
 	    scene_draw(game_scene, renderer);
-	}
+	}break;
 	case EXIT:{
-	    printf("on exit\n");
 	    gIsGameRunning = false;
-	}
+	}break;
 	}	
 	
 	//scene_draw(game_scene, renderer);
@@ -169,11 +169,16 @@ void game_loop(void){
     }
     
     scene_destroy(game_scene);
-  
+    gg_deinit();    
 }
 
-
-void main_menu(){
+/**
+ * 
+ * Draws the main menu of the game. From there we can start
+ * the game, go to options or exit.
+ *
+*/
+void main_menu(void){
     int selected = -1;
     SDL_Point button_position = {0, 0};
     SDL_Rect button_rect = {0, 0, 120, 75};
@@ -206,17 +211,13 @@ void main_menu(){
     //do based on selection
     switch(selected){
     case 0:{
-	printf("Start\n");
-	game_scene = scene_create(gTexturesPaths, renderer);
+	game_scene = scene_create(&game_resources);
 	gAppState = SCENARIO;
     }break;
     case 1:{
-	printf("Options\n");
-	options_menu();
 	gAppState = OPTIONS_MENU;	
     }break;
     case 2:{
-	printf("Exit\n");
 	gAppState = EXIT;	
     }break;
     default:{}
@@ -224,11 +225,57 @@ void main_menu(){
 	        
 }
 
-void options_menu(){
+/**
+ * Draw the options menu.
+ */
+void options_menu(void){
     
 }
 
-int init(){
+/**
+ * Load all game resources on a global 'resources_t' structure.
+ */
+void
+load_resources(void){
+    //load textures
+    for(int i = 0; i < TXT_TOTAL; i++){
+	game_resources.textures[i] = NULL;
+	game_resources.textures[i] =
+	    IMG_LoadTexture(renderer, gTexturesPaths[i]);
+	if(game_resources.textures[i] == NULL){
+	    printf("Warning: failed on resources load: %s\n",
+		   gTexturesPaths[i]);
+	}
+    }
+
+    //load font
+    game_resources.font = TTF_OpenFont("resources/fonts/font.ttf", 16);
+    if(game_resources.font == NULL){
+	printf("Warning: failed on resource load: resources/fonts/font.ttf");
+    }
+}
+
+/**
+ * Free all game resources from global 'resources_t' structure.
+ */
+void
+free_resources(void){
+    //destroy all textures
+    for(int i = 0; i < TXT_TOTAL; i++){
+	SDL_DestroyTexture(game_resources.textures[i]);
+	game_resources.textures[i] = NULL;
+    }
+
+    //close font
+    TTF_CloseFont(game_resources.font);
+}
+
+/**
+ * Initializes SDL2, SDL2_Image, SDL_ttf create windows and 
+ * renderer.
+ * @return returns 0 on succes or -1 on error
+ */
+int init(void){
     int success = 0;
 
     //
@@ -295,20 +342,14 @@ int init(){
 	IMG_Quit();	
 	return -1;
     }
-
-    gFont = TTF_OpenFont("resources/fonts/font.ttf", 16);
-    
-    if(gg_init(renderer, gFont) < 0){
-	printf("gg_init failed!\n");
-	return -1;
-    }
     
     return 0;
 }
 
-void deinit(){
-    gg_deinit();
-    
+/**
+ * Closes all SDL2 libraries and destroys resources.
+ */
+void deinit(void){        
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     IMG_Quit();
