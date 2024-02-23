@@ -1,4 +1,4 @@
-OBJS = main.o container.o enemy.o player.o projectile.o scene.o spline.o ui.o keyframe.o
+OBJS = main.o container.o enemy.o player.o projectile.o scene.o spline.o ui.o keyframe.o gg.o
 
 CC = gcc
 
@@ -18,29 +18,32 @@ all: $(OBJS)
 main.o: source/main.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/main.c
 
-ui.o: source/include/ui.h source/lib/ui.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/ui.c
+gg.o: source/gg.h source/gg.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/gg.c
 
-container.o: source/include/container.h source/lib/container.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/container.c
+ui.o: source/core/ui.h source/core/ui.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/core/ui.c
 
-enemy.o: source/include/enemy.h source/lib/enemy.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/enemy.c
+container.o: source/core/container.h source/core/container.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/core/container.c
 
-player.o: source/include/player.h source/lib/player.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/player.c
+enemy.o: source/enemy.h source/enemy.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/enemy.c
 
-projectile.o: source/include/projectile.h source/lib/projectile.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/projectile.c
+player.o: source/player.h source/player.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/player.c
 
-keyframe.o: source/include/keyframe.h source/lib/keyframe.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/keyframe.c
+projectile.o: source/projectile.h source/projectile.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/projectile.c
 
-scene.o: source/include/scene.h source/lib/scene.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/scene.c
+keyframe.o: source/keyframe.h source/keyframe.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/keyframe.c
 
-spline.o: source/include/spline.h source/lib/spline.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/lib/spline.c
+scene.o: source/scene.h source/scene.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/scene.c
+
+spline.o: source/spline.h source/spline.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/spline.c
 
 clean:
 	rm *.o
