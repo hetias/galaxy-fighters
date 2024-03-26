@@ -6,7 +6,7 @@
 #include <SDL2/SDL.h>
 
 #include"core/definitions.h"
-#include"spline.h"
+#include"core/spline.h"
 #include"core/container.h"
 #include"projectile.h"
 

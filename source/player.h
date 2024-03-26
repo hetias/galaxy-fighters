@@ -1,6 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include<math.h>
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
 #include"core/definitions.h"

@@ -105,7 +105,7 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
  *@params _renderer Pointer to an SDL_Renderer where the player is drawn
  */
 
-void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){  
+void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){
     if(_enemy){
 
 	SDL_RenderCopyF(_renderer,
