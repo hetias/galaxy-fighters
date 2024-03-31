@@ -24,8 +24,15 @@ SDL_Window     *gWindow = NULL;
 bool    gIsGameRunning = true;
 bool           gPaused = false;
 
-SDL_Point gWindow_size = {WINDOW_WIDTH, WINDOW_HEIGHT};
-SDL_Point gWord_center = {WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2};
+resources_t game_resources;
+
+SDL_Point screen_res = {WINDOW_WIDTH, WINDOW_HEIGHT};
+
+//word info
+SDL_Rect  game_space = {0, 0, 0, 0};
+SDL_Point gWord_center = {0, 0};
+
+SDL_Rect player_rect = {0, 0, 0, 0};
 
 const char* gTexturesPaths[] ={
     //background
@@ -48,12 +55,12 @@ TTF_Font *gFont = NULL;
 
 int main(){
     if(init() < 0){
-	printf("failed on initialization\n");
+	SDL_Log("failed on initialization\n");
 	deinit();
     }
 
     load_resources();
-
+    
     loop();
 
     free_resources();
@@ -62,51 +69,19 @@ int main(){
     return 0;
 }
 
-int
-init(void){
-    int success = 0;
-
-    success = SDL_Init(SDL_INIT_EVERYTHING);
-    if(success != 0){
-	printf("Failed initializing sdl2\n");
-	return -1;
-    }
-
-    success = IMG_Init(IMG_INIT_PNG);
-    if(success != IMG_INIT_PNG){
-	printf("Failed initializing SDL_IMG\n");
-	return -1;
-    }
-    
-    success = TTF_Init();
-    if(success < 0){
-	printf("Failed initializ SDL_TTF\n");
-	return -1;
-    }    
-
-    
-    gWindow = SDL_CreateWindow("window",
-			      SDL_WINDOWPOS_CENTERED,
-			      SDL_WINDOWPOS_CENTERED,
-			      gWindow_size.x,
-			      gWindow_size.y,
-			      SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
-    if(gWindow == NULL){
-	printf("Failed on window creation\n");
-	return -1;
-    }
-
-    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_PRESENTVSYNC);
-    if(gRenderer == NULL){
-	printf("Failed on renderer creation\n");
-	return -1;
-    }
-
-}
-
 void
 loop(void){
+    //figure out the size of the player texture
+    SDL_QueryTexture(game_resources.textures[TXT_PLAYER_BLUE], NULL, NULL, &player_rect.w, &player_rect.h);
 
+    //get the center of the screen and the game space
+    gWord_center = (SDL_Point){screen_res.x / 2, screen_res.y / 2};
+    game_space = (SDL_Rect){0, 0, screen_res.x, screen_res.x};    
+
+    //center the player's texture
+    player_rect.x = gWord_center.x - player_rect.w / 2;
+    player_rect.y = gWord_center.y - player_rect.h / 2;    
+    
     //events();
     SDL_Event e;
     while(gIsGameRunning){
@@ -120,12 +95,25 @@ loop(void){
 		//handling window events
 		switch(e.window.event){
 		case SDL_WINDOWEVENT_RESIZED:
+                    #if DEBUG
 		    SDL_Log("Window %d resized to %d x %d\n", e.window.windowID, e.window.data1, e.window.data2);
-		    gWindow_size.x = e.window.data1;
-		    gWindow_size.y = e.window.data2;
+                    #endif
+		    
+		    screen_res.x = e.window.data1;
+		    screen_res.y = e.window.data2;
+		    
+		    gWord_center.x = screen_res.x / 2;
+		    gWord_center.y = screen_res.y / 2;
 
-		    gWord_center.x = gWindow_size.x / 2;
-		    gWord_center.y = gWindow_size.y / 2;
+		    player_rect.x = gWord_center.x - (player_rect.w / 2);
+		    player_rect.y = gWord_center.y - (player_rect.h / 2);
+		    
+		    game_space.w = screen_res.y;
+		    game_space.h = screen_res.y;
+
+		    game_space.x = gWord_center.x - (game_space.w / 2);
+		    game_space.y = 0;
+		    
 		    break;
 		}
 		break;
@@ -134,41 +122,115 @@ loop(void){
 	//logic();
 	const int rsize = 20;
 
-	SDL_Point mp;
+	SDL_Rect mp = {0, 0};
 	SDL_GetMouseState(&mp.x, &mp.y);
 	
 	//draw();
 	SDL_SetRenderDrawColor(gRenderer, 100, 25, 75, 255);
 	SDL_RenderClear(gRenderer);
 
-	//draw window mouse pos
-	SDL_Rect mwp = {mp.x - (rsize / 2), mp.y - (rsize / 2), rsize, rsize};
-	SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-	SDL_RenderDrawRect(gRenderer, &mwp); 
-
-	//draw mouse word position
-	SDL_Point wp = screen_to_word((SDL_Point){mwp.x, mwp.y});
-	SDL_Rect mwwp = {wp.x, wp.y, rsize, rsize};
-	SDL_SetRenderDrawColor(gRenderer, 0, 255, 0, 255);
-	SDL_RenderDrawRect(gRenderer, &mwwp); 
-
+	//bg
+	SDL_RenderCopy(gRenderer, game_resources.textures[TXT_BG_PURPLE], NULL, &game_space);		
+	
+	//render player
+	SDL_RenderCopy(gRenderer, game_resources.textures[TXT_PLAYER_BLUE], NULL, &player_rect);
+	
 	//draw center
 	SDL_Rect cr = {gWord_center.x - (rsize / 2), gWord_center.y - (rsize / 2), rsize, rsize};
+        #if DEBUG
+	SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
+	SDL_RenderDrawRect(gRenderer, &cr);
+
+
+	SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);	
+	SDL_RenderDrawLine(gRenderer,
+			   screen_res.x / 2, 0,
+			   screen_res.x / 2, screen_res.y);
+	SDL_RenderDrawLine(gRenderer,
+			   0, screen_res.y / 2,
+			   screen_res.x, screen_res.y / 2);
+	
+
+	
+
+	//draw real world space
 	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-	SDL_RenderDrawRect(gRenderer, &cr); 
+	SDL_RenderDrawRect(gRenderer, &game_space);
+        #endif	
 	
 	SDL_RenderPresent(gRenderer);
     }    
 }
 
+int
+init(void){
+    int success = 0;
+
+    success = SDL_Init(SDL_INIT_EVERYTHING);
+    if(success != 0){
+	SDL_Log("Failed initializing sdl2\n");
+	return -1;
+    }
+
+    success = IMG_Init(IMG_INIT_PNG);
+    if(success != IMG_INIT_PNG){
+	SDL_Log("Failed initializing SDL_IMG\n");
+	return -1;
+    }
+    
+    success = TTF_Init();
+    if(success < 0){
+	SDL_Log("Failed initializ SDL_TTF\n");
+	return -1;
+    }    
+
+    
+    gWindow = SDL_CreateWindow("window",
+			      SDL_WINDOWPOS_CENTERED,
+			      SDL_WINDOWPOS_CENTERED,
+			      screen_res.x,
+			      screen_res.y,
+			      SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    if(gWindow == NULL){
+	SDL_Log("Failed on window creation\n");
+	return -1;
+    }
+
+    gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_PRESENTVSYNC);
+    if(gRenderer == NULL){
+	SDL_Log("Failed on renderer creation\n");
+	return -1;
+    }
+
+}
+
 void
 load_resources(void){
-    
+    for(int i = 0; i < TXT_TOTAL; i++){
+	game_resources.textures[i] = NULL;
+	game_resources.textures[i] =
+	    IMG_LoadTexture(gRenderer, gTexturesPaths[i]);
+	if(game_resources.textures[i] == NULL){
+	    SDL_Log("Warning: failed on resouces load: %s\n",
+		   gTexturesPaths[i]);
+	}
+    }
+
+    const char* fontPath = "resources/fonts/font.ttf";
+    game_resources.font = TTF_OpenFont(fontPath,16);
+    if(game_resources.font == NULL){
+	SDL_Log("Warning: failed on resource load: %s\n", fontPath);
+    }
 }
 
 void
 free_resources(void){
-    
+    for(int i = 0; i < TXT_TOTAL; i++){
+	SDL_DestroyTexture(game_resources.textures[i]);
+	game_resources.textures[i] = NULL;
+    }
+
+    TTF_CloseFont(game_resources.font);
 }
 
 void
