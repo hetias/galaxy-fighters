@@ -1,4 +1,6 @@
 #include"player.h"
+#include "core/definitions.h"
+#include "core/timing.h"
 
 
 /**
@@ -29,9 +31,9 @@ player_t* player_create(SDL_Texture**_textures_vector){
 	(float)dims.x,
 	(float)dims.y};
     
-    tmp_player->shootDelay = SHOOT_SLOW;
+    tmp_player->shootDelay = SHOOT_FAST;
     tmp_player->currentShootDelay = tmp_player->shootDelay;
-    tmp_player->speed     = 8.5f;
+    tmp_player->speed     = 550.0f;
 
     tmp_player->sprite = _textures_vector[TXT_PLAYER_BLUE];
     tmp_player->projectile_sprite = _textures_vector[TXT_LASER_BLUE];
@@ -82,18 +84,19 @@ int player_update(player_t* _player, const Uint8* _keyboardState, game_container
     }else{
 	_player->direction.x = 0;
     }
-
-    //shoot projectile
-    if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0)
-    {
-	projectile_t* tmp_prj = projectile_create(_player->position, (SDL_FPoint){0.0f, -1.0f}, true, _player->projectile_sprite);
-
-	container_add(projectiles_container, (void*)tmp_prj);
     
+    //shoot projectile
+    if(_keyboardState[SDL_SCANCODE_J] && _player->currentShootDelay < 0){
+	
+	projectile_t* tmp_prj = projectile_create(_player->position,
+						  (SDL_FPoint){0.0f, -1.0f},
+						  true,
+						  _player->projectile_sprite);
+	
+	container_add(projectiles_container, (void*)tmp_prj);
+	
 	_player->currentShootDelay = _player->shootDelay;
-    }
-    else
-    {
+    }else{
 	_player->currentShootDelay--;
     }
 
@@ -117,21 +120,20 @@ int player_update(player_t* _player, const Uint8* _keyboardState, game_container
     float magnitud = sqrt(_player->direction.x * _player->direction.x + _player->direction.y * _player->direction.y);
     _player->direction.x = (_player->direction.x != 0.0) ? _player->direction.x / magnitud : 0.0f;
     _player->direction.y = (_player->direction.y != 0.0) ? _player->direction.y / magnitud : 0.0f;
-  
-    //move
-    _player->position.x += _player->direction.x * _player->speed;
-    _player->position.y += _player->direction.y * _player->speed;
-
+    
+    _player->position.x += _player->direction.x * (_player->speed * gametime.frame_ms);
+    _player->position.y += _player->direction.y * (_player->speed * gametime.frame_ms);
+    
     _player->hitbox.x = _player->position.x - (_player->hitbox.w / 2);
     _player->hitbox.y = _player->position.y - (_player->hitbox.h / 2);
-
+    
     return 0;
 }
 
 
 
 /**
- *Updates player's internal state
+ *Draws player
  *@params _player Pointer to the player structure to draw
  *@params _renderer Pointer to an SDL_Renderer where the player will be drawn
  */

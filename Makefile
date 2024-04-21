@@ -1,4 +1,4 @@
-GAME_OBJS = game.o container.o enemy.o player.o projectile.o scene.o spline.o ui.o keyframe.o gg.o
+GAME_OBJS = game.o container.o enemy.o player.o projectile.o scene.o spline.o ui.o keyframe.o gg.o timing.o
 
 ENGINE_OBJS = engine.o spline.o keyframe.o gg.o
 
@@ -21,11 +21,10 @@ engine: engine.o
 	$(CC) $(ENGINE_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o engine
 
 #OBJS
-
-engine.o: source/engine.c gg.o keyframe.o spline.o
+engine.o: source/engine.c gg.o keyframe.o spline.o timing.o
 	$(CC) $(INCLUDE_PATHS) -g -c source/engine.c
 
-game.o: source/game.c gg.o ui.o container.o enemy.o player.o projectile.o keyframe.o scene.o spline.o
+game.o: source/game.c gg.o ui.o container.o enemy.o player.o projectile.o keyframe.o scene.o spline.o timing.o
 	$(CC) $(INCLUDE_PATHS) -g -c source/game.c
 
 gg.o: source/core/gg.h source/core/gg.c
@@ -49,11 +48,14 @@ projectile.o: source/projectile.h source/projectile.c
 keyframe.o: source/core/keyframe.h source/core/keyframe.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/keyframe.c
 
-scene.o: source/core/scene.c keyframe.o
+scene.o: source/core/scene.c source/core/definitions.h keyframe.o
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/scene.c
 
 spline.o: source/core/spline.h source/core/spline.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/spline.c
+
+timing.o: source/core/timing.h source/core/timing.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/core/timing.c
 
 clean:
 	rm *.o

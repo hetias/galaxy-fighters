@@ -1,3 +1,5 @@
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_timer.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
@@ -8,7 +10,8 @@
 
 #include"core/resources.h"
 #include"core/scene.h"
-#include"core/gg.h"
+#include "core/gg.h"
+#include "core/timing.h"
 
 enum APP_STATES{
     MAIN_MENU = 0,
@@ -25,7 +28,6 @@ struct main_menu_bgfx{
 };
 
 struct main_menu_bgfx mm_bgfx = {-600, 0};
-    
 
 resources_t game_resources;
 
@@ -46,6 +48,7 @@ bool           gPaused = false;
 int          gAppState = MAIN_MENU;
 
 //
+time_info gametime = {0};
 scene_t *game_scene    = NULL;
 
 const char* gTexturesPaths[] ={
@@ -65,7 +68,7 @@ const char* gTexturesPaths[] ={
     "resources/sprites/ui/lifeblue1.png"
 };
 
-TTF_Font *gFont = NULL;
+//TTF_Font *gFont = NULL;
 
 int main(void){
 
@@ -91,7 +94,10 @@ void game_loop(void){
     gg_init(renderer, game_resources.font);
     
     //game running
-    while(gIsGameRunning){	
+    while(gIsGameRunning){
+	
+	timeframe_start(&gametime);
+	
 	//event loop
 	SDL_Event e;
 	while(SDL_PollEvent(&e)){
@@ -172,11 +178,18 @@ void game_loop(void){
 	    gIsGameRunning = false;
 	}break;
 	}	
-	
-	//scene_draw(game_scene, renderer);
-    
+			
 	SDL_RenderPresent(renderer);
-	SDL_Delay(16);
+	
+        timeframe_end(&gametime);
+	
+	timeframe_cycles(&gametime);
+	timeframe_ms(&gametime);
+	timeframe_sc(&gametime);
+
+	printf("cycles: %ld\n", gametime.frame_cycles);
+	printf("ms: %f\n", gametime.frame_ms);
+	printf("sc: %f\n", gametime.frame_sc);	
     }
 
     scene_destroy(game_scene);
@@ -341,7 +354,7 @@ int init(void){
     //
     //CREATE RENDERER
     //
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_PRESENTVSYNC);
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     if(renderer == NULL){
 	printf("Failed on renderer creation\n");
 	SDL_Quit();

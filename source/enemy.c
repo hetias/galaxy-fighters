@@ -1,4 +1,5 @@
 #include"enemy.h"
+#include "player.h"
 
 /**
  *Allocates memory for an enemy structure.
@@ -213,6 +214,8 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 	    }break;
 	}
     }
+
+    return PATH_STATE_FORWARD;
 }
 
 void enemy_change_path(enemy_t* _enemy, spline_t* _spline){

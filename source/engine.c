@@ -1,3 +1,8 @@
+#include <SDL2/SDL_keyboard.h>
+#include <SDL2/SDL_rect.h>
+#include <SDL2/SDL_render.h>
+#include <SDL2/SDL_scancode.h>
+#include <stdint.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
@@ -9,6 +14,18 @@
 #include"core/resources.h"
 #include"core/scene.h"
 #include"core/gg.h"
+#include "core/spline.h"
+
+enum ObjectType{
+    OBJECT_ENEMY,
+    OBJECT_SPLINE,
+};
+
+typedef struct sObject{
+    int type;  
+    SDL_Point position;
+    void *obj;
+}Object;
 
 int init(void);
 void deinit(void);
@@ -28,8 +45,15 @@ resources_t game_resources;
 
 SDL_Point screen_res = {WINDOW_WIDTH, WINDOW_HEIGHT};
 
+typedef struct spline_s{
+    int top;
+    spline_t arr[64];
+}spline_stack;
+
+spline_stack splines = {-1, {0}};
+
 //word info
-SDL_Rect  game_space = {0, 0, 0, 0};
+SDL_Rect  game_space = {0, 0, 0, 0}; //
 SDL_Point gWord_center = {0, 0};
 
 SDL_Rect player_rect = {0, 0, 0, 0};
@@ -76,17 +100,21 @@ loop(void){
 
     //get the center of the screen and the game space
     gWord_center = (SDL_Point){screen_res.x / 2, screen_res.y / 2};
-    game_space = (SDL_Rect){0, 0, screen_res.x, screen_res.x};    
+    game_space = (SDL_Rect){0, 0, screen_res.x, screen_res.x}; 
 
     //center the player's texture
     player_rect.x = gWord_center.x - player_rect.w / 2;
     player_rect.y = gWord_center.y - player_rect.h / 2;    
+
+    //gg_init(gRenderer, game_resources.font);
     
     //events();
     SDL_Event e;
     while(gIsGameRunning){
 
 	while(SDL_PollEvent(&e)){
+	    //gg_events(e);
+	    
 	    switch(e.type){
 	    case SDL_QUIT:
 		gIsGameRunning = false;
@@ -119,47 +147,56 @@ loop(void){
 		break;
 	    }
 	}
-	//logic();
+	//logic();	
 	const int rsize = 20;
 
 	SDL_Rect mp = {0, 0};
 	SDL_GetMouseState(&mp.x, &mp.y);
+
+	const uint8_t* keys = SDL_GetKeyboardState(NULL);
+
+	if(keys[SDL_SCANCODE_N] ){
+	    printf("new spline");
+
+	    splines.top += 1;
+	    spline_t s;
+	    
+	    s.loop = false;
+	    s.points[0] = (SDL_FPoint){100.0f, 100.0f};
+	    s.points[1] = (SDL_FPoint){200.0f, 200.0f};
+	    s.points[2] = (SDL_FPoint){300.0f, 200.0f};
+	    s.points[3] = (SDL_FPoint){400.0f, 100.0f};
+	    s.total_points = 4;
+	    splines.arr[splines.top] = s;
+	}
 	
 	//draw();
 	SDL_SetRenderDrawColor(gRenderer, 100, 25, 75, 255);
 	SDL_RenderClear(gRenderer);
-
+	
 	//bg
 	SDL_RenderCopy(gRenderer, game_resources.textures[TXT_BG_PURPLE], NULL, &game_space);		
 	
 	//render player
 	SDL_RenderCopy(gRenderer, game_resources.textures[TXT_PLAYER_BLUE], NULL, &player_rect);
-	
-	//draw center
-	SDL_Rect cr = {gWord_center.x - (rsize / 2), gWord_center.y - (rsize / 2), rsize, rsize};
-        #if DEBUG
-	SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-	SDL_RenderDrawRect(gRenderer, &cr);
 
+	#define SR_SIZE 25
+	SDL_FPoint p = {0};
+	SDL_Rect sr = {0};
+	for(int i = 0; i < splines.top; i++){
+	    for(int j = 0; j < splines.arr[i].total_points; j++){
+		p = splines.arr[i].points[j];
+		sr = (SDL_Rect){(p.x - (float)SR_SIZE / 2 ) + game_space.x,
+				(p.y - (float)SR_SIZE / 2) + game_space.y,
+				SR_SIZE, SR_SIZE};	   
+		SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
+		SDL_RenderDrawRect(gRenderer, &sr);
+	    }
 
-	SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);	
-	SDL_RenderDrawLine(gRenderer,
-			   screen_res.x / 2, 0,
-			   screen_res.x / 2, screen_res.y);
-	SDL_RenderDrawLine(gRenderer,
-			   0, screen_res.y / 2,
-			   screen_res.x, screen_res.y / 2);
-	
-
-	
-
-	//draw real world space
-	SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-	SDL_RenderDrawRect(gRenderer, &game_space);
-        #endif	
-	
+            spline_draw_world(splines.arr[i], (SDL_Point){game_space.x, game_space.y}, gRenderer);	    
+	}
 	SDL_RenderPresent(gRenderer);
-    }    
+    }
 }
 
 int
@@ -202,6 +239,7 @@ init(void){
 	return -1;
     }
 
+    return success;
 }
 
 void

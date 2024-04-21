@@ -5,6 +5,7 @@
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
 #include"core/definitions.h"
+#include"core/timing.h"
 
 //player definition
 typedef struct player_s{
@@ -21,6 +22,8 @@ typedef struct player_s{
 
 #include"core/container.h"
 #include"projectile.h"
+
+extern time_info gametime;
 
 //
 //FUNCTION DEFINITIONS

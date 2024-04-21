@@ -4,9 +4,9 @@
 #define WINDOW_HEIGHT 600
 
 //definitions needed for player and enemy
-#define SHOOT_SLOW   30
-#define SHOOT_NORMAL 20
-#define SHOOT_FAST   10
+#define SHOOT_SLOW   375
+#define SHOOT_NORMAL 200
+#define SHOOT_FAST   155
 
 #define DEBUG 0
 

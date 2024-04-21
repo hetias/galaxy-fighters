@@ -1,4 +1,5 @@
 #include"spline.h"
+#include <SDL2/SDL_render.h>
 #include <string.h>
 
 /**
@@ -92,7 +93,14 @@ SDL_FPoint to_fixedCoords(SDL_FPoint point){
     return p;
 }
 
+//basic draw function fallbacks to fixed draw
 void spline_draw(spline_t _spline, SDL_Renderer* renderer){
+    spline_draw_fixed(_spline, (SDL_Point){0, 0}, renderer);
+}
+
+// this functions expects splines points to be
+// on (0, 1) range
+void spline_draw_fixed(spline_t _spline, SDL_Point position, SDL_Renderer *renderer) {
     if(_spline.total_points < 4) return;
     
     float maxit = 0.0f;
@@ -107,6 +115,25 @@ void spline_draw(spline_t _spline, SDL_Renderer* renderer){
 	SDL_FPoint p = to_worldCoords(spline_get_point(_spline, i));
 	SDL_RenderDrawPointF(renderer, p.x, p.y);
     }
+}
+
+//this functions expects points to be
+// on (0, WINDOW_WIDHT) range
+void spline_draw_world(spline_t _spline, SDL_Point position, SDL_Renderer *renderer){
+    if(_spline.total_points < 4) return;
+    
+    float maxit = 0.0f;
+  
+    if(_spline.loop){
+	maxit = _spline.total_points; 
+    }else{
+	maxit = _spline.total_points - 3.0f; 
+    }
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    for(float i = 0.0f; i < maxit; i += +0.01f){
+	SDL_FPoint p = spline_get_point(_spline, i);
+	SDL_RenderDrawPointF(renderer, p.x + position.x, p.y + position.y);
+    }    
 }
 
 void spline_clean(spline_t *s){

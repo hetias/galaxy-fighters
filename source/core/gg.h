@@ -21,7 +21,6 @@ typedef struct{
     int           activeitem;
     SDL_Renderer *renderer;
     TTF_Font     *font;
-    
 }gg_state;
 
 int gg_init(SDL_Renderer*, TTF_Font*);

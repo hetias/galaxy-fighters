@@ -1,4 +1,5 @@
 #include"projectile.h"
+#include "player.h"
 
 /**
  *Allocates memory for a new projectile structure
@@ -41,8 +42,8 @@ int projectile_update(projectile_t* _prj, game_container* _enemy_container, play
 
 	_prj->alive = false;
     }else{
-	_prj->position.x += _prj->direction.x * _prj->speed;
-	_prj->position.y += _prj->direction.y * _prj->speed;
+	_prj->position.x += _prj->direction.x * (_prj->speed * gametime.frame_ms);
+	_prj->position.y += _prj->direction.y * (_prj->speed * gametime.frame_ms);
 
 	_prj->hitbox.x = _prj->position.x - (_prj->hitbox.w / 2);
 	_prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);

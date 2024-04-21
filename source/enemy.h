@@ -8,7 +8,8 @@
 #include"core/definitions.h"
 #include"core/spline.h"
 #include"core/container.h"
-#include"projectile.h"
+#include "projectile.h"
+#include"core/timing.h"
 
 typedef enum EPATH_STATE{
     PATH_STATE_FORWARD,
@@ -46,6 +47,8 @@ typedef struct enemy_s{
     PATH_STATE path_state;
     PATH_TYPE path_type;
 }enemy_t;
+
+extern time_info gametime;
 
 //
 //FUNCTION DEFINITIONS
