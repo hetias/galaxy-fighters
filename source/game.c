@@ -187,9 +187,9 @@ void game_loop(void){
 	timeframe_ms(&gametime);
 	timeframe_sc(&gametime);
 
-	printf("cycles: %ld\n", gametime.frame_cycles);
-	printf("ms: %f\n", gametime.frame_ms);
-	printf("sc: %f\n", gametime.frame_sc);	
+	/* printf("cycles: %ld\n", gametime.frame_cycles); */
+	/* printf("ms: %f\n", gametime.frame_ms); */
+	/* printf("sc: %f\n", gametime.frame_sc); */	
     }
 
     scene_destroy(game_scene);

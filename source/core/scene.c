@@ -56,10 +56,13 @@ int scene_update(scene_t* _scene){
     }
     
     //update all enemies
-    scene_update_enemies(&_scene->enemies_container, &_scene->projectiles_container);
+    scene_update_enemies(&_scene->enemies_container,
+			 &_scene->projectiles_container);
   
     //update projectiles
-    scene_update_projectiles(&_scene->projectiles_container, &_scene->enemies_container, _scene->player);
+    scene_update_projectiles(&_scene->projectiles_container,
+			     &_scene->enemies_container,
+			     _scene->player);
     
     _scene->tick++;
 
@@ -172,14 +175,16 @@ int scene_draw(scene_t* _scene, SDL_Renderer* _renderer){
  * @param _renderer SDL2 renderer where everything will be drawn
  * @return Returns 0 on succes, in case there are invalid pointers it returns -1
  */
-int scene_draw_projectiles(game_container* projectiles_container, SDL_Renderer* _renderer){
+int scene_draw_projectiles(game_container* projectiles_container,
+			   SDL_Renderer* _renderer){
     if(_renderer == NULL)
 	return -1;
     
     for(int i = 0; i < projectiles_container->count; i++){
-	projectile_draw((projectile_t*)projectiles_container->array[i], _renderer);
+	projectile_draw((projectile_t*)projectiles_container->array[i],
+			_renderer);
     }
-
+    
     return 0;
 }
 
@@ -238,10 +243,9 @@ int scene_destroy(scene_t* _scene){
 
 void scene_next_action(scene_t* _scene){
     if(_scene == NULL) return;
-    /* SDL_assert(_scene->current_keyframe > _scene->keyframe_count); */
-    /* SDL_assert(_scene->keyframe_count < 0); */
+    
     keyframe_t current_keyframe = _scene->keyframes[_scene->current_keyframe];
-        
+
     if(_scene->tick == current_keyframe.tick){
 	switch(current_keyframe.action){
 
@@ -311,7 +315,7 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
     //check PATHS section
     char buff[32];
     fread(buff, sizeof(char), 6, level_file);
-
+    
     if(strcmp(buff, "PATHS\n") != 0){
 	printf("Path section not found\n");
 	return false;
@@ -366,6 +370,12 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 	keyframe_t k = {};
 	fread(&k, sizeof(keyframe_t), 1, level_file);
 
+	//TODO:::::::::::::::
+	//we're multiplying the ticks manually by 60, so we move one tick
+	//every 60 frames. This shouldn't be handled by the scene but
+	//rather the level editor.
+        k.tick *= 60;
+	
 	_scene->keyframes[_scene->keyframe_count] = k;
 	_scene->keyframe_count += 1;
 	

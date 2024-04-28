@@ -8,7 +8,7 @@
  *@params _texturesVector An vector of SDL_Textures pointers.
  *@return Pointer to an player structure.
  */
-player_t* player_create(SDL_Texture**_textures_vector){
+player_t* player_create(SDL_Texture **_textures_vector){
 
     player_t* tmp_player = (player_t*)malloc(sizeof(player_t));
 

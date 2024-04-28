@@ -42,6 +42,7 @@ typedef struct enemy_s{
     int hp;
     int shootDelay;
     int currentDelay;
+    float speed;
     spline_t* path;
     float path_time;
     PATH_STATE path_state;

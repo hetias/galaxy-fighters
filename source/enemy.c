@@ -1,5 +1,6 @@
 #include"enemy.h"
 #include "player.h"
+#include <SDL2/SDL_rect.h>
 
 /**
  *Allocates memory for an enemy structure.
@@ -8,10 +9,10 @@
  */
 
 enemy_t* enemy_create(SDL_Texture** _texturesVector, int _id){
-    enemy_t* _tmp = (enemy_t*)malloc(sizeof(enemy_t));
+    enemy_t* enemy = (enemy_t*)malloc(sizeof(enemy_t));
     
-    _tmp->id = _id;
-    _tmp->position = (SDL_FPoint){0.0f, 0.0f};
+    enemy->id = _id;
+    enemy->position = (SDL_FPoint){0.0f, 0.0f};
 
     //get texture dimensions
     SDL_Point dimensions = (SDL_Point){0};
@@ -21,20 +22,21 @@ enemy_t* enemy_create(SDL_Texture** _texturesVector, int _id){
 		     &dimensions.x,
 		     &dimensions.y);
 
-    _tmp->hitbox   = (SDL_FRect){_tmp->position.x,
-	_tmp->position.y,
+    enemy->hitbox   = (SDL_FRect){enemy->position.x,
+	enemy->position.y,
 	(float)dimensions.x,
 	(float)dimensions.y};
-    _tmp->sprite   = _texturesVector[TXT_ENEMY1_BLACK];
-    _tmp->projectile_texture   = _texturesVector[TXT_LASER_RED];
-    _tmp->hp       = 4;
-    _tmp->shootDelay = SHOOT_SLOW;
-    _tmp->currentDelay = _tmp->shootDelay;
-    _tmp->path_time = 0.0f;
-    _tmp->path = NULL;
-    _tmp->path_state = PATH_STATE_FORWARD;
-    _tmp->path_type = PATH_REPEAT;
-    return _tmp;  
+    enemy->sprite   = _texturesVector[TXT_ENEMY1_BLACK];
+    enemy->projectile_texture   = _texturesVector[TXT_LASER_RED];
+    enemy->hp       = 4;
+    enemy->shootDelay = SHOOT_SLOW;
+    enemy->speed = 1.0f;
+    enemy->currentDelay = enemy->shootDelay;
+    enemy->path_time = 0.0f;
+    enemy->path = NULL;
+    enemy->path_state = PATH_STATE_FORWARD;
+    enemy->path_type = PATH_REPEAT;
+    return enemy;  
 }
 
 /**
@@ -58,6 +60,11 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
     }
   
     //movin'
+    //TODO:: Enemy doesn't have speed perse
+    //becase of this there is no way to update
+    //it's position  with delta time on a straight
+    //forward way. How "fast" it moves it's determined
+    //by spline_get_point and path_time.
     int up = enemy_update_path(_enemy);
     
     //check collisions with projectiles
@@ -164,7 +171,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
     switch(_enemy->path_type){
     case PATH_START_END:
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
-	    _enemy->path_time += 0.01;
+            _enemy->path_time += _enemy->speed * gametime.frame_ms;
 	    _enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 
 	    if(_enemy->path_time >= 1.0f){
@@ -179,7 +186,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
     case PATH_REPEAT:
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
 	    if(_enemy->path_state == PATH_STATE_FORWARD){
-		_enemy->path_time += 0.01;
+		_enemy->path_time += _enemy->speed * gametime.frame_ms;
 		_enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 		
 		if(_enemy->path_time >= 1.0f){
@@ -188,7 +195,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 		    return PATH_STATE_END;
 		}
 	    }else if(_enemy->path_state == PATH_STATE_BACKWARD){
-		_enemy->path_time -= 0.01;
+		_enemy->path_time -= _enemy->speed * gametime.frame_ms;
 		_enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));		
 		
 		if(_enemy->path_time <= 0.0f){
@@ -200,7 +207,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 	case PATH_LOOP:
 	    if(_enemy->path->loop && _enemy->path_type == PATH_LOOP){
 		if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
-		    _enemy->path_time += 0.01;
+		    _enemy->path_time += _enemy->speed * gametime.frame_ms;
 		    _enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 				
 		    if(_enemy->path_time >= 1.0f){
