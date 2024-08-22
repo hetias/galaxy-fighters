@@ -95,12 +95,12 @@ SDL_FPoint to_fixedCoords(SDL_FPoint point){
 
 //basic draw function fallbacks to fixed draw
 void spline_draw(spline_t _spline, SDL_Renderer* renderer){
-    spline_draw_fixed(_spline, (SDL_Point){0, 0}, renderer);
+    spline_draw_world(_spline, (SDL_Point){0, 0}, renderer);
 }
 
 // this functions expects splines points to be
 // on (0, 1) range
-void spline_draw_fixed(spline_t _spline, SDL_Point position, SDL_Renderer *renderer) {
+void spline_draw_world(spline_t _spline, SDL_Point position, SDL_Renderer *renderer) {
     if(_spline.total_points < 4) return;
     
     float maxit = 0.0f;
@@ -117,9 +117,29 @@ void spline_draw_fixed(spline_t _spline, SDL_Point position, SDL_Renderer *rende
     }
 }
 
+void spline_draw_camera(spline_t _spline, SDL_Point camera, SDL_Renderer* renderer){
+    if(_spline.total_points < 4) return;
+    
+    float maxit = 0.0f;
+  
+    if(_spline.loop){
+	maxit = _spline.total_points; 
+    }else{
+	maxit = _spline.total_points - 3.0f; 
+    }
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    for(float j = 0.0f; j < maxit; j += +0.01f){
+	//SDL_FPoint p = to_worldCoords(spline_get_point(_spline, i));
+	SDL_FPoint p = spline_get_point(_spline, j);
+	SDL_RenderDrawPointF(renderer,
+			     p.x * WINDOW_WIDTH - camera.x,
+			     p.y * WINDOW_HEIGHT - camera.y);
+    }    
+}
+
 //this functions expects points to be
 // on (0, WINDOW_WIDHT) range
-void spline_draw_world(spline_t _spline, SDL_Point position, SDL_Renderer *renderer){
+void spline_draw_fixed(spline_t _spline, SDL_Point position, SDL_Renderer *renderer){
     if(_spline.total_points < 4) return;
     
     float maxit = 0.0f;

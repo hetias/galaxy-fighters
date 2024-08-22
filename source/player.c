@@ -24,10 +24,10 @@ player_t* player_create(SDL_Texture **_textures_vector){
     tmp_player->position = (SDL_FPoint) {300.0f, 600.0f - dims.y};
     
     tmp_player->direction = (SDL_FPoint){0};
-
+        
     tmp_player->hitbox    = (SDL_FRect){
-	tmp_player->position.x,
-	tmp_player->position.y,
+	tmp_player->position.x - (dims.x / 2),
+	tmp_player->position.y - (dims.y / 2),
 	(float)dims.x,
 	(float)dims.y};
     

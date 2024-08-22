@@ -8,7 +8,7 @@
 
 #include"definitions.h"
 
-#include"ui.h"
+#include"gg.h"
 #include"container.h"
 #include"resources.h"
 #include"../player.h"
@@ -43,7 +43,7 @@ typedef struct{
 }scene_t;
 
 //scene management
-scene_t* scene_create(resources_t*);
+scene_t* scene_create(resources_t*, const char*);
 
 //scene functionalities
 int scene_update(scene_t*);

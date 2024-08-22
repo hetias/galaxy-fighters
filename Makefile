@@ -1,6 +1,4 @@
-GAME_OBJS = game.o container.o enemy.o player.o projectile.o scene.o spline.o ui.o keyframe.o gg.o timing.o
-
-ENGINE_OBJS = engine.o spline.o keyframe.o gg.o
+GAME_OBJS = main.o container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o gg.o editor.o
 
 CC = gcc
 
@@ -13,19 +11,11 @@ COMPILER_FLAGS = -Wall -Wextra
 LINKER_FLAGS = -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 #BUILDING ACTUAL GAME APP
-game: game.o
-	$(CC) $(GAME_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o game
+all: main.o
+	$(CC) $(GAME_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o main
 
-#BUILDING THE ENGINE
-engine: engine.o
-	$(CC) $(ENGINE_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o engine
-
-#OBJS
-engine.o: source/engine.c gg.o keyframe.o spline.o timing.o
-	$(CC) $(INCLUDE_PATHS) -g -c source/engine.c
-
-game.o: source/game.c gg.o ui.o container.o enemy.o player.o projectile.o keyframe.o scene.o spline.o timing.o
-	$(CC) $(INCLUDE_PATHS) -g -c source/game.c
+main.o: source/main.c gg.o ui.o container.o enemy.o player.o projectile.o keyframe.o scene.o timing.o spline.o gg.o editor.o
+	$(CC) $(INCLUDE_PATHS) -g -c source/main.c
 
 gg.o: source/core/gg.h source/core/gg.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/gg.c
@@ -56,6 +46,9 @@ spline.o: source/core/spline.h source/core/spline.c
 
 timing.o: source/core/timing.h source/core/timing.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/timing.c
+
+editor.o: source/editor.h source/editor.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/editor.c
 
 clean:
 	rm *.o

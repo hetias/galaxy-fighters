@@ -7,7 +7,7 @@
  * @param _texture_paths
  * @return pointer to a new scene_t
  */
-scene_t* scene_create(resources_t *_resources){
+scene_t* scene_create(resources_t *_resources, const char* level_file){
     scene_t* new_scene = (scene_t*)malloc(sizeof(scene_t));
 
     //no resources loaded
@@ -23,10 +23,15 @@ scene_t* scene_create(resources_t *_resources){
     new_scene->enemies_container = container_create(CONTAINER_ENEMY);
     new_scene->max_enemy_id = 0;
     
-    //scene actions    
-    scene_load_level("level.lvl", new_scene);
-    printf("loaded %d paths from file\n", new_scene->spline_count);
-    printf("loaded %d keyframes from file\n", new_scene->keyframe_count);
+    //scene actions
+    if(level_file != NULL){
+	scene_load_level(level_file, new_scene);	
+    }else{
+	new_scene->spline_count = 0;
+	new_scene->keyframe_count = 0;
+    }
+    //printf("loaded %d paths from file\n", new_scene->spline_count);
+    //printf("loaded %d keyframes from file\n", new_scene->keyframe_count);
      
     //start ticks
     new_scene->tick = 0;

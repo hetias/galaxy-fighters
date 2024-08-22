@@ -115,12 +115,11 @@ int enemy_update(enemy_t* _enemy, game_container* projectiles_container){
 
 void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){
     if(_enemy){
-
 	SDL_RenderCopyF(_renderer,
 			_enemy->sprite,
 			NULL,
 			&_enemy->hitbox
-	    );
+			);
     }
 
     #if DEBUG

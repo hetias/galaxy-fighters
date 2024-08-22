@@ -29,5 +29,6 @@ void spline_draw(spline_t, SDL_Renderer *);
 // on (0, 1) range
 void spline_draw_fixed(spline_t, SDL_Point, SDL_Renderer*);
 void spline_draw_world(spline_t, SDL_Point, SDL_Renderer*);
+void spline_draw_camera(spline_t, SDL_Point, SDL_Renderer*);
 
 #endif

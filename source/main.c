@@ -6,8 +6,10 @@
 
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
-#include"core/definitions.h"
 
+#include"editor.h"
+
+#include"core/definitions.h"
 #include"core/resources.h"
 #include"core/scene.h"
 #include "core/gg.h"
@@ -19,6 +21,8 @@ enum APP_STATES{
     SCENARIO_LOAD,
     SCENARIO,
     SCENARIO_END,
+    EDITOR_START,
+    EDITOR_RUNNING,
     EXIT
 };
 
@@ -114,69 +118,54 @@ void game_loop(void){
 		   && gAppState == OPTIONS_MENU){
 		    gAppState = MAIN_MENU;
 		}
+
+		if(e.key.keysym.scancode == SDL_SCANCODE_E){
+		    gAppState = EDITOR_START;
+		}
+				
 		break;
+	    }
+
+	    if(gAppState == EDITOR_RUNNING){
+		editor_events(e);
 	    }
 	    gg_events(e);
 	}
-    
+	
 	//keyboard input
 	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
 	if(keyboardState[SDL_SCANCODE_ESCAPE] &&
 	   gAppState == MAIN_MENU){
 	    gIsGameRunning = false;
 	};
-	
-	//update
-	if(gAppState == SCENARIO){
-	    scene_update(game_scene);
-	}
-	
+
 	//draw
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
-
+	
 	//we do depending on the Global Application State
 	switch(gAppState){
 	case MAIN_MENU:{
-	    //bg
-	    SDL_Rect dst_1 = {mm_bgfx.position_1, 0, 600, 600};
-	    SDL_Rect dst_2 = {mm_bgfx.position_2, 0, 600, 600};
-	    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_PURPLE], NULL, &dst_1);
-	    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_PURPLE], NULL, &dst_2);
-
-	    mm_bgfx.position_1 += 1;
-	    mm_bgfx.position_2 += 1;
-
-	    if(mm_bgfx.position_2 >= 600)
-		mm_bgfx.position_2 = -600;
-	    if(mm_bgfx.position_1 >= 600)
-		mm_bgfx.position_1 = -600;		    
-	    //create main menu
 	    main_menu();
 	}break;
 	case OPTIONS_MENU:{
-	    //bg
-	    SDL_Rect dst_1 = {mm_bgfx.position_1, 0, 600, 600};
-	    SDL_Rect dst_2 = {mm_bgfx.position_2, 0, 600, 600};
-	    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_BLACK], NULL, &dst_1);
-	    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_BLACK], NULL, &dst_2);
-
-	    mm_bgfx.position_1 += 1;
-	    mm_bgfx.position_2 += 1;
-
-	    if(mm_bgfx.position_2 >= 600)
-		mm_bgfx.position_2 = -600;
-	    if(mm_bgfx.position_1 >= 600)
-		mm_bgfx.position_1 = -600;		    	    
-	    //options
 	    options_menu();
 	}break;
 	case SCENARIO:{
+	    scene_update(game_scene);
 	    scene_draw(game_scene, renderer);
 	}break;
 	case EXIT:{
 	    gIsGameRunning = false;
 	}break;
+	case EDITOR_START:{
+	    editor_start(&game_resources, window);
+	    gAppState = EDITOR_RUNNING;
+	}break;
+	case EDITOR_RUNNING:{
+	    editor_running();
+	    editor_draw(renderer);
+	};
 	}	
 			
 	SDL_RenderPresent(renderer);
@@ -203,6 +192,21 @@ void game_loop(void){
  *
 */
 void main_menu(void){
+    //bg
+    SDL_Rect dst_1 = {mm_bgfx.position_1, 0, 600, 600};
+    SDL_Rect dst_2 = {mm_bgfx.position_2, 0, 600, 600};
+    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_PURPLE], NULL, &dst_1);
+    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_PURPLE], NULL, &dst_2);
+
+    mm_bgfx.position_1 += 1;
+    mm_bgfx.position_2 += 1;
+
+    if(mm_bgfx.position_2 >= 600)
+	mm_bgfx.position_2 = -600;
+    if(mm_bgfx.position_1 >= 600)
+	mm_bgfx.position_1 = -600;		    
+
+    //buttons
     int selected = -1;
     SDL_Rect btn_rect = {300, 150, 120, 75}; //this is the first button, from here we arrange the rest
 
@@ -230,7 +234,7 @@ void main_menu(void){
 	if(gg_button(0, bt) ){
 	    selected = i;
 	}
-
+	
 	//draw label
 	gg_label(bt, options[i], 16);
     }
@@ -239,7 +243,7 @@ void main_menu(void){
     //do based on selection
     switch(selected){
     case 0:{
-	game_scene = scene_create(&game_resources);
+	game_scene = scene_create(&game_resources, "level.lvl");
 	gAppState = SCENARIO;
     }break;
     case 1:{
@@ -257,7 +261,21 @@ void main_menu(void){
  * Draw the options menu.
  */
 void options_menu(void){
+    //bg
+    SDL_Rect dst_1 = {mm_bgfx.position_1, 0, 600, 600};
+    SDL_Rect dst_2 = {mm_bgfx.position_2, 0, 600, 600};
+    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_BLACK], NULL, &dst_1);
+    SDL_RenderCopy(renderer, game_resources.textures[TXT_BG_BLACK], NULL, &dst_2);
 
+    mm_bgfx.position_1 += 1;
+    mm_bgfx.position_2 += 1;
+
+    if(mm_bgfx.position_2 >= 600)
+	mm_bgfx.position_2 = -600;
+    if(mm_bgfx.position_1 >= 600)
+	mm_bgfx.position_1 = -600;
+
+    //buttons
     SDL_Point btn_pos = {300, 150};
     SDL_Point btn_dim = {150, 75};
     int gap = 10;
