@@ -18,12 +18,14 @@ typedef struct{
 spline_t spline_create(bool);
 bool spline_add_point(spline_t*, SDL_FPoint);
 bool spline_add_points(spline_t*, SDL_FPoint*, int);
+bool spline_remove_point(spline_t*, int);
 void spline_clean(spline_t*);
 SDL_FPoint spline_get_point(spline_t, float);
 SDL_FPoint to_worldCoords(SDL_FPoint);
 SDL_FPoint to_fixedCoords(SDL_FPoint);
 
-void spline_draw(spline_t, SDL_Renderer *);
+void spline_draw(spline_t, SDL_Renderer*);
+void spline_debug_draw(spline_t, SDL_Renderer*, SDL_Point);
 
 // this functions expects splines points to be
 // on (0, 1) range

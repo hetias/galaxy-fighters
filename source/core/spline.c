@@ -78,6 +78,13 @@ bool spline_add_points(spline_t *s, SDL_FPoint *points, int size){
     return true;
 }
 
+bool spline_remove_point(spline_t* s, int index){
+    s->total_points -= 1;
+    for(int i = index; i < s->total_points; i++){
+	s->points[i] = s->points[i + 1];
+    }    
+}
+
 SDL_FPoint to_worldCoords(SDL_FPoint point){
     SDL_FPoint p = {
 	point.x * WINDOW_WIDTH,
@@ -95,7 +102,16 @@ SDL_FPoint to_fixedCoords(SDL_FPoint point){
 
 //basic draw function fallbacks to fixed draw
 void spline_draw(spline_t _spline, SDL_Renderer* renderer){
-    spline_draw_world(_spline, (SDL_Point){0, 0}, renderer);
+    spline_draw_world(_spline, (SDL_Point){0, 0}, renderer);   
+}
+
+void spline_debug_draw(spline_t _spline, SDL_Renderer* renderer, SDL_Point camera){
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 0);
+    for(int i = 0; i < _spline.total_points - 1; i++){
+	SDL_RenderDrawLineF(renderer,
+			    _spline.points[i].x * WINDOW_WIDTH - camera.x, _spline.points[i].y * WINDOW_HEIGHT - camera.y,
+			    _spline.points[i + 1].x * WINDOW_WIDTH - camera.x, _spline.points[i + 1].y * WINDOW_HEIGHT - camera.y);
+    }    
 }
 
 // this functions expects splines points to be
