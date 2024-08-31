@@ -1,20 +1,29 @@
 #include"editor.h"
 
 #define DRAW_GRID 0
-#define DRAW_KEYFRAME_EDITOR 0
+#define DRAW_KEYFRAME_EDITOR 1
 #define DRAW_SPLINE_EDITOR 1
-#define DRAW_TIMELINE 0
+#define DRAW_TIMELINE 1
+
+static SDL_Point window_size = {600, 600};
 
 static scene_t* editor_scene;
-static int camera_speed = 2;
-static SDL_Point window_size = {600, 600};
+
 static SDL_Point camera = {0, 0};
+static int camera_speed = 2;
+
 static SDL_Point mouse = {0, 0};
+
+static int mwheel_dir = 0;
+static bool mwheel_this_frame = false;
+
 static bool lclick_pressed = false;
 static bool rclick_pressed = false;
 static int selected_spline = -1;
 
 static TTF_Font* ui_font = NULL;
+
+static int timeline_tick = 0;
 
 bool editor_start(resources_t* game_resources, SDL_Window* window){
     printf("editor starting...\n");
@@ -26,13 +35,18 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
     SDL_SetWindowResizable(window, SDL_TRUE);
     editor_scene = scene_create(game_resources, NULL);
     ui_font = game_resources->font;
+
+    add_keyframe((keyframe_t){0, KEYFRAME_ENEMY_ADD, (keyframe_params){0, 0, 0}});
+    add_keyframe((keyframe_t){60, KEYFRAME_ENEMY_ADD, (keyframe_params){0, 0, 0}});
+    add_keyframe((keyframe_t){120, KEYFRAME_ENEMY_ADD, (keyframe_params){0, 0, 0}});
     
     printf("spline count: %d\n", editor_scene->spline_count);
+    printf("keyframe count: %d\n", editor_scene->keyframe_count);
 }
 
 void editor_running(){
     //get user input
-
+	
     //mouse
     //
     // Documentation says that SDL_BUTTON_RIGHT = 3,
@@ -66,46 +80,7 @@ void editor_running(){
     
     //spline modifier
     if(selected_spline >= 0){
-	spline_t* spline = &(get_splines()[selected_spline]);
-	int point_count = spline->total_points;
-	SDL_FPoint* points = spline->points;       
-
-	////modify points
-	const int size = 25;
-	SDL_Rect r = {0, 0, size, size};
-	int selected_point = -1;
-	for(int i = 0; i < point_count; i++){
-	    r = (SDL_Rect){((points[i].x * WINDOW_WIDTH) - camera.x),
-			   ((points[i].y * WINDOW_HEIGHT) - camera.y),
-			   size, size};
-	    if(is_hovering(mouse, r) && selected_point < 0){
-		//if we want to hold, SDL_BUTTON()
-		if(SDL_BUTTON(mouse_click) == 8 && modState == KMOD_LCTRL){
-		    if(point_count > 4){
-			spline_remove_point(spline, i);		
-		    }
-		}else if(SDL_BUTTON(mouse_click) == SDL_BUTTON_LEFT){
-		    points[i].x = ((float)(mouse.x - size / 2) + (float)camera.x) / (float)WINDOW_WIDTH;
-		    points[i].y = ((float)(mouse.y - size / 2) + (float)camera.y) / (float)WINDOW_HEIGHT;
-		    selected_point = i;
-		}
-	    }
-	}
-
-	//if we only want mouse press, rclick_pressed/lclicl_pressed...
-	if(rclick_pressed && modState == KMOD_NONE){
-	    SDL_FPoint p;
-	    p.x = ((float)(mouse.x - size / 2) + (float)camera.x) /
-		(float)WINDOW_WIDTH;
-	    p.y = ((float)(mouse.y - size / 2) + (float)camera.y) /
-		(float)WINDOW_HEIGHT;
-
-	    if(point_count + 1 < MAX_POINTS){
-		spline_add_point(&(get_splines()[selected_spline]), p);
-	    }else{
-		printf("no more points can be added\n");
-	    }
-	}
+	spline_editor(mouse_click, modState);
     }
 }
 
@@ -115,7 +90,7 @@ void editor_draw(SDL_Renderer* renderer){
     SDL_RenderCopy(renderer, editor_scene->resources->textures[TXT_BG_PURPLE], NULL, &bg);
 
     //draw grid
-    #if DRAW_GRID
+#if DRAW_GRID
     int divider = 300;
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 0);
     for(int i = 0; i < divider; i++){
@@ -127,7 +102,7 @@ void editor_draw(SDL_Renderer* renderer){
 			   -camera.x, (i * divider) - camera.y,
 			   600 - camera.x, (i * divider) - camera.y);
     }
-    #endif
+#endif
 
     //
     //DRAW GAME ELEMENTS
@@ -173,22 +148,20 @@ void editor_draw(SDL_Renderer* renderer){
     int widget_size = 300;
 
     //spline editor
-    #if DRAW_SPLINE_EDITOR
+#if DRAW_SPLINE_EDITOR
     SDL_Rect spline_editor_bg = {0, 0,
-				 widget_size, window_size.y};
+	    widget_size, window_size.y};
 
-    if(mouse.x > spline_editor_bg.x &&
-       mouse.x < spline_editor_bg.x + spline_editor_bg.w &&
-       mouse.y > spline_editor_bg.y &&
-       mouse.y < spline_editor_bg.y + spline_editor_bg.h){
+    if(is_hovering(mouse, spline_editor_bg)){
 	SDL_SetRenderDrawColor(renderer, ui_color.r, ui_color.g,
-		       ui_color.b, 0);	
+			       ui_color.b, 0);
+	SDL_RenderFillRect(renderer, &spline_editor_bg);
     }else{
         SDL_SetRenderDrawColor(renderer,
 			       ui_color_active.r, ui_color_active.g,
 			       ui_color_active.b, 0);
+	SDL_RenderFillRect(renderer, &spline_editor_bg);	
     }
-    SDL_RenderFillRect(renderer, &spline_editor_bg);
 
     ////add spline button
     SDL_Rect add_button = spline_editor_bg;
@@ -214,33 +187,28 @@ void editor_draw(SDL_Renderer* renderer){
 				    spline_editor_bg.w,
 				    spline_editor_bg.h};
     selector_dimensions.h = 25;    
-    for(int i = 0; i < get_spline_count(); i++ ){
-	if(is_hovering(mouse, selector_dimensions)){
-	    if(lclick_pressed){
-		printf("selected spline: %d\n", i);
-		SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-		if(selected_spline == i){
-		    selected_spline = -1;
-		}else{
-		    selected_spline = i;
-		}
+    char str_buff[16] = {0};
+    for(int i = 0; i <get_spline_count(); i++){
+	sprintf(str_buff, "%d", i);
+	if(ui_button(selector_dimensions, str_buff, renderer)){
+	    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+	    if(selected_spline == i){
+		selected_spline = -1;
 	    }else{
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+		selected_spline = i;
 	    }
-	}else{
-	    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	}
-	SDL_RenderFillRect(renderer, &selector_dimensions);
 	selector_dimensions.y += selector_dimensions.h + 25;
     }
+    
+#endif
 
-    #endif
     
     //keyframe editor
-    #if DRAW_KEYFRAME_EDITOR
+#if DRAW_KEYFRAME_EDITOR
     SDL_Rect keyframe_editor_bg = {window_size.x - widget_size,0,
 				   widget_size, window_size.y};
-    if(is_hover(keyframe_editor_bg)){
+    if(is_hovering(mouse, keyframe_editor_bg)){
 	SDL_SetRenderDrawColor(renderer, ui_color.r, ui_color.g,
 			       ui_color.b, 0);	
     }else{
@@ -249,13 +217,21 @@ void editor_draw(SDL_Renderer* renderer){
 			       ui_color_active.b, 0);	
     }
     SDL_RenderFillRect(renderer, &keyframe_editor_bg);
-    #endif
-    
+#endif
+
     //timeline
-    #if DRAW_TIMELINE
-    SDL_Rect timeline_bg = {0, window_size.y - (window_size.y / 4),
-			    window_size.x, (window_size.y / 4)};
-    if(is_hover(timeline_bg)){
+#if DRAW_TIMELINE
+    SDL_Rect timeline_bg = {widget_size, window_size.y - (window_size.y / 4),
+			    window_size.x - widget_size * 2, window_size.y / 4};
+
+    SDL_Rect time_line = {timeline_bg.x + 15, timeline_bg.y + 15,
+			  timeline_bg.w - 30, timeline_bg.h - 30};
+    
+    SDL_Rect more_button = {(timeline_bg.x + timeline_bg.w) - 50, timeline_bg.y - 50, 50, 50};
+    SDL_Rect less_button = {(timeline_bg.x + timeline_bg.w) - 50 * 2, timeline_bg.y - 50, 50, 50};
+
+    //bg
+    if(is_hovering(mouse, timeline_bg)){
 	SDL_SetRenderDrawColor(renderer, ui_color.r, ui_color.g,
 			       ui_color.b, 0);	
     }else{
@@ -263,10 +239,60 @@ void editor_draw(SDL_Renderer* renderer){
 			       ui_color_active.r, ui_color_active.g,
 			       ui_color_active.b, 0);
     }
-    #endif
+    SDL_RenderFillRect(renderer, &timeline_bg);
 
+    //more button
+    if(ui_button(more_button, "+", renderer)){
+	
+    }
+
+    //less button
+    if(ui_button(less_button, "-", renderer)){
+	
+    }
+    
+    //timeline
+    if(is_hovering(mouse, time_line)){
+	SDL_SetRenderDrawColor(renderer, 125, 125, 125, 125);
+	
+	if(mwheel_this_frame){
+	    timeline_tick += mwheel_dir;
+	}
+	
+    }else{
+	SDL_SetRenderDrawColor(renderer, 130, 130, 130, 130);
+    }
+    SDL_RenderFillRect(renderer, &time_line);
+
+    SDL_SetRenderDrawColor(renderer, 150, 150, 150, 150);
+
+    int keyframe_count = get_keyframe_count();
+    const keyframe_t *keyframes = get_keyframes();
+    SDL_Rect keyframe_bar = {time_line.x, time_line.y,
+			     time_line.w / 16, time_line.h};
+    
+    for(int i = timeline_tick; i < 16; i++){
+	keyframe_bar.x = time_line.x + (keyframes[i].tick / 60) * keyframe_bar.w
+	    - (timeline_tick * keyframe_bar.w);
+	
+	if(keyframe_bar.x >= time_line.x &&
+	   keyframe_bar.x < time_line.x + time_line.w){
+	    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
+	    SDL_RenderFillRect(renderer, &keyframe_bar);	    
+	}
+    }
+
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
+    SDL_RenderDrawLine(renderer,
+		       time_line.x, time_line.y,
+		       time_line.x, time_line.y + time_line.h);
+#endif
+
+    //this should be placed on it's own function
+    //editor_event_start();
     lclick_pressed = false;
     rclick_pressed = false;
+    mwheel_this_frame = false;
 }
 
 void editor_exit(){
@@ -288,6 +314,15 @@ void editor_events(SDL_Event event){
 	add_spline(s);
     }
 
+    //we can have multiple calls of SDL_MOUSEWHEEL event perframe
+    //so we just check once per frame
+    if(event.type == SDL_MOUSEWHEEL){
+	mwheel_this_frame = true;
+	mwheel_dir = event.wheel.y;
+    }else{
+	mwheel_this_frame = false;
+    }
+    
     if(event.type == SDL_MOUSEBUTTONUP &&
        event.button.button == SDL_BUTTON_LEFT
        ){
@@ -318,7 +353,7 @@ static int get_keyframe_count(){
     return editor_scene->keyframe_count;    
 }
 
-static const keyframe_t* get_keyframes(){
+static keyframe_t* get_keyframes(){
     return editor_scene->keyframes;    
 }
 
@@ -331,7 +366,11 @@ static int get_spline_count(){
 }
 
 static void add_keyframe(keyframe_t k){
-    
+    keyframe_t *keyframes = get_keyframes();
+    int count = get_keyframe_count();
+
+    keyframes[count] = k;
+    editor_scene->keyframe_count += 1;
 }
 
 static void add_spline(spline_t s){
@@ -352,13 +391,53 @@ static void remove_spline(int remove_id){
     selected_spline = -1;
 }
 
+static void spline_editor(int mouse_click, SDL_Keymod modState){
+    spline_t* spline = &(get_splines()[selected_spline]);
+    int point_count = spline->total_points;
+    SDL_FPoint* points = spline->points;       
+
+    ////modify points
+    const int size = 25;
+    SDL_Rect r = {0, 0, size, size};
+    int selected_point = -1;
+    for(int i = 0; i < point_count; i++){
+	r = (SDL_Rect){((points[i].x * WINDOW_WIDTH) - camera.x),
+		       ((points[i].y * WINDOW_HEIGHT) - camera.y),
+		       size, size};
+	if(is_hovering(mouse, r) && selected_point < 0){
+	    //if we want to hold, SDL_BUTTON()
+	    if(SDL_BUTTON(mouse_click) == 8 && modState == KMOD_LCTRL){
+		if(point_count > 4){
+		    spline_remove_point(spline, i);		
+		}
+	    }else if(SDL_BUTTON(mouse_click) == SDL_BUTTON_LEFT){
+		points[i].x = ((float)(mouse.x - size / 2) + (float)camera.x) / (float)WINDOW_WIDTH;
+		points[i].y = ((float)(mouse.y - size / 2) + (float)camera.y) / (float)WINDOW_HEIGHT;
+		selected_point = i;
+	    }
+	}
+    }
+
+    //if we only want mouse press, rclick_pressed/lclicl_pressed...
+    if(rclick_pressed && modState == KMOD_NONE){
+	SDL_FPoint p;
+	p.x = ((float)(mouse.x - size / 2) + (float)camera.x) /
+	    (float)WINDOW_WIDTH;
+	p.y = ((float)(mouse.y - size / 2) + (float)camera.y) /
+	    (float)WINDOW_HEIGHT;
+
+	if(point_count + 1 < MAX_POINTS){
+	    spline_add_point(&(get_splines()[selected_spline]), p);
+	}else{
+	    printf("no more points can be added\n");
+	}
+    }
+}
+
 //ui elements
 static bool ui_button(SDL_Rect rect, const char* text, SDL_Renderer* renderer){
     bool clicked = false;
     bool hover = false;
-    SDL_Surface* sf = NULL;
-    SDL_Texture* tx = NULL;
-    SDL_Rect r = {0};
     
     if(is_hovering(mouse, rect)){
 	hover = true;
@@ -380,16 +459,21 @@ static bool ui_button(SDL_Rect rect, const char* text, SDL_Renderer* renderer){
     }
 
     SDL_RenderFillRect(renderer, &rect);
-        
-    sf = TTF_RenderText_Solid(ui_font, text, (SDL_Color){0, 0, 0,});
-    tx = SDL_CreateTextureFromSurface(renderer, sf);
+
+    if(text){
+	SDL_Surface* sf = NULL;
+	SDL_Texture* tx = NULL;
+	SDL_Rect r = {0};
+	sf = TTF_RenderText_Solid(ui_font, text, (SDL_Color){0, 0, 0,});
+	tx = SDL_CreateTextureFromSurface(renderer, sf);
     
-    r = (SDL_Rect){rect.x + (rect.w / 2), (rect.h / 2),
-		  sf->w, sf->h};
+	r = (SDL_Rect){rect.x + (rect.w / 2), rect.y + (rect.h / 2),
+		       sf->w, sf->h};
 
-    SDL_RenderCopy(renderer, tx, 0, &r);
+	SDL_RenderCopy(renderer, tx, 0, &r);
 
-    SDL_FreeSurface(sf);
-    SDL_DestroyTexture(tx);    
+	SDL_FreeSurface(sf);
+	SDL_DestroyTexture(tx);    
+    }
     return clicked;
 }

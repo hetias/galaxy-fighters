@@ -252,6 +252,7 @@ void scene_next_action(scene_t* _scene){
     keyframe_t current_keyframe = _scene->keyframes[_scene->current_keyframe];
 
     if(_scene->tick == current_keyframe.tick){
+	printf("hit keyframe tick: %d\n", _scene->tick / 60);
 	switch(current_keyframe.action){
 
 	case KEYFRAME_ENEMY_ADD:{

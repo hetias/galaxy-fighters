@@ -27,8 +27,13 @@ static bool is_hovering(SDL_Point, SDL_Rect);
 static int get_spline_count();
 static void add_spline(spline_t);
 static void remove_spline(int);
-static spline_t* get_splines();
+static spline_t *get_splines();
 
+static keyframe_t *get_keyframes();
+static int get_keyframe_count();
+static void add_keyframe(keyframe_t);
+
+static void spline_editor();
 static bool ui_button(SDL_Rect rect, const char*, SDL_Renderer*);
 
 #endif
