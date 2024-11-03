@@ -9,6 +9,23 @@
 
 #include"SDL2/SDL.h"
 #include"SDL2/SDL_image.h"
+
+//Nuklear Immediate Mode GUI library
+/* #define NK_INCLUDE_FIXED_TYPES */
+/* #define NK_INCLUDE_STANDARD_IO */
+/* #define NK_INCLUDE_STANDARD_VARARGS */
+/* #define NK_INCLUDE_DEFAULT_ALLOCATOR */
+/* #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT */
+/* #define NK_INCLUDE_FONT_BAKING */
+/* #define NK_INCLUDE_DEFAULT_FONT */
+
+//#define NK_IMPLEMENTATION
+//#define NK_SDL_RENDERER_IMPLEMENTATION
+
+#define NK_SDL_RENDERER_SDL_H "SDL2/SDL.h"
+#include "nuklear.h"
+#include "demo/sdl_renderer/nuklear_sdl_renderer.h"
+
 #include"core/definitions.h"
 
 #include"core/resources.h"
@@ -19,7 +36,7 @@
 bool editor_start(resources_t* game_resources, SDL_Window* window);
 
 void editor_events(SDL_Event e);
-void editor_running();
+void editor_running(struct nk_context*);
 void editor_draw(SDL_Renderer* r);
 void editor_exit();
 
