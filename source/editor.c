@@ -35,18 +35,20 @@ static TTF_Font* ui_font = NULL;
 
 static int timeline_tick = 0;
 
-
+extern SDL_Window *window;
 extern struct nk_colorf bg;
 
 bool editor_start(resources_t* game_resources, SDL_Window* window){
-  
+
+	SDL_SetWindowResizable(window, SDL_TRUE);
+	SDL_MaximizeWindow(window);
+	
     printf("editor starting...\n");
 
     if(!game_resources){
 		return false;
     }
     
-    SDL_SetWindowResizable(window, SDL_TRUE);
     editor_scene = scene_create(game_resources, "level.lvl");
     ui_font = game_resources->font;
 
@@ -60,9 +62,6 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
 
 void editor_running(struct nk_context *gui_context){
     //get user input
-  
-  
-  
     //mouse
     //
     // Documentation says that SDL_BUTTON_RIGHT = 3,
@@ -100,35 +99,63 @@ void editor_running(struct nk_context *gui_context){
     }
 	
 	//GUI
-	if (nk_begin(gui_context, "Demo", nk_rect(50, 50, 230, 250),
-				 NK_WINDOW_BORDER|NK_WINDOW_MOVABLE|NK_WINDOW_SCALABLE|
-				 NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE))
+	int widgets_parameters = NK_WINDOW_BORDER| NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE;
+	
+	int win_x = 0;
+	int win_y = 0;
+	SDL_GetWindowSize(window, &win_x, &win_y);
+
+	
+	//SPLINE EDITOR
+	struct nk_rect spline_editor_rect = nk_rect(0, 0, win_x / 4, win_y);
+	
+	if (nk_begin(gui_context, "spline editor", spline_editor_rect, widgets_parameters))
 	{
-		enum {EASY, HARD};
-		static int op = EASY;
-		static int property = 20;
-
-		nk_layout_row_static(gui_context, 30, 80, 1);
-		if (nk_button_label(gui_context, "button"))
-			fprintf(stdout, "button pressed\n");
 		nk_layout_row_dynamic(gui_context, 30, 2);
-		if (nk_option_label(gui_context, "easy", op == EASY)) op = EASY;
-		if (nk_option_label(gui_context, "hard", op == HARD)) op = HARD;
-		nk_layout_row_dynamic(gui_context, 25, 1);
-		nk_property_int(gui_context, "Compression:", 0, &property, 100, 10, 1);
+		if(nk_button_label(gui_context, "add")){
+			add_default_spline();
+		}
 
-		nk_layout_row_dynamic(gui_context, 20, 1);
-		nk_label(gui_context, "background:", NK_TEXT_LEFT);
+		if(nk_button_label(gui_context, "delete")){
+			if(selected_spline >= 0){
+				remove_spline(selected_spline);	
+			}
+		}
+		
+		//spline selection
+		nk_layout_row_dynamic(gui_context, 25, 1);		
+		for(int i = 0; i < get_spline_count(); i++){
+			if (nk_button_label(gui_context, "spline")) {
+				if(selected_spline != i){
+					selected_spline = i;
+				}else{
+					selected_spline = -1;
+				}
+			}
+			
+		}
+		
+	}
+	nk_end(gui_context);
+
+	//KEYFRAME EDITOR
+	struct nk_rect keyframe_editor_rect = nk_rect(win_x - (win_x / 4), 0, win_x / 4, win_y);
+	
+	if(nk_begin(gui_context, "keyframe editor", keyframe_editor_rect, widgets_parameters)){
 		nk_layout_row_dynamic(gui_context, 25, 1);
-		if (nk_combo_begin_color(gui_context, nk_rgb_cf(bg), nk_vec2(nk_widget_width(gui_context),400))) {
-			nk_layout_row_dynamic(gui_context, 120, 1);
-			bg = nk_color_picker(gui_context, bg, NK_RGBA);
-			nk_layout_row_dynamic(gui_context, 25, 1);
-			bg.r = nk_propertyf(gui_context, "#R:", 0, bg.r, 1.0f, 0.01f,0.005f);
-			bg.g = nk_propertyf(gui_context, "#G:", 0, bg.g, 1.0f, 0.01f,0.005f);
-			bg.b = nk_propertyf(gui_context, "#B:", 0, bg.b, 1.0f, 0.01f,0.005f);
-			bg.a = nk_propertyf(gui_context, "#A:", 0, bg.a, 1.0f, 0.01f,0.005f);
-			nk_combo_end(gui_context);
+		if(nk_button_label(gui_context, "select")){
+			printf("selection");
+		}
+	}
+	nk_end(gui_context);
+
+	//TIMELINE
+	struct nk_rect timeline_editor_rect = nk_rect(win_x / 4, win_y - (win_y / 3),
+												  (win_x / 4) * 2, win_y / 3);
+	if(nk_begin(gui_context, "timeline", timeline_editor_rect, widgets_parameters)){
+		nk_layout_row_dynamic(gui_context, 25, 1);
+		if(nk_button_label(gui_context, "select")){
+			
 		}
 	}
 	nk_end(gui_context);
@@ -189,153 +216,6 @@ void editor_draw(SDL_Renderer* renderer){
 			SDL_RenderDrawRect(renderer, &r);
 		}
     }
-    
-    
-    //
-    // DRAW GUI ELEMENTS 
-    //
-    const SDL_Color ui_color = {104, 48, 161};
-    const SDL_Color ui_color_active = {143, 77, 209};
-    int widget_size = 300;
-
-    //spline editor
-#if DRAW_SPLINE_EDITOR
-    SDL_Rect spline_editor_bg = {0, 0,
-								 widget_size, window_size.y};
-
-    if(is_hovering(mouse, spline_editor_bg)){
-		SDL_SetRenderDrawColor(renderer, ui_color.r, ui_color.g,
-							   ui_color.b, 0);
-		SDL_RenderFillRect(renderer, &spline_editor_bg);
-    }else{
-        SDL_SetRenderDrawColor(renderer,
-							   ui_color_active.r, ui_color_active.g,
-							   ui_color_active.b, 0);
-		SDL_RenderFillRect(renderer, &spline_editor_bg);	
-    }
-
-    ////add spline button
-    SDL_Rect add_button = spline_editor_bg;
-    add_button.w -= (spline_editor_bg.w / 2);
-    add_button.h = 25;
-    if(ui_button(add_button, "add", renderer)){
-		spline_t s = {4,
-					  {{0, 0.5f}, {0.25f, 0.5f}, {0.5f, 0.5f}, {0.75f, 0.5f}},
-					  false};
-		add_spline(s);
-    }
-
-    ////delete spline button
-    SDL_Rect delete_button = add_button;
-    delete_button.x += delete_button.w;
-    if(ui_button(delete_button, "delete", renderer)){
-		remove_spline(selected_spline);
-    }
-    
-    //// spline selectors
-    SDL_Rect selector_dimensions = {spline_editor_bg.x,
-									spline_editor_bg.y + add_button.h,
-									spline_editor_bg.w,
-									spline_editor_bg.h};
-    selector_dimensions.h = 25;    
-    char str_buff[16] = {0};
-    for(int i = 0; i <get_spline_count(); i++){
-		sprintf(str_buff, "%d", i);
-		if(ui_button(selector_dimensions, str_buff, renderer)){
-			SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-			if(selected_spline == i){
-				selected_spline = -1;
-			}else{
-				selected_spline = i;
-			}
-		}
-		selector_dimensions.y += selector_dimensions.h + 25;
-    }
-    
-#endif
-
-    
-    //keyframe editor
-#if DRAW_KEYFRAME_EDITOR
-    SDL_Rect keyframe_editor_bg = {window_size.x - widget_size,0,
-								   widget_size, window_size.y};
-    if(is_hovering(mouse, keyframe_editor_bg)){
-		SDL_SetRenderDrawColor(renderer, ui_color.r, ui_color.g,
-							   ui_color.b, 0);	
-    }else{
-        SDL_SetRenderDrawColor(renderer,
-							   ui_color_active.r, ui_color_active.g,
-							   ui_color_active.b, 0);	
-    }
-    SDL_RenderFillRect(renderer, &keyframe_editor_bg);
-#endif
-
-    //timeline
-#if DRAW_TIMELINE
-    SDL_Rect timeline_bg = {widget_size, window_size.y - (window_size.y / 4),
-							window_size.x - widget_size * 2, window_size.y / 4};
-
-    SDL_Rect time_line = {timeline_bg.x + 15, timeline_bg.y + 15,
-						  timeline_bg.w - 30, timeline_bg.h - 30};
-    
-    SDL_Rect more_button = {(timeline_bg.x + timeline_bg.w) - 50, timeline_bg.y - 50, 50, 50};
-    SDL_Rect less_button = {(timeline_bg.x + timeline_bg.w) - 50 * 2, timeline_bg.y - 50, 50, 50};
-
-    //bg
-    if(is_hovering(mouse, timeline_bg)){
-		SDL_SetRenderDrawColor(renderer, ui_color.r, ui_color.g,
-							   ui_color.b, 0);	
-    }else{
-        SDL_SetRenderDrawColor(renderer,
-							   ui_color_active.r, ui_color_active.g,
-							   ui_color_active.b, 0);
-    }
-    SDL_RenderFillRect(renderer, &timeline_bg);
-
-    //more button
-    if(ui_button(more_button, "+", renderer)){
-	
-    }
-
-    //less button
-    if(ui_button(less_button, "-", renderer)){
-	
-    }
-    
-    //timeline
-    if(is_hovering(mouse, time_line)){
-		SDL_SetRenderDrawColor(renderer, 125, 125, 125, 125);
-	
-		if(mwheel_this_frame){
-			timeline_tick += mwheel_dir;
-		}
-	
-    }else{
-		SDL_SetRenderDrawColor(renderer, 130, 130, 130, 130);
-    }
-    SDL_RenderFillRect(renderer, &time_line);
-
-    SDL_SetRenderDrawColor(renderer, 150, 150, 150, 150);
-
-    const int bars_amount = 32;
-    int keyframe_count = get_keyframe_count();
-    const keyframe_t *keyframes = get_keyframes();
-    SDL_Rect keyframe_bar = {time_line.x, time_line.y,
-							 time_line.w / bars_amount, time_line.h};
-    
-    for(int i = 0; i < keyframe_count; i++){
-		/* keyframe_bar.x = time_line.x + (keyframes[i].tick / 60) * keyframe_bar.w */
-		/*     - (timeline_tick * keyframe_bar.w); */
-	
-		SDL_SetRenderDrawColor(renderer, 255, 0, 0, 0);
-		SDL_RenderFillRect(renderer, &keyframe_bar);	    
-    }
-
-    SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
-    SDL_RenderDrawLine(renderer,
-					   time_line.x, time_line.y,
-					   time_line.x, time_line.y + time_line.h);
-#endif
 
     //this should be placed on it's own function
     //editor_event_start();
@@ -352,16 +232,13 @@ void editor_events(SDL_Event event){
 	//nk_sdl_handle_event(&event);
     if(event.type == SDL_WINDOWEVENT){
 		if(event.window.event == SDL_WINDOWEVENT_RESIZED){
-			window_size.x = event.window.data1;
-			window_size.y = event.window.data2;
+			window_size.x = (int)event.window.data1;
+			window_size.y = (int)event.window.data2;
 		}
     }
 
     if(event.type == SDL_KEYUP && event.key.keysym.sym == SDLK_n){
-		spline_t s = {4,
-					  {{0, 0.5f}, {0.25f, 0.5f}, {0.5f, 0.5f}, {1.0f, 0.5f}},
-					  false};
-		add_spline(s);
+		add_default_spline();
     }
 
     //we can have multiple calls of SDL_MOUSEWHEEL event perframe
@@ -388,10 +265,13 @@ void editor_events(SDL_Event event){
 }
 
 static bool is_hovering(SDL_Point mouse, SDL_Rect rect){
-    return (mouse.x > rect.x &&
-			mouse.x < rect.x + rect.w &&
-			mouse.y > rect.y &&
-			mouse.y < rect.y + rect.h);
+
+	if((mouse.x > rect.x && (mouse.x < (rect.x + rect.w))) &&
+	   (mouse.y > rect.y && (mouse.y < (rect.y + rect.y)))){
+		return true;
+	}
+	
+	return false;
 }
 
 //indirection
@@ -421,6 +301,13 @@ static void add_keyframe(keyframe_t k){
 
     keyframes[count] = k;
     editor_scene->keyframe_count += 1;
+}
+
+static void add_default_spline(){
+	spline_t s = {4,
+				  {{0, 0.5f}, {0.25f, 0.5f}, {0.5f, 0.5f}, {1.0f, 0.5f}},
+				  false};
+	add_spline(s);
 }
 
 static void add_spline(spline_t s){

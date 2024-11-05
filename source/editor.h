@@ -11,13 +11,13 @@
 #include"SDL2/SDL_image.h"
 
 //Nuklear Immediate Mode GUI library
-/* #define NK_INCLUDE_FIXED_TYPES */
-/* #define NK_INCLUDE_STANDARD_IO */
-/* #define NK_INCLUDE_STANDARD_VARARGS */
-/* #define NK_INCLUDE_DEFAULT_ALLOCATOR */
-/* #define NK_INCLUDE_VERTEX_BUFFER_OUTPUT */
-/* #define NK_INCLUDE_FONT_BAKING */
-/* #define NK_INCLUDE_DEFAULT_FONT */
+#define NK_INCLUDE_FIXED_TYPES
+#define NK_INCLUDE_STANDARD_IO
+#define NK_INCLUDE_STANDARD_VARARGS
+#define NK_INCLUDE_DEFAULT_ALLOCATOR
+#define NK_INCLUDE_VERTEX_BUFFER_OUTPUT
+#define NK_INCLUDE_FONT_BAKING
+#define NK_INCLUDE_DEFAULT_FONT
 
 //#define NK_IMPLEMENTATION
 //#define NK_SDL_RENDERER_IMPLEMENTATION
@@ -40,9 +40,10 @@ void editor_running(struct nk_context*);
 void editor_draw(SDL_Renderer* r);
 void editor_exit();
 
-static bool is_hovering(SDL_Point, SDL_Rect);
+//static bool is_hovering(SDL_Point, SDL_Rect);
 static int get_spline_count();
 static void add_spline(spline_t);
+static void add_default_spline();
 static void remove_spline(int);
 static spline_t *get_splines();
 

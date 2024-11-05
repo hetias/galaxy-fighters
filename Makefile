@@ -2,7 +2,7 @@ GAME_OBJS = main.o container.o enemy.o player.o projectile.o scene.o ui.o timing
 
 CC = gcc
 
-INCLUDE_PATHS = -I
+INCLUDE_PATHS = -I deps/Nuklear/
 
 LIBRARY_PATHS = -L
 
