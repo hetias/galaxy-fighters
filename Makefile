@@ -1,4 +1,4 @@
-GAME_OBJS = main.o container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o gg.o editor.o
+GAME_OBJS = container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o gg.o editor.o input.o
 
 CC = gcc
 
@@ -12,9 +12,9 @@ LINKER_FLAGS = -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 #BUILDING ACTUAL GAME APP
 all: main.o
-	$(CC) $(GAME_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o main
+	$(CC) main.o $(GAME_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o main
 
-main.o: source/main.c gg.o ui.o container.o enemy.o player.o projectile.o keyframe.o scene.o timing.o spline.o gg.o editor.o
+main.o: source/main.c $(GAME_OBJS)
 	$(CC) $(INCLUDE_PATHS) -g -c source/main.c
 
 gg.o: source/core/gg.h source/core/gg.c
@@ -49,6 +49,9 @@ timing.o: source/core/timing.h source/core/timing.c
 
 editor.o: source/editor.h source/editor.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/editor.c
+
+input.o: source/input.h source/input.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/input.c
 
 clean:
 	rm *.o

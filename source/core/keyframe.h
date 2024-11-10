@@ -10,7 +10,7 @@ enum keyframe_action{
 typedef struct{
     int id;           //used by KEYFRAME_ENEMY_DESTROY KEYFRAME_ENEMY_CHANGE_PATH
     int enemy_type;   //used by KEYFRAME_ENEMY_ADD
-    int pathid;   //used by KEYFRAME_ENEMY_ADD     KEYFRAME_ENEMY_CHANGE_PATH **rather than passing an pointer, it probably would be better to pass an int, and use it as an index for the array of paths inside of scene. Gonna leave it like this for now tho.**
+    int pathid;   //used by KEYFRAME_ENEMY_ADD KEYFRAME_ENEMY_CHANGE_PATH
 }keyframe_params;
 
 typedef struct{

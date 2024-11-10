@@ -19,9 +19,6 @@
 #define NK_INCLUDE_FONT_BAKING
 #define NK_INCLUDE_DEFAULT_FONT
 
-//#define NK_IMPLEMENTATION
-//#define NK_SDL_RENDERER_IMPLEMENTATION
-
 #define NK_SDL_RENDERER_SDL_H "SDL2/SDL.h"
 #include "nuklear.h"
 #include "demo/sdl_renderer/nuklear_sdl_renderer.h"
@@ -51,7 +48,9 @@ static keyframe_t *get_keyframes();
 static int get_keyframe_count();
 static void add_keyframe(keyframe_t);
 
+static void draw_timeline(struct nk_context*);
 static void spline_editor();
 static bool ui_button(SDL_Rect rect, const char*, SDL_Renderer*);
+static bool on_keyframe();
 
 #endif

@@ -10,46 +10,17 @@
 
 //Nuklear Immediate Mode GUI library
 #define NK_IMPLEMENTATION
-
-//#define NK_SDL_RENDERER_SDL_H "SDL2/SDL.h"
 #define NK_SDL_RENDERER_IMPLEMENTATION
-
-//#include "nuklear.h"
-//#include "demo/sdl_renderer/nuklear_sdl_renderer.h"
 
 //Game Internals
 #include"editor.h"
 
+#include"input.h"
 #include"core/definitions.h"
 #include"core/resources.h"
 #include"core/scene.h"
-#include "core/gg.h"
-#include "core/timing.h"
-
-#define INPUT_NONE     0b0001
-#define INPUT_PRESSED  0x0002
-#define INPUT_HELD     0x0003
-#define INPUT_RELEASED 0x0004
-
-typedef struct keyinfo_s{
-	SDL_Scancode key;
-	int state;
-}keyinfo_t;
-
-keyinfo_t game_keys[] = {{SDL_SCANCODE_W, INPUT_NONE},
-						 {SDL_SCANCODE_S, INPUT_NONE},
-						 {SDL_SCANCODE_D, INPUT_NONE},
-						 {SDL_SCANCODE_A, INPUT_NONE},
-						 {SDL_SCANCODE_J, INPUT_NONE}};
-
-void input_clear(keyinfo_t*);
-void input_update(keyinfo_t*);
-
-bool input_pressed(keyinfo_t*, SDL_Scancode);
-bool input_held(keyinfo_t*, SDL_Scancode);
-bool input_released(keyinfo_t*, SDL_Scancode);
-bool input_unpressed(keyinfo_t*, SDL_Scancode);
-//void input_clear(keyinfo*);
+#include"core/gg.h"
+#include"core/timing.h"
 
 enum APP_STATES{
 	MAIN_MENU = 0,
@@ -182,7 +153,7 @@ void game_loop(void){
 		   gAppState == MAIN_MENU){
 			gIsGameRunning = false;
 		};
-
+				
 		//draw
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
@@ -194,6 +165,16 @@ void game_loop(void){
 		}break;
 		case OPTIONS_MENU:{
 			options_menu();
+		}break;
+		case SCENARIO_LOAD:{
+			game_scene = scene_create(&game_resources, "level.lvl");
+			if(game_scene == NULL){
+				printf("failed load of scene\n");
+				return;
+			}
+
+			gAppState = SCENARIO;
+			
 		}break;
 		case SCENARIO:{
 			scene_update(game_scene);
@@ -213,7 +194,6 @@ void game_loop(void){
 		}	
 
 		nk_sdl_render(NK_ANTI_ALIASING_ON);
-		
 		SDL_RenderPresent(renderer);
 	
 		timeframe_end(&gametime);
@@ -251,56 +231,22 @@ void main_menu(void){
 		mm_bgfx.position_2 = -600;
 	if(mm_bgfx.position_1 >= 600)
 		mm_bgfx.position_1 = -600;		    
-
-	//buttons
-	int selected = -1;
-	SDL_Rect btn_rect = {300, 150, 120, 75}; //this is the first button, from here we arrange the rest
-
-	const char* options[] = {
-		"Start",
-		"Options",
-		"Exit"
-	};
-	    
-	gg_begin();
-	//we can't assing the rect neither know it's dimensions
-	//(TODO::)make it so we can assing the rect(dimensions) OR know it's actual size
-	gg_label( (SDL_Rect){300 - 115, 25, 0, 0}, "Galaxy Fighters", 28);
-	//draw all available options
-	for(int i = 0; i < 3; i++){
-
-		//set rectangle
-		SDL_Rect bt = {
-			btn_rect.x - btn_rect.w / 2,
-			btn_rect.y + (btn_rect.h * i) + (15 * i),
-			btn_rect.w,
-			btn_rect.h};
-
-		//draw button
-		if(gg_button(0, bt) ){
-			selected = i;
-		}
 	
-		//draw label
-		gg_label(bt, options[i], 16);
-	}
-	gg_end();
+	if(nk_begin(gui_context, "", nk_rect(250, 150, 120, 250), 0)){
+		nk_layout_row_static(gui_context, 32, 100, 1);
+		if(nk_button_label(gui_context, "start")){
+			gAppState = SCENARIO_LOAD;
+		}
 
-	//do based on selection
-	switch(selected){
-	case 0:{
-		game_scene = scene_create(&game_resources, "level.lvl");
-		gAppState = SCENARIO;
-	}break;
-	case 1:{
-		gAppState = OPTIONS_MENU;	
-	}break;
-	case 2:{
-		gAppState = EXIT;	
-	}break;
-	default:{}
+		if(nk_button_label(gui_context, "options")){
+			gAppState = OPTIONS_MENU;
+		}
+
+		if(nk_button_label(gui_context, "exit")){
+			gAppState = EXIT;
+		}		
 	}
-	        
+	nk_end(gui_context);
 }
 
 /**
@@ -321,135 +267,27 @@ void options_menu(void){
 	if(mm_bgfx.position_1 >= 600)
 		mm_bgfx.position_1 = -600;
 
-	//buttons
-	SDL_Point btn_pos = {300, 150};
-	SDL_Point btn_dim = {150, 75};
-	int gap = 10;
+	//GUI
+	if(nk_begin(gui_context, "", nk_rect(250, 150, 120, 250), 0)){
+		nk_layout_row_static(gui_context, 32, 100, 1);
+		if(nk_button_label(gui_context, "option 1")){
+			
+		}
 
-	const char *options[] = {
-		"option_1",
-		"option_2",
-		"option_3",
-	};
+		if(nk_button_label(gui_context, "option 2")){
+			
+		}
 
-	gg_begin();       
-	for(int i = 0; i < 3; i++){
-		SDL_Rect btn = {
-			btn_pos.x - btn_dim.x / 2,
-			btn_pos.y + (btn_dim.y * i+1) + gap * i,
-			btn_dim.x,
-			btn_dim.y};
-		gg_button(0, btn);
-		gg_label(btn, options[i], 16);	
+		if(nk_button_label(gui_context, "option 3")){
+			
+		}		
+
+		if(nk_button_label(gui_context, "option 3")){
+			gAppState = MAIN_MENU;
+		}		
 	}
-	gg_end();	
+	nk_end(gui_context);
 }
-
-void input_update(keyinfo_t* _keys){
-	const Uint8* keyboard = SDL_GetKeyboardState(NULL);
-	int size = sizeof(_keys) / sizeof(keyinfo_t);
-    
-	for(int i = 0; i < size; i++){
-		if(keyboard[_keys[i].key]){
-			if(_keys[i].state & INPUT_NONE){
-				_keys[i].state |= INPUT_PRESSED;
-			}
-
-			if(_keys[i].state & INPUT_PRESSED){
-				_keys[i].state |= INPUT_HELD;
-			}
-
-			if(_keys[i].state & INPUT_HELD){
-				_keys[i].state |= INPUT_HELD;
-			}
-
-			if(_keys[i].state & INPUT_RELEASED){
-				_keys[i].state |= INPUT_RELEASED;
-			}
-		}else{
-			if(_keys[i].state & INPUT_NONE){
-		
-			}
-
-			if(_keys[i].state & INPUT_PRESSED){
-				_keys[i].state |= INPUT_RELEASED;
-			}
-
-			if(_keys[i].state & INPUT_HELD){
-				_keys[i].state |= INPUT_RELEASED;
-			}
-
-			if(_keys[i].state & INPUT_RELEASED){
-				_keys[i].state |= INPUT_NONE;
-			}
-		}
-
-		printf("%d: %b\n", i, _keys[i].state);
-	}
-}
-
-void input_clear(keyinfo_t* _keys){
-	const Uint8* keyboard = SDL_GetKeyboardState(NULL);
-	int size = sizeof(_keys) / sizeof(keyinfo_t);
-
-	for(int i = 0; i < size; i++){
-		if(_keys[i].state & INPUT_NONE){
-			_keys[i].state |= INPUT_NONE;
-			_keys[i].state &= ~INPUT_PRESSED;
-			_keys[i].state &= ~INPUT_RELEASED;
-			_keys[i].state &= ~INPUT_HELD;
-		}
-
-		if(_keys[i].state & INPUT_PRESSED){
-			_keys[i].state &= ~(INPUT_PRESSED);
-		}
-
-		if(_keys[i].state & INPUT_HELD){
-			_keys[i].state |= INPUT_HELD;	    
-		}
-
-		if(_keys[i].state & INPUT_RELEASED){
-			_keys[i].state &= ~(INPUT_RELEASED);
-		}
-	}
-}
-
-bool input_pressed(keyinfo_t* keys, SDL_Scancode key){
-	int size = sizeof(keys) / sizeof(keyinfo_t);
-	for(int i = 0; i < size; i++){
-		if(key == keys->key){
-			return (keys->state & INPUT_PRESSED);
-		}
-	}
-}
-
-bool input_held(keyinfo_t* keys, SDL_Scancode key){
-	int size = sizeof(keys) / sizeof(keyinfo_t);
-	for(int i = 0; i < size; i++){
-		if(key == keys->key){
-			return (keys->state & INPUT_HELD);
-		}
-	}    
-}
-
-bool input_released(keyinfo_t* keys, SDL_Scancode key){
-	int size = sizeof(keys) / sizeof(keyinfo_t);
-	for(int i = 0; i < size; i++){
-		if(key == keys->key){
-			return (keys->state & INPUT_RELEASED);
-		}
-	}
-}
-
-bool input_unpressed(keyinfo_t* keys, SDL_Scancode key){
-	int size = sizeof(keys) / sizeof(keyinfo_t);
-	for(int i = 0; i < size; i++){
-		if(key == keys->key){
-			return (keys->state & INPUT_NONE);
-		}
-	}    
-}
-
 
 /**
  * Load all game resources on a global 'resources_t' structure.

@@ -8,7 +8,7 @@
 #define SHOOT_NORMAL 200
 #define SHOOT_FAST   155
 
-#define DEBUG 0
+#define DEBUG 1
 
 enum ETextures{
   //background

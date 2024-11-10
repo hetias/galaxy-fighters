@@ -42,8 +42,6 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
 
 	SDL_SetWindowResizable(window, SDL_TRUE);
 	SDL_MaximizeWindow(window);
-	
-    printf("editor starting...\n");
 
     if(!game_resources){
 		return false;
@@ -52,22 +50,29 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
     editor_scene = scene_create(game_resources, "level.lvl");
     ui_font = game_resources->font;
 
-    /* add_keyframe((keyframe_t){0, KEYFRAME_ENEMY_ADD, (keyframe_params){0, 0, 0}}); */
-    /* add_keyframe((keyframe_t){60, KEYFRAME_ENEMY_ADD, (keyframe_params){0, 0, 0}}); */
-    /* add_keyframe((keyframe_t){120, KEYFRAME_ENEMY_ADD, (keyframe_params){0, 0, 0}}) */;
-    
+	#if DEBUG
+	const keyframe_t *keyframes = editor_scene->keyframes;
+	const int keyframe_count = editor_scene->keyframe_count;
+	
     printf("spline count: %d\n", editor_scene->spline_count);
     printf("keyframe count: %d\n", editor_scene->keyframe_count);
+
+	for(int i = 0; i < keyframe_count; i++){
+		printf("keyframe: %d\n", i);
+		printf("---tick: %d\n", keyframes[i].tick);
+		printf("---action: %d\n", keyframes[i].action);
+		printf("\n");
+	}
+	
+	#endif
 }
 
 void editor_running(struct nk_context *gui_context){
+	const keyframe_t *all_keyframes = get_keyframes();
+	const int k_count = get_keyframe_count();
+		
     //get user input
     //mouse
-    //
-    // Documentation says that SDL_BUTTON_RIGHT = 3,
-    // but for some reason it retuns 4.
-    // passing it to SDL_BUTTON() returns 8 but not 4.
-    //    
     int mouse_click = SDL_GetMouseState(&mouse.x, &mouse.y);
 
     //keyboard
@@ -75,7 +80,6 @@ void editor_running(struct nk_context *gui_context){
     const SDL_Keymod modState = SDL_GetModState();
     
     //update
-
     if(keyboardState[SDL_SCANCODE_A]){
 		camera.x -= camera_speed;
     }else if(keyboardState[SDL_SCANCODE_D]){
@@ -105,9 +109,22 @@ void editor_running(struct nk_context *gui_context){
 	int win_y = 0;
 	SDL_GetWindowSize(window, &win_x, &win_y);
 
+	//TOP-BAR
+	struct nk_rect top_bar = nk_rect(0, 0, win_x, 30);
+	if(nk_begin(gui_context, "", top_bar, 0)){
+		nk_layout_row_static(gui_context, 15, 125, 4);
+		if(nk_button_label(gui_context, "archive")){
+			
+		}
+		
+		if(nk_button_label(gui_context, "options")){
+			
+		}
+	}
+	nk_end(gui_context);
 	
 	//SPLINE EDITOR
-	struct nk_rect spline_editor_rect = nk_rect(0, 0, win_x / 4, win_y);
+	struct nk_rect spline_editor_rect = nk_rect(0, win_y / 24, win_x / 4, win_y);
 	
 	if (nk_begin(gui_context, "spline editor", spline_editor_rect, widgets_parameters))
 	{
@@ -142,10 +159,67 @@ void editor_running(struct nk_context *gui_context){
 	struct nk_rect keyframe_editor_rect = nk_rect(win_x - (win_x / 4), 0, win_x / 4, win_y);
 	
 	if(nk_begin(gui_context, "keyframe editor", keyframe_editor_rect, widgets_parameters)){
-		nk_layout_row_dynamic(gui_context, 25, 1);
-		if(nk_button_label(gui_context, "select")){
-			printf("selection");
+		
+		if(on_keyframe()){
+			char text_buffer[64];
+
+			nk_layout_row_dynamic(gui_context, 25, 1);
+
+			//frame tick
+			snprintf(text_buffer, 64, "tick: %d", timeline_tick);
+			nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+			
+			//frame action
+			keyframe_t current_keyframe;
+			for(int i = 0; i < k_count; i++){
+				if(timeline_tick * 60 == all_keyframes[i].tick){
+					current_keyframe = all_keyframes[i];
+					break;
+				}
+			}
+
+			switch(current_keyframe.action){
+			case KEYFRAME_ENEMY_ADD:
+				snprintf(text_buffer, 64, "action: %s", "enemy add");
+				break;
+			case KEYFRAME_ENEMY_CHANGE_PATH:
+				snprintf(text_buffer, 64, "action: %s", "enemy change path");
+				break;
+			case KEYFRAME_ENEMY_DESTROY:
+				snprintf(text_buffer, 64, "action: %s", "enemy destroy");
+				break;						
+			default:
+				snprintf(text_buffer, 64, "action: %s", "unknown");
+				break;
+			}
+			nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+			
+			//frame parameters
+			//we show parameters only if their supposed to be 
+			//ussable for the current keyframe type
+			nk_label(gui_context, "+paramaters+ ", NK_TEXT_CENTERED);
+
+			if(current_keyframe.action == KEYFRAME_ENEMY_DESTROY ||
+			   current_keyframe.action == KEYFRAME_ENEMY_CHANGE_PATH){
+				snprintf(text_buffer, 64, "id: %d", current_keyframe.params.id);
+				nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+			
+			}
+			
+			if(current_keyframe.action == KEYFRAME_ENEMY_ADD){
+				snprintf(text_buffer, 64, "enemy type: %d", current_keyframe.params.enemy_type);
+				nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+			}
+			
+			if(current_keyframe.action == KEYFRAME_ENEMY_ADD ||
+			   current_keyframe.action == KEYFRAME_ENEMY_CHANGE_PATH){
+				snprintf(text_buffer, 64, "path id: %d", current_keyframe.params.pathid);
+				nk_label(gui_context, text_buffer, NK_TEXT_LEFT);				
+			}
+			
+			
 		}
+
 	}
 	nk_end(gui_context);
 
@@ -153,13 +227,10 @@ void editor_running(struct nk_context *gui_context){
 	struct nk_rect timeline_editor_rect = nk_rect(win_x / 4, win_y - (win_y / 3),
 												  (win_x / 4) * 2, win_y / 3);
 	if(nk_begin(gui_context, "timeline", timeline_editor_rect, widgets_parameters)){
-		nk_layout_row_dynamic(gui_context, 25, 1);
-		if(nk_button_label(gui_context, "select")){
-			
-		}
+		//draw timeline
+		draw_timeline(gui_context);
 	}
-	nk_end(gui_context);
-	
+	nk_end(gui_context);	
 }
 
 void editor_draw(SDL_Renderer* renderer){
@@ -218,7 +289,7 @@ void editor_draw(SDL_Renderer* renderer){
     }
 
     //this should be placed on it's own function
-    //editor_event_start();
+    //editor_event_start() or something like that...;
     lclick_pressed = false;
     rclick_pressed = false;
     mwheel_this_frame = false;
@@ -413,4 +484,88 @@ static bool ui_button(SDL_Rect rect, const char* text, SDL_Renderer* renderer){
 		SDL_DestroyTexture(tx);    
     }
     return clicked;
+}
+
+static void draw_timeline(struct nk_context *gui_context){
+	int k_count = get_keyframe_count();
+	const keyframe_t *all_keyframes = get_keyframes();
+	
+	char buff[4];
+	snprintf(buff, 4, "%d", timeline_tick);
+
+	nk_layout_row_static(gui_context, 30, 120, 3);
+	if(nk_button_label(gui_context, "previous" )){
+		for(int i = 0; i < k_count-1; i++){
+			
+			int first_tick = all_keyframes[i].tick / 60;
+			int second_tick = all_keyframes[i+1].tick / 60;
+			int max_tick = all_keyframes[k_count-1].tick / 60;
+
+			//we're further to the right than the last tick
+			if(timeline_tick > max_tick){
+				timeline_tick = max_tick;
+				break;
+			}
+
+			//we're between the range of the first and last tick
+			if(timeline_tick > first_tick &&
+			   timeline_tick <= second_tick){
+				timeline_tick = first_tick;
+				break;
+			}
+			
+		}		
+	}
+
+	if(nk_button_label(gui_context, "next")){		
+		for(int i = 0; i < k_count-1; i++){
+			
+			int first_tick = all_keyframes[i].tick / 60;
+			int second_tick = all_keyframes[i+1].tick / 60;
+			int min_tick = all_keyframes[0].tick / 60;
+
+			//we're further to the left than the first tick
+			if(timeline_tick < min_tick){
+				timeline_tick = min_tick;
+				break;
+			}
+
+			//we're between the range of the first and last tick
+			if(timeline_tick >= first_tick &&
+			   timeline_tick < second_tick){
+				timeline_tick = second_tick;
+				break;
+			}
+			
+		}
+	}
+
+	if(nk_button_label(gui_context, "add")){
+		printf("add on current position\n");
+	}	
+	
+	nk_layout_row_begin(gui_context, NK_DYNAMIC, 25, 2);
+
+	nk_layout_row_push(gui_context, 0.1f);
+	nk_label(gui_context, buff, NK_TEXT_LEFT);
+
+	nk_layout_row_push(gui_context, 0.9f);
+	nk_slider_int(gui_context, 0, &timeline_tick, 1000, 1);
+
+	nk_layout_row_end(gui_context);
+	
+}
+
+static bool on_keyframe(){
+	const keyframe_t *all_keyframes = get_keyframes();
+	const int k_count = get_keyframe_count();
+
+	for(int i = 0; i < k_count; i++){
+		if(timeline_tick == all_keyframes[i].tick/60){
+			return true;
+
+		}
+	}
+
+	return false;
 }
