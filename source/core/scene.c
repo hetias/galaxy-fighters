@@ -385,8 +385,10 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 		//we're multiplying the ticks manually by 60, so we move one tick
 		//every 60 frames. This shouldn't be handled by the scene but
 		//rather the level editor.
-        k.tick *= 60;
-	
+
+		//with vsync enabled this is not need...
+		k.tick *= 1;
+		
 		_scene->keyframes[_scene->keyframe_count] = k;
 		_scene->keyframe_count += 1;
 	

@@ -22,7 +22,7 @@ projectile_t* projectile_create(SDL_FPoint _position, SDL_FPoint _direction, boo
     tmp->speed = NORMAL_PRJ_SPEED;
     tmp->isFriendly = _isFriendly;
     tmp->alive = true;
-
+    
     return tmp;
 }
 

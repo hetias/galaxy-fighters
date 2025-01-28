@@ -4,9 +4,11 @@
 #define WINDOW_HEIGHT 600
 
 //definitions needed for player and enemy
-#define SHOOT_SLOW   375
-#define SHOOT_NORMAL 200
-#define SHOOT_FAST   155
+
+//this has to be divided by 60 cause of vsync
+#define SHOOT_SLOW   375 / 60
+#define SHOOT_NORMAL 200 / 60
+#define SHOOT_FAST   155 / 60
 
 #define DEBUG 1
 
