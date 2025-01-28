@@ -131,16 +131,16 @@ void enemy_draw(enemy_t* _enemy, SDL_Renderer* _renderer){
     };
   
     //draw centered cube
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-    SDL_RenderDrawRectF(gRenderer, &_positionSquare);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);
+    SDL_RenderDrawRectF(_renderer, &_positionSquare);
 
     //draw hitbox
-    SDL_SetRenderDrawColor(gRenderer, 255, 0, 0, 255);
-    SDL_RenderDrawRectF(gRenderer, &_enemy->hitbox);
+    SDL_SetRenderDrawColor(_renderer, 255, 0, 0, 255);
+    SDL_RenderDrawRectF(_renderer, &_enemy->hitbox);
 
     //draw position point
-    SDL_SetRenderDrawColor(gRenderer, 0, 0, 255, 255);
-    SDL_RenderDrawPointF(gRenderer, _enemy->position.x, _enemy->position.y);
+    SDL_SetRenderDrawColor(_renderer, 0, 0, 255, 255);
+    SDL_RenderDrawPointF(_renderer, _enemy->position.x, _enemy->position.y);
     #endif
   
 }

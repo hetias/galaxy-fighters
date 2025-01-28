@@ -362,7 +362,7 @@ int init(void){
 	//
 	//CREATE RENDERER
 	//
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 	if(renderer == NULL){
 		printf("Failed on renderer creation\n");
 		SDL_Quit();
