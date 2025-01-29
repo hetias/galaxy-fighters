@@ -49,6 +49,7 @@ void free_resources(void);
 void game_loop(void);
 
 //menu options
+
 void main_menu(void);
 void options_menu(void);
 

@@ -39,7 +39,6 @@ extern SDL_Window *window;
 extern struct nk_colorf bg;
 
 bool editor_start(resources_t* game_resources, SDL_Window* window){
-
 	SDL_SetWindowResizable(window, SDL_TRUE);
 	SDL_MaximizeWindow(window);
 
@@ -54,8 +53,8 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
 	const keyframe_t *keyframes = editor_scene->keyframes;
 	const int keyframe_count = editor_scene->keyframe_count;
 	
-    printf("spline count: %d\n", editor_scene->spline_count);
-    printf("keyframe count: %d\n", editor_scene->keyframe_count);
+	printf("spline count: %d\n", editor_scene->spline_count);
+	printf("keyframe count: %d\n", editor_scene->keyframe_count);
 
 	for(int i = 0; i < keyframe_count; i++){
 		printf("keyframe: %d\n", i);
@@ -71,20 +70,20 @@ void editor_running(struct nk_context *gui_context){
 	const keyframe_t *all_keyframes = get_keyframes();
 	const int k_count = get_keyframe_count();
 		
-    //get user input
-    //mouse
-    int mouse_click = SDL_GetMouseState(&mouse.x, &mouse.y);
+	//get user input
+	//mouse
+	int mouse_click = SDL_GetMouseState(&mouse.x, &mouse.y);
 
-    //keyboard
-    const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-    const SDL_Keymod modState = SDL_GetModState();
+	//keyboard
+	const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
+	const SDL_Keymod modState = SDL_GetModState();
     
-    //update
-    if(keyboardState[SDL_SCANCODE_A]){
-		camera.x -= camera_speed;
-    }else if(keyboardState[SDL_SCANCODE_D]){
-		camera.x += camera_speed;
-    }
+	//update
+	if(keyboardState[SDL_SCANCODE_A]){
+	  camera.x -= camera_speed;
+	}else if(keyboardState[SDL_SCANCODE_D]){
+	  camera.x += camera_speed;
+	}
 
     if(keyboardState[SDL_SCANCODE_W]){
 		camera.y -= camera_speed;
@@ -172,10 +171,16 @@ void editor_running(struct nk_context *gui_context){
 			//frame action
 			keyframe_t current_keyframe;
 			for(int i = 0; i < k_count; i++){
-				if(timeline_tick * 60 == all_keyframes[i].tick){
-					current_keyframe = all_keyframes[i];
-					break;
-				}
+			  /* if(timeline_tick * 60 == all_keyframes[i].tick){ */
+			  /* 		current_keyframe = all_keyframes[i]; */
+			  /* 		break; */
+			  /* 	} */
+
+			  //we now work on vsync
+			    if(timeline_tick == all_keyframes[i].tick){
+			       current_keyframe = all_keyframes[i];
+			       break;
+			    }
 			}
 
 			switch(current_keyframe.action){
@@ -489,7 +494,7 @@ static bool ui_button(SDL_Rect rect, const char* text, SDL_Renderer* renderer){
 static void draw_timeline(struct nk_context *gui_context){
 	int k_count = get_keyframe_count();
 	const keyframe_t *all_keyframes = get_keyframes();
-	
+
 	char buff[4];
 	snprintf(buff, 4, "%d", timeline_tick);
 
@@ -497,9 +502,14 @@ static void draw_timeline(struct nk_context *gui_context){
 	if(nk_button_label(gui_context, "previous" )){
 		for(int i = 0; i < k_count-1; i++){
 			
-			int first_tick = all_keyframes[i].tick / 60;
-			int second_tick = all_keyframes[i+1].tick / 60;
-			int max_tick = all_keyframes[k_count-1].tick / 60;
+			/* int first_tick = all_keyframes[i].tick / 60; */
+			/* int second_tick = all_keyframes[i+1].tick / 60; */
+			/* int max_tick = all_keyframes[k_count-1].tick / 60; */
+
+		        //we now work on vsync
+			int first_tick = all_keyframes[i].tick;
+			int second_tick = all_keyframes[i+1].tick;
+			int max_tick = all_keyframes[k_count-1].tick;
 
 			//we're further to the right than the last tick
 			if(timeline_tick > max_tick){
@@ -520,9 +530,14 @@ static void draw_timeline(struct nk_context *gui_context){
 	if(nk_button_label(gui_context, "next")){		
 		for(int i = 0; i < k_count-1; i++){
 			
-			int first_tick = all_keyframes[i].tick / 60;
-			int second_tick = all_keyframes[i+1].tick / 60;
-			int min_tick = all_keyframes[0].tick / 60;
+			/* int first_tick = all_keyframes[i].tick / 60; */
+			/* int second_tick = all_keyframes[i+1].tick / 60; */
+			/* int min_tick = all_keyframes[0].tick / 60; */
+
+		        //we work with vsync now
+		        int first_tick = all_keyframes[i].tick;
+			int second_tick = all_keyframes[i+1].tick;
+			int min_tick = all_keyframes[0].tick;
 
 			//we're further to the left than the first tick
 			if(timeline_tick < min_tick){
@@ -561,10 +576,14 @@ static bool on_keyframe(){
 	const int k_count = get_keyframe_count();
 
 	for(int i = 0; i < k_count; i++){
-		if(timeline_tick == all_keyframes[i].tick/60){
-			return true;
+	  //vsync n stuff
+	  /* 	if(timeline_tick == all_keyframes[i].tick/60){ */
+	  /* 	return true; */
+	  /* } */
+	     if(timeline_tick == all_keyframes[i].tick){
+	       return true;
+	     }
 
-		}
 	}
 
 	return false;
