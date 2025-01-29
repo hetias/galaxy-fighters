@@ -16,6 +16,8 @@
 #include"keyframe.h"
 #include"spline.h"
 
+#include"debug_draw.h"
+
 #define MAX_KEYFRAMES 10
 #define MAX_SPLINES   10
 

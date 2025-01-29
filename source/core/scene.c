@@ -74,6 +74,12 @@ int scene_update(scene_t* _scene){
     
     _scene->tick++;
 
+    //print current tick as debug info
+    //char *buff = malloc(sizeof(char) * 32);
+    //snprintf(buff, 32, "tick: %d", _scene->tick);
+    
+    debug_text("we can draw text anywhere now1!11!!", 0, 0, (SDL_Color){0, 255, 0});
+    
     return 0;
 }
 

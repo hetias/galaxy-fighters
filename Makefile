@@ -1,4 +1,4 @@
-GAME_OBJS = container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o gg.o editor.o input.o
+GAME_OBJS = container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o gg.o editor.o input.o debug_draw.o
 
 CC = gcc
 
@@ -16,6 +16,9 @@ all: main.o
 
 main.o: source/main.c $(GAME_OBJS)
 	$(CC) $(INCLUDE_PATHS) -g -c source/main.c
+
+debug_draw.o: source/core/debug_draw.h source/core/debug_draw.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/core/debug_draw.c
 
 gg.o: source/core/gg.h source/core/gg.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/gg.c

@@ -1,5 +1,3 @@
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_timer.h>
 #include<stdio.h>
 #include<stdlib.h>
 #include<stdbool.h>
@@ -16,6 +14,7 @@
 #include"editor.h"
 
 #include"input.h"
+#include"core/debug_draw.h"
 #include"core/definitions.h"
 #include"core/resources.h"
 #include"core/scene.h"
@@ -40,6 +39,7 @@ struct main_menu_bgfx{
 
 struct main_menu_bgfx mm_bgfx = {-600, 0};
 
+debug_info_t g_debug;
 resources_t game_resources;
 
 int init(void);
@@ -157,7 +157,7 @@ void game_loop(void){
 		//draw
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
-	
+
 		//we do depending on the Global Application State
 		switch(gAppState){
 		case MAIN_MENU:{
@@ -192,7 +192,8 @@ void game_loop(void){
 			editor_draw(renderer);
 		};
 		}	
-
+		
+		debug_draw();
 		nk_sdl_render(NK_ANTI_ALIASING_ON);
 		SDL_RenderPresent(renderer);
 	
@@ -204,7 +205,8 @@ void game_loop(void){
 
 		/* printf("cycles: %ld\n", gametime.frame_cycles); */
 		/* printf("ms: %f\n", gametime.frame_ms); */
-		/* printf("sc: %f\n", gametime.frame_sc); */	
+		/* printf("sc: %f\n", gametime.frame_sc); */
+		
 	}
 
 	scene_destroy(game_scene);
@@ -420,6 +422,8 @@ int init(void){
 		nk_style_set_font(gui_context, &font->handle);
 	}
 	bg.r = 0.10f, bg.g = 0.18f, bg.b = 0.24f, bg.a = 1.0f;
+
+	debug_start();
 	
 	return 0;
 }
@@ -428,7 +432,7 @@ int init(void){
  * Closes all SDL2 libraries and destroys resources.
  */
 void deinit(void){
-
+        debug_clean();
 	nk_sdl_shutdown();
 	
 	SDL_DestroyRenderer(renderer);
