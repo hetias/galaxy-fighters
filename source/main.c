@@ -106,11 +106,14 @@ int main(void){
 void game_loop(void){
     
 	gg_init(renderer, game_resources.font);
-	SDL_Event e;    
+	SDL_Event e;
+	
 	//game running
 	while(gIsGameRunning){
-	
+	  
 		timeframe_start(&gametime);
+
+		Uint64 start_time = SDL_GetTicks64();
 	
 		//event loop
 		//input_clear(game_keys);
@@ -199,15 +202,11 @@ void game_loop(void){
 		SDL_RenderPresent(renderer);
 	
 		timeframe_end(&gametime);
-	
-		timeframe_cycles(&gametime);
-		timeframe_ms(&gametime);
-		timeframe_sc(&gametime);
 
-		/* printf("cycles: %ld\n", gametime.frame_cycles); */
-		/* printf("ms: %f\n", gametime.frame_ms); */
-		/* printf("sc: %f\n", gametime.frame_sc); */
+		Uint64 elapsed = time_get_elapsed(&gametime);
 		
+		if(elapsed < 16)
+		  SDL_Delay(16 - elapsed);
 	}
 
 	scene_destroy(game_scene);
@@ -365,7 +364,7 @@ int init(void){
 	//
 	//CREATE RENDERER
 	//
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
 	if(renderer == NULL){
 		printf("Failed on renderer creation\n");
 		SDL_Quit();

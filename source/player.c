@@ -121,8 +121,8 @@ int player_update(player_t* _player, const Uint8* _keyboardState, game_container
     _player->direction.x = (_player->direction.x != 0.0) ? _player->direction.x / magnitud : 0.0f;
     _player->direction.y = (_player->direction.y != 0.0) ? _player->direction.y / magnitud : 0.0f;
     
-    _player->position.x += _player->direction.x * (_player->speed * gametime.frame_ms);
-    _player->position.y += _player->direction.y * (_player->speed * gametime.frame_ms);
+    _player->position.x += _player->direction.x * (_player->speed * time_get_delta(&gametime));
+    _player->position.y += _player->direction.y * (_player->speed * time_get_delta(&gametime));
     
     _player->hitbox.x = _player->position.x - (_player->hitbox.w / 2);
     _player->hitbox.y = _player->position.y - (_player->hitbox.h / 2);

@@ -42,8 +42,8 @@ int projectile_update(projectile_t* _prj, game_container* _enemy_container, play
 
 	_prj->alive = false;
     }else{
-	_prj->position.x += _prj->direction.x * (_prj->speed * gametime.frame_ms);
-	_prj->position.y += _prj->direction.y * (_prj->speed * gametime.frame_ms);
+	_prj->position.x += _prj->direction.x * (_prj->speed * time_get_delta(&gametime));
+	_prj->position.y += _prj->direction.y * (_prj->speed * time_get_delta(&gametime));
 
 	_prj->hitbox.x = _prj->position.x - (_prj->hitbox.w / 2);
 	_prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);

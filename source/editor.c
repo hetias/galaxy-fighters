@@ -15,12 +15,18 @@
 #define DRAW_SPLINE_EDITOR 1
 #define DRAW_TIMELINE 1
 
+static const char* keyframe_type_names[] = {
+  "Enemy add",
+  "Enemy change path",
+  "Enemy destroy",
+};
+
 static SDL_Point window_size = {600, 600};
 
 static scene_t* editor_scene;
 
 static SDL_Point camera = {0, 0};
-static int camera_speed = 2;
+static int camera_speed = 10;
 
 static SDL_Point mouse = {0, 0};
 
@@ -67,7 +73,7 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
 }
 
 void editor_running(struct nk_context *gui_context){
-	const keyframe_t *all_keyframes = get_keyframes();
+        keyframe_t *all_keyframes = get_keyframes();
 	const int k_count = get_keyframe_count();
 		
 	//get user input
@@ -169,7 +175,7 @@ void editor_running(struct nk_context *gui_context){
 			nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
 			
 			//frame action
-			keyframe_t current_keyframe;
+			keyframe_t *current_keyframe = NULL;
 			for(int i = 0; i < k_count; i++){
 			  /* if(timeline_tick * 60 == all_keyframes[i].tick){ */
 			  /* 		current_keyframe = all_keyframes[i]; */
@@ -178,50 +184,56 @@ void editor_running(struct nk_context *gui_context){
 
 			  //we now work on vsync
 			    if(timeline_tick == all_keyframes[i].tick){
-			       current_keyframe = all_keyframes[i];
+			       current_keyframe = &all_keyframes[i];
 			       break;
 			    }
 			}
 
-			switch(current_keyframe.action){
-			case KEYFRAME_ENEMY_ADD:
-				snprintf(text_buffer, 64, "action: %s", "enemy add");
-				break;
-			case KEYFRAME_ENEMY_CHANGE_PATH:
-				snprintf(text_buffer, 64, "action: %s", "enemy change path");
-				break;
-			case KEYFRAME_ENEMY_DESTROY:
-				snprintf(text_buffer, 64, "action: %s", "enemy destroy");
-				break;						
-			default:
-				snprintf(text_buffer, 64, "action: %s", "unknown");
-				break;
+			if(current_keyframe != NULL){
+			  /* nk_bool active = true; */
+			/* if(nk_checkbox_label(gui_context, "sm", &active)){ */
+			/*   printf("radio\n"); */
+			/* } */
+			  
+			  struct nk_vec2 size = {100, 100};
+			  int type_selection = nk_combo(gui_context, keyframe_type_names, 3, current_keyframe->action, 12, size);
+			  if(type_selection != current_keyframe->action){
+			    current_keyframe->action = type_selection;
+			    printf("change\n");
 			}
-			nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+
+			/* static char bff[32]; */
+			/* static int len = 0; */
+			/* nk_edit_string(gui_context, NK_EDIT_SIMPLE, bff, &len, 32, nk_filter_decimal); */
+
+			/* int num = atoi(bff); */
+			/* if(num > 10){ */
+			/*   printf("invalid number\n"); */
+			/* } */
 			
 			//frame parameters
 			//we show parameters only if their supposed to be 
 			//ussable for the current keyframe type
 			nk_label(gui_context, "+paramaters+ ", NK_TEXT_CENTERED);
 
-			if(current_keyframe.action == KEYFRAME_ENEMY_DESTROY ||
-			   current_keyframe.action == KEYFRAME_ENEMY_CHANGE_PATH){
-				snprintf(text_buffer, 64, "id: %d", current_keyframe.params.id);
+			if(current_keyframe->action == KEYFRAME_ENEMY_DESTROY ||
+			   current_keyframe->action == KEYFRAME_ENEMY_CHANGE_PATH){
+				snprintf(text_buffer, 64, "id: %d", current_keyframe->params.id);
 				nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
 			
 			}
 			
-			if(current_keyframe.action == KEYFRAME_ENEMY_ADD){
-				snprintf(text_buffer, 64, "enemy type: %d", current_keyframe.params.enemy_type);
+			if(current_keyframe->action == KEYFRAME_ENEMY_ADD){
+				snprintf(text_buffer, 64, "enemy type: %d", current_keyframe->params.enemy_type);
 				nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
 			}
 			
-			if(current_keyframe.action == KEYFRAME_ENEMY_ADD ||
-			   current_keyframe.action == KEYFRAME_ENEMY_CHANGE_PATH){
-				snprintf(text_buffer, 64, "path id: %d", current_keyframe.params.pathid);
+			if(current_keyframe->action == KEYFRAME_ENEMY_ADD ||
+			   current_keyframe->action == KEYFRAME_ENEMY_CHANGE_PATH){
+				snprintf(text_buffer, 64, "path id: %d", current_keyframe->params.pathid);
 				nk_label(gui_context, text_buffer, NK_TEXT_LEFT);				
 			}
-			
+			  }
 			
 		}
 

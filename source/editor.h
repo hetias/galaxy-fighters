@@ -25,8 +25,8 @@
 
 #include"core/definitions.h"
 
-#include"core/resources.h"
-#include"core/scene.h"
+#include "core/resources.h"
+#include "core/scene.h"
 #include "core/gg.h"
 #include "core/timing.h"
 

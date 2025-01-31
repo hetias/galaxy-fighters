@@ -170,7 +170,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
     switch(_enemy->path_type){
     case PATH_START_END:
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
-            _enemy->path_time += _enemy->speed * gametime.frame_ms;
+            _enemy->path_time += _enemy->speed * time_get_delta(&gametime);
 	    _enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 
 	    if(_enemy->path_time >= 1.0f){
@@ -185,7 +185,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
     case PATH_REPEAT:
 	if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
 	    if(_enemy->path_state == PATH_STATE_FORWARD){
-		_enemy->path_time += _enemy->speed * gametime.frame_ms;
+		_enemy->path_time += _enemy->speed * time_get_delta(&gametime);
 		_enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 		
 		if(_enemy->path_time >= 1.0f){
@@ -194,7 +194,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 		    return PATH_STATE_END;
 		}
 	    }else if(_enemy->path_state == PATH_STATE_BACKWARD){
-		_enemy->path_time -= _enemy->speed * gametime.frame_ms;
+		_enemy->path_time -= _enemy->speed * time_get_delta(&gametime);
 		_enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));		
 		
 		if(_enemy->path_time <= 0.0f){
@@ -206,7 +206,7 @@ PATH_STATE enemy_update_path(enemy_t* _enemy){
 	case PATH_LOOP:
 	    if(_enemy->path->loop && _enemy->path_type == PATH_LOOP){
 		if(_enemy->path_time >= 0.0 && _enemy->path_time <= 1.0f){
-		    _enemy->path_time += _enemy->speed * gametime.frame_ms;
+		    _enemy->path_time += _enemy->speed * time_get_delta(&gametime);
 		    _enemy->position = to_worldCoords(spline_get_point(*_enemy->path, _enemy->path_time));
 				
 		    if(_enemy->path_time >= 1.0f){
