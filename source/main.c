@@ -39,9 +39,6 @@ struct main_menu_bgfx{
 
 struct main_menu_bgfx mm_bgfx = {-600, 0};
 
-debug_info_t g_debug;
-resources_t game_resources;
-
 int init(void);
 void deinit(void);
 void load_resources(void);
@@ -53,6 +50,9 @@ void game_loop(void);
 void main_menu(void);
 void options_menu(void);
 
+//global structures
+debug_info_t g_debug_info;
+resources_t game_resources;
 struct nk_context *gui_context;
 struct nk_colorf bg;
 SDL_Renderer *renderer = NULL;
@@ -104,7 +104,6 @@ int main(void){
  * Menus and gameplay logic happens here.
  */
 void game_loop(void){
-    
 	gg_init(renderer, game_resources.font);
 	SDL_Event e;
 	
@@ -157,7 +156,11 @@ void game_loop(void){
 		   gAppState == MAIN_MENU){
 			gIsGameRunning = false;
 		};
-				
+
+		debug_rect(0, 0, 30, 30, (SDL_Color){255, 0, 0});
+		debug_line(0, 0, 600, 600, (SDL_Color){0, 255, 0});
+		debug_text("asdas", 0, 0,(SDL_Color){0, 0, 255});
+		
 		//draw
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 		SDL_RenderClear(renderer);
@@ -197,8 +200,10 @@ void game_loop(void){
 		};
 		}	
 		
-		debug_draw();
+		debug_draw_present();
+		
 		nk_sdl_render(NK_ANTI_ALIASING_ON);
+		
 		SDL_RenderPresent(renderer);
 	
 		timeframe_end(&gametime);
