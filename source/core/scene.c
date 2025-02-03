@@ -58,27 +58,27 @@ int scene_update(scene_t* _scene){
     
     //update player
     if(_scene->player->hp > 0){
-		player_update(_scene->player, keyboardState, &_scene->projectiles_container);	
-    }else{
-	
+		player_update(_scene->player,
+			      keyboardState,
+			      &_scene->projectiles_container);	
     }
     
     //update all enemies
     scene_update_enemies(&_scene->enemies_container,
-						 &_scene->projectiles_container);
+			 &_scene->projectiles_container);
   
     //update projectiles
     scene_update_projectiles(&_scene->projectiles_container,
-							 &_scene->enemies_container,
-							 _scene->player);
+			     &_scene->enemies_container,
+			     _scene->player);
     
     _scene->tick++;
 
     //print current tick as debug info
-    //char *buff = malloc(sizeof(char) * 32);
-    //snprintf(buff, 32, "tick: %d", _scene->tick);
+    char buff[32] = "";
+    snprintf(buff, 32, "tick: %d", _scene->tick);
     
-    debug_text("we can draw text anywhere now1!11!!", 0, 0, (SDL_Color){0, 255, 0});
+    debug_text(buff, 0, 0, (SDL_Color){0, 255, 0});
     
     return 0;
 }
@@ -262,7 +262,7 @@ void scene_next_action(scene_t* _scene){
 
     if(_scene->tick == current_keyframe.tick){
 		#if DEBUG
-		printf("hit keyframe tick: %d\n", _scene->tick / 60);
+		printf("hit keyframe tick: %d\n", _scene->tick);
 		#endif
 		switch(current_keyframe.action){
 

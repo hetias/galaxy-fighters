@@ -156,10 +156,6 @@ void game_loop(void){
 		   gAppState == MAIN_MENU){
 			gIsGameRunning = false;
 		};
-
-		debug_rect(0, 0, 30, 30, (SDL_Color){255, 0, 0});
-		debug_line(0, 0, 600, 600, (SDL_Color){0, 255, 0});
-		debug_text("asdas", 0, 0,(SDL_Color){0, 0, 255});
 		
 		//draw
 		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);

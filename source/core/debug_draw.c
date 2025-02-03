@@ -46,14 +46,21 @@ void debug_line(int _x, int _y, int _x2, int _y2, SDL_Color _color){
 }
 
 void debug_text(const char* _text, int _x, int _y, SDL_Color _color){
+  
   debug_data_t d = {
     .type = TEXT,
-    .text = _text,
+    //.text = _text, not really
     .x = _x,
     .y = _y,
     .color = _color
   };
 
+  int len = strlen(_text);
+  for(int i = 0; i < len; i++){
+    d.text[i] = _text[i];
+  }
+  d.text[len+1] = '\n';
+  
   g_debug_info.data[g_debug_info.top] = d;
   g_debug_info.top += 1;  
 }
@@ -99,6 +106,9 @@ void debug_draw_line(debug_data_t _data){
 }
 
 void debug_draw_text(debug_data_t _data){
+  if(_data.text == NULL)
+    return;
+
   g_debug_info.text_surface = TTF_RenderText_Blended(game_resources.font, _data.text, _data.color);
 
   if(g_debug_info.text_surface != NULL)

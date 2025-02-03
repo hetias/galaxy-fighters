@@ -1,12 +1,17 @@
 #ifndef DEBUG_DRAW_H
 #define DEBUG_DRAW_H
 
+#include<stdio.h>
+#include<string.h>
+
 #include "SDL2/SDL_ttf.h"
 #include "SDL2/SDL_pixels.h"
 #include "SDL2/SDL_surface.h"
 #include "SDL2/SDL_render.h"
 
 #include "resources.h"
+
+#define MAX_TEXT_SIZE 64
 
 enum draw_type{
   RECT,
@@ -15,7 +20,7 @@ enum draw_type{
 };
 
 typedef struct debug_data_s{
-  const char* text;
+  char text[MAX_TEXT_SIZE];
   int type;
   int x;
   int y;
