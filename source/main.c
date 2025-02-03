@@ -46,9 +46,8 @@ void free_resources(void);
 void game_loop(void);
 
 //menu options
-
-void main_menu(void);
-void options_menu(void);
+int main_menu(void);
+int options_menu(void);
 
 //global structures
 debug_info_t g_debug_info;
@@ -90,7 +89,7 @@ int main(void){
 		exit(-1);
 
 	load_resources();
-    
+
 	game_loop();
 
 	free_resources();
@@ -103,115 +102,93 @@ int main(void){
  * Main game loop of the application.
  * Menus and gameplay logic happens here.
  */
-void game_loop(void){
-	gg_init(renderer, game_resources.font);
-	SDL_Event e;
-	
-	//game running
-	while(gIsGameRunning){
-	  
-		timeframe_start(&gametime);
+void game_loop(){
 
-		Uint64 start_time = SDL_GetTicks64();
-	
-		//event loop
-		//input_clear(game_keys);
-		nk_input_begin(gui_context);
-		while(SDL_PollEvent(&e)){
-			switch(e.type){
-			case SDL_QUIT:
-				gIsGameRunning = false;
-				break;
-			case SDL_KEYUP:
-				if(e.key.keysym.scancode == SDL_SCANCODE_P){
-					gPaused = !gPaused;
-				}
-		
-				if(e.key.keysym.scancode == SDL_SCANCODE_ESCAPE
-				   && gAppState == OPTIONS_MENU){
-					gAppState = MAIN_MENU;
-				}
+  gg_init(renderer, game_resources.font);
+  SDL_Event e;
+  
+  //main loop
+  while(gIsGameRunning){
 
-				if(e.key.keysym.scancode == SDL_SCANCODE_E){
-					gAppState = EDITOR_START;
-				}
-				
-				break;
-			}
+    timeframe_start(&gametime);
 
+    nk_input_begin(gui_context);
+    while(SDL_PollEvent(&e)){
+      switch(e.type){
+      case SDL_QUIT:
+	gAppState = EXIT;
+	break;
+      case SDL_KEYUP:
+	SDL_Scancode code = e.key.keysym.scancode;
+	if(code == SDL_SCANCODE_P)
+	  gPaused = !gPaused;
+	if(code == SDL_SCANCODE_ESCAPE && gAppState == OPTIONS_MENU)
+	  gAppState = MAIN_MENU;
+	if(code == SDL_SCANCODE_E && gAppState == MAIN_MENU)
+	  gAppState = EDITOR_START;
+	break;
+      }
+      
+      if(gAppState == EDITOR_RUNNING)
+	editor_events(e);
+      nk_sdl_handle_event(&e);
+      gg_events(e);
+    }
+    nk_sdl_handle_grab();
+    nk_input_end(gui_context);
 
-			if(gAppState == EDITOR_RUNNING){
-				editor_events(e);
-			}
+    const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
 
-			nk_sdl_handle_event(&e);
-			gg_events(e);
-		}
-		nk_sdl_handle_grab();
-		nk_input_end(gui_context);
-		
-		//keyboard input
-		const Uint8* keyboardState = SDL_GetKeyboardState(NULL);
-		if(keyboardState[SDL_SCANCODE_ESCAPE] &&
-		   gAppState == MAIN_MENU){
-			gIsGameRunning = false;
-		};
-		
-		//draw
-		SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
-		SDL_RenderClear(renderer);
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
+    SDL_RenderClear(renderer);
+    
+    switch(gAppState){
+    case MAIN_MENU:{
+      int selection = main_menu();
+      if(selection != -1) gAppState = selection;
+    }break;
+    case OPTIONS_MENU:{
+      int selection = options_menu();
+      if(selection != -1) gAppState = selection;
+    }break;
+    case SCENARIO_LOAD:
+      game_scene = scene_create(&game_resources, "level.lvl");
+      if(game_scene == NULL){
+	printf("failed load of scene\n");
+	return;
+      }	
+      gAppState = SCENARIO;
+      break;
+    case SCENARIO:
+      scene_update(game_scene);
+      scene_draw(game_scene, renderer);
+      break;
+    case EXIT:
+      gIsGameRunning = false;
+      break;
+    case EDITOR_START:
+      editor_start(&game_resources, window);
+      gAppState = EDITOR_RUNNING;
+      break;
+    case EDITOR_RUNNING:
+      editor_running(gui_context);
+      editor_draw(renderer);
+    }
 
-		//we do depending on the Global Application State
-		switch(gAppState){
-		case MAIN_MENU:{
-			main_menu();
-		}break;
-		case OPTIONS_MENU:{
-			options_menu();
-		}break;
-		case SCENARIO_LOAD:{
-			game_scene = scene_create(&game_resources, "level.lvl");
-			if(game_scene == NULL){
-				printf("failed load of scene\n");
-				return;
-			}
+    debug_draw_present();
+    nk_sdl_render(NK_ANTI_ALIASING_ON);
+    SDL_RenderPresent(renderer);
+    
+    timeframe_end(&gametime);
 
-			gAppState = SCENARIO;
-			
-		}break;
-		case SCENARIO:{
-			scene_update(game_scene);
-			scene_draw(game_scene, renderer);
-		}break;
-		case EXIT:{
-			gIsGameRunning = false;
-		}break;
-		case EDITOR_START:{
-			editor_start(&game_resources, window);
-			gAppState = EDITOR_RUNNING;
-		}break;
-		case EDITOR_RUNNING:{
-			editor_running(gui_context);
-			editor_draw(renderer);
-		};
-		}	
-		
-		debug_draw_present();
-		
-		nk_sdl_render(NK_ANTI_ALIASING_ON);
-		
-		SDL_RenderPresent(renderer);
-	
-		timeframe_end(&gametime);
+    Uint64 elapsed = time_get_elapsed(&gametime);
 
-		Uint64 elapsed = time_get_elapsed(&gametime);
-		
-		if(elapsed < 16)
-		  SDL_Delay(16 - elapsed);
-	}
-
-	scene_destroy(game_scene);
-	gg_deinit();    
+    if(elapsed < 16)
+      SDL_Delay(16 - elapsed);
+    
+  }
+  scene_destroy(game_scene);
+  gg_deinit();
 }
 
 /**
@@ -220,7 +197,8 @@ void game_loop(void){
  * the game, go to options or exit.
  *
  */
-void main_menu(void){
+int main_menu(void){
+        int selection = -1;
 	//bg
 	SDL_Rect dst_1 = {mm_bgfx.position_1, 0, 600, 600};
 	SDL_Rect dst_2 = {mm_bgfx.position_2, 0, 600, 600};
@@ -238,24 +216,26 @@ void main_menu(void){
 	if(nk_begin(gui_context, "", nk_rect(250, 150, 120, 250), 0)){
 		nk_layout_row_static(gui_context, 32, 100, 1);
 		if(nk_button_label(gui_context, "start")){
-			gAppState = SCENARIO_LOAD;
+			selection = SCENARIO_LOAD;
 		}
 
 		if(nk_button_label(gui_context, "options")){
-			gAppState = OPTIONS_MENU;
+			selection = OPTIONS_MENU;
 		}
 
 		if(nk_button_label(gui_context, "exit")){
-			gAppState = EXIT;
+		  selection = EXIT;
 		}		
 	}
 	nk_end(gui_context);
+	return selection;
 }
 
 /**
  * Draw the options menu.
  */
-void options_menu(void){
+int options_menu(void){
+        int selection = -1;
 	//bg
 	SDL_Rect dst_1 = {mm_bgfx.position_1, 0, 600, 600};
 	SDL_Rect dst_2 = {mm_bgfx.position_2, 0, 600, 600};
@@ -286,10 +266,12 @@ void options_menu(void){
 		}		
 
 		if(nk_button_label(gui_context, "option 3")){
-			gAppState = MAIN_MENU;
+			selection = MAIN_MENU;
 		}		
 	}
 	nk_end(gui_context);
+
+	return selection;
 }
 
 /**
