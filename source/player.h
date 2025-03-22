@@ -10,15 +10,15 @@
 
 //player definition
 typedef struct player_s{
-  SDL_FPoint position;
-  SDL_FPoint direction;
-  SDL_FRect hitbox;
-  int shootDelay;
-  int currentShootDelay;
-  int hp;
-  float speed;
-  SDL_Texture* sprite;
-  SDL_Texture* projectile_sprite;
+    SDL_FPoint position;
+    SDL_FPoint direction;
+    SDL_FRect hitbox;
+    int shootDelay;
+    int currentShootDelay;
+    int hp;
+    float speed;
+    SDL_Texture* sprite;
+    SDL_Texture* projectile_sprite;
 }player_t;
 
 #include"core/container.h"

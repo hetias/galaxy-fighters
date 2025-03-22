@@ -11,8 +11,8 @@
 #define INPUT_RELEASED 0x0004
 
 typedef struct keyinfo_s{
-	SDL_Scancode key;
-	int state;
+    SDL_Scancode key;
+    int state;
 }keyinfo_t;
 
 static keyinfo_t game_keys[] = {{SDL_SCANCODE_W, INPUT_NONE},

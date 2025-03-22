@@ -11,10 +11,10 @@
 #include<string.h>
 
 typedef struct{
-  void** items;
-  size_t capacity;
-  size_t len;
-  size_t  type_size;
+    void** items;
+    size_t capacity;
+    size_t len;
+    size_t  type_size;
 }array_list;
 
 array_list container_create(size_t);

@@ -14,26 +14,26 @@
 #define MAX_TEXT_SIZE 64
 
 enum draw_type{
-  RECT,
-  LINE,
-  TEXT,
+    RECT,
+    LINE,
+    TEXT,
 };
 
 typedef struct debug_data_s{
-  char text[MAX_TEXT_SIZE];
-  int type;
-  int x;
-  int y;
-  int x2;
-  int y2;
-  SDL_Color color;
+    char text[MAX_TEXT_SIZE];
+    int type;
+    int x;
+    int y;
+    int x2;
+    int y2;
+    SDL_Color color;
 }debug_data_t;
 
 typedef struct debug_info_s{
-  debug_data_t data[16];
-  SDL_Texture *text_texture;
-  SDL_Surface *text_surface;
-  int top;
+    debug_data_t data[16];
+    SDL_Texture *text_texture;
+    SDL_Surface *text_surface;
+    int top;
 }debug_info_t;
 
 extern SDL_Renderer *renderer;

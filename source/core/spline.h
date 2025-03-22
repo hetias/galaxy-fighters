@@ -10,9 +10,9 @@
 #define MAX_POINTS 12
 
 typedef struct{
-  size_t total_points;
-  SDL_FPoint points[MAX_POINTS];
-  bool loop;
+    size_t total_points;
+    SDL_FPoint points[MAX_POINTS];
+    bool loop;
 }spline_t;
 
 spline_t spline_create(bool);

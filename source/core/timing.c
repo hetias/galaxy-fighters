@@ -8,9 +8,9 @@ void timeframe_end(time_info* timing){
 }
 
 Uint64 time_get_elapsed(time_info *timing){
-  return (timing->frame_start - timing->frame_end) + 1;
+    return (timing->frame_start - timing->frame_end) + 1;
 }
 
 double time_get_delta(time_info *timing){
-  return time_get_elapsed(timing) / 1000.0f;
+    return time_get_elapsed(timing) / 1000.0f;
 }

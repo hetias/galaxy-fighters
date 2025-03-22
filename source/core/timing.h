@@ -5,9 +5,9 @@
 #include <stdint.h>
 
 typedef struct time_info{
-  uint64_t frame_start;
-  uint64_t frame_end;
-  Uint64 elasped;
+    uint64_t frame_start;
+    uint64_t frame_end;
+    Uint64 elasped;
 }time_info;
 
 void timeframe_start(time_info*);

@@ -12,19 +12,18 @@
 
 projectile_t projectile_create(SDL_FPoint _position, SDL_FPoint _direction, bool _isFriendly, SDL_Texture* _sprite)
 {
-  printf("projectile create\n");
-  projectile_t tmp;
+    projectile_t tmp;
 
-  tmp.position = _position;
-  tmp.direction = _direction;
-  tmp.hitbox = (SDL_FRect){tmp.position.x, tmp.position.y,
-                           13.0f,           54.0f};
-  tmp.sprite = _sprite;
-  tmp.speed = NORMAL_PRJ_SPEED;
-  tmp.isFriendly = _isFriendly;
-  tmp.alive = true;
+    tmp.position = _position;
+    tmp.direction = _direction;
+    tmp.hitbox = (SDL_FRect){tmp.position.x, tmp.position.y,
+			     13.0f,           54.0f};
+    tmp.sprite = _sprite;
+    tmp.speed = NORMAL_PRJ_SPEED;
+    tmp.isFriendly = _isFriendly;
+    tmp.alive = true;
 
-  return tmp;
+    return tmp;
 }
 
 /**
@@ -34,37 +33,37 @@ projectile_t projectile_create(SDL_FPoint _position, SDL_FPoint _direction, bool
  */
 
 int projectile_update(projectile_t* _prj, array_list* _enemy_container, player_t* _player){
-  if(_prj == NULL)
-    return -1;
+    if(_prj == NULL)
+	return -1;
 
-  //on bounds check
-  if(_prj->position.x > 600 || _prj->position.x < 0 ||
-     _prj->position.y > 600 || _prj->position.y < 0){
+    //on bounds check
+    if(_prj->position.x > 600 || _prj->position.x < 0 ||
+       _prj->position.y > 600 || _prj->position.y < 0){
 
-    _prj->alive = false;
-  }else{
-    _prj->position.x += _prj->direction.x * (_prj->speed * time_get_delta(&gametime));
-    _prj->position.y += _prj->direction.y * (_prj->speed * time_get_delta(&gametime));
+	_prj->alive = false;
+    }else{
+	_prj->position.x += _prj->direction.x * (_prj->speed * time_get_delta(&gametime));
+	_prj->position.y += _prj->direction.y * (_prj->speed * time_get_delta(&gametime));
 
-    _prj->hitbox.x = _prj->position.x - (_prj->hitbox.w / 2);
-    _prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);
-  }
+	_prj->hitbox.x = _prj->position.x - (_prj->hitbox.w / 2);
+	_prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);
+    }
 
-  //check collision with enemies
-  for(int i = 0; i < _enemy_container->len; i++){
-    enemy_t* _enemy = container_get(_enemy_container, i);
+    //check collision with enemies
+    for(int i = 0; i < _enemy_container->len; i++){
+	enemy_t* _enemy = container_get(_enemy_container, i);
 
-    if(SDL_HasIntersectionF(&_enemy->hitbox, &_prj->hitbox) && _prj->isFriendly == true){
+	if(SDL_HasIntersectionF(&_enemy->hitbox, &_prj->hitbox) && _prj->isFriendly == true){
 	    _prj->alive = false;
 	    break;
+	}
     }
-  }
 
-  //check collision with player
-  if(SDL_HasIntersectionF(&_player->hitbox, &_prj->hitbox) && _prj->isFriendly == false){
-    _prj->alive = false;
-  }
-  return 1;
+    //check collision with player
+    if(SDL_HasIntersectionF(&_player->hitbox, &_prj->hitbox) && _prj->isFriendly == false){
+	_prj->alive = false;
+    }
+    return 1;
 }
 
 /**
@@ -75,31 +74,31 @@ int projectile_update(projectile_t* _prj, array_list* _enemy_container, player_t
 
 void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
 {
-  //drawing projectile
-  if(_prj->isFriendly){
-    SDL_RenderCopyExF(_renderer,
-                      _prj->sprite,
-                      NULL,
-                      &_prj->hitbox,
-                      0.0,
-                      NULL,
-                      SDL_FLIP_NONE);
-  }else{
-    SDL_RenderCopyExF(_renderer,
-                      _prj->sprite,
-                      NULL,
-                      &_prj->hitbox,
-                      180.0,
-                      NULL,
-                      SDL_FLIP_NONE);
-  }
-  //drawing hitbox
-  //FIX::The hitbox is correctly drawn for player projs but
-  //not enemy projs
-  /* SDL_FRect smallerHitbox = _prj->hitbox; */
-  /* smallerHitbox.h = _prj->hitbox.h / 3.0f; */
-  /* SDL_SetRenderDrawColor(_renderer, 0, 255, 0, 255); */
-  /* SDL_RenderDrawRectF(_renderer, &smallerHitbox); */
+    //drawing projectile
+    if(_prj->isFriendly){
+	SDL_RenderCopyExF(_renderer,
+			  _prj->sprite,
+			  NULL,
+			  &_prj->hitbox,
+			  0.0,
+			  NULL,
+			  SDL_FLIP_NONE);
+    }else{
+	SDL_RenderCopyExF(_renderer,
+			  _prj->sprite,
+			  NULL,
+			  &_prj->hitbox,
+			  180.0,
+			  NULL,
+			  SDL_FLIP_NONE);
+    }
+    //drawing hitbox
+    //FIX::The hitbox is correctly drawn for player projs but
+    //not enemy projs
+    /* SDL_FRect smallerHitbox = _prj->hitbox; */
+    /* smallerHitbox.h = _prj->hitbox.h / 3.0f; */
+    /* SDL_SetRenderDrawColor(_renderer, 0, 255, 0, 255); */
+    /* SDL_RenderDrawRectF(_renderer, &smallerHitbox); */
 
 }
 
@@ -110,10 +109,10 @@ void projectile_draw(projectile_t* _prj, SDL_Renderer* _renderer)
 /*
   void projectile_destroy(projectile_t** projectile){
   if(projectile == NULL && *projectile == NULL){
-	printf("Failed to destroy projectiles\nFound void pointers on 'projectile_destroy'\n");
+  printf("Failed to destroy projectiles\nFound void pointers on 'projectile_destroy'\n");
   }else{
-	free(*projectile);
-	*projectile = NULL;
+  free(*projectile);
+  *projectile = NULL;
   }
   }*/
 
