@@ -16,21 +16,21 @@
 #define SLOW_PRJ_SPEED 250.0f
 
 typedef struct projectile_s{
-    SDL_FPoint position;
-    SDL_FPoint direction;
-    SDL_FRect hitbox;
-    SDL_Texture* sprite;
-    float speed;
-    bool isFriendly;
-    bool alive;
+  SDL_FPoint position;
+  SDL_FPoint direction;
+  SDL_FRect hitbox;
+  SDL_Texture* sprite;
+  float speed;
+  bool isFriendly;
+  bool alive;
 }projectile_t;
 
 extern time_info gametime;
 
 //projectile function definitions
-projectile_t* projectile_create(SDL_FPoint, SDL_FPoint, bool, SDL_Texture*);
-int projectile_update(projectile_t*, game_container*, player_t*);
+projectile_t projectile_create(SDL_FPoint, SDL_FPoint, bool, SDL_Texture*);
+int projectile_update(projectile_t*, array_list*, player_t*);
 void projectile_draw(projectile_t*, SDL_Renderer*);
-void projectile_destroy(projectile_t**);
+//void projectile_destroy(projectile_t**);
 
 #endif

@@ -3,7 +3,7 @@
 void input_update(keyinfo_t* _keys){
 	const Uint8* keyboard = SDL_GetKeyboardState(NULL);
 	int size = sizeof(_keys) / sizeof(keyinfo_t);
-    
+
 	for(int i = 0; i < size; i++){
 		if(keyboard[_keys[i].key]){
 			if(_keys[i].state & INPUT_NONE){
@@ -23,7 +23,7 @@ void input_update(keyinfo_t* _keys){
 			}
 		}else{
 			if(_keys[i].state & INPUT_NONE){
-		
+
 			}
 
 			if(_keys[i].state & INPUT_PRESSED){
@@ -61,7 +61,7 @@ void input_clear(keyinfo_t* _keys){
 		}
 
 		if(_keys[i].state & INPUT_HELD){
-			_keys[i].state |= INPUT_HELD;	    
+			_keys[i].state |= INPUT_HELD;
 		}
 
 		if(_keys[i].state & INPUT_RELEASED){
@@ -86,7 +86,7 @@ bool input_held(keyinfo_t* keys, SDL_Scancode key){
 		if(key == keys->key){
 			return (keys->state & INPUT_HELD);
 		}
-	}    
+	}
 }
 
 bool input_released(keyinfo_t* keys, SDL_Scancode key){
@@ -104,6 +104,6 @@ bool input_unpressed(keyinfo_t* keys, SDL_Scancode key){
 		if(key == keys->key){
 			return (keys->state & INPUT_NONE);
 		}
-	}    
+	}
 }
 

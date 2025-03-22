@@ -3,29 +3,29 @@
 
 #include<stdio.h>
 #include<stdlib.h>
+#include<assert.h>
+
+#include<inttypes.h>
+#include<stddef.h>
+#include<stdbool.h>
+#include<string.h>
 
 typedef struct{
-  void** array;
-  int size;
-  int count;
-  int  type;
-}game_container;
+  void** items;
+  size_t capacity;
+  size_t len;
+  size_t  type_size;
+}array_list;
 
-#include"../enemy.h"
-#include"../projectile.h"
+array_list container_create(size_t);
 
-#define ENEMIES_CAP 32
-#define PROJECTILES_CAP 128
+void container_add(array_list*, void*);
+void container_remove(array_list*, size_t);
+void *container_get(array_list*, size_t index);
 
-enum CONTAINER_TYPE{CONTAINER_ENEMY = 1, CONTAINER_PROJECTILE = 2};
+int container_clear(array_list*);
 
-game_container container_create(int);
-int container_add(game_container*, void*);
-void* container_remove(game_container*, int);
-int container_remove_destroy(game_container*, int);
-int container_clear(game_container*);
-bool container_empty(game_container);
-bool container_full(game_container);
-int container_print(game_container);
+bool container_empty(array_list);
+bool container_full(array_list);
 
 #endif

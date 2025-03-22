@@ -46,7 +46,7 @@ void debug_line(int _x, int _y, int _x2, int _y2, SDL_Color _color){
 }
 
 void debug_text(const char* _text, int _x, int _y, SDL_Color _color){
-  
+
   debug_data_t d = {
     .type = TEXT,
     //.text = _text, not really
@@ -60,13 +60,13 @@ void debug_text(const char* _text, int _x, int _y, SDL_Color _color){
     d.text[i] = _text[i];
   }
   d.text[len+1] = '\n';
-  
+
   g_debug_info.data[g_debug_info.top] = d;
-  g_debug_info.top += 1;  
+  g_debug_info.top += 1;
 }
 
 void debug_draw_present(){
-  
+
   for(int i = 0; i < g_debug_info.top; i++){
 
     switch(g_debug_info.data[i].type){
@@ -89,20 +89,20 @@ void debug_draw_present(){
 
 void debug_draw_rect(debug_data_t _data){
   SDL_Rect r = {_data.x, _data.y,
-		_data.x2, _data.y2};
+                _data.x2, _data.y2};
 
   SDL_SetRenderDrawColor(renderer, _data.color.r,
-		      _data.color.g, _data.color.b,
-		      0);
+                         _data.color.g, _data.color.b,
+                         0);
   SDL_RenderDrawRect(renderer, &r);
 }
 
 void debug_draw_line(debug_data_t _data){
   SDL_SetRenderDrawColor(renderer, _data.color.r,
-		      _data.color.g, _data.color.b,
-		      0);
+                         _data.color.g, _data.color.b,
+                         0);
   SDL_RenderDrawLine(renderer, _data.x, _data.y,
-		     _data.x2, _data.y2);
+                     _data.x2, _data.y2);
 }
 
 void debug_draw_text(debug_data_t _data){
@@ -118,9 +118,9 @@ void debug_draw_text(debug_data_t _data){
 
   if(g_debug_info.text_texture != NULL){
     SDL_Rect r = {_data.x, _data.y,
-		  g_debug_info.text_surface->w, g_debug_info.text_surface->h};
+                  g_debug_info.text_surface->w, g_debug_info.text_surface->h};
     SDL_RenderCopy(renderer, g_debug_info.text_texture,
-		   NULL, &r);
+                   NULL, &r);
 
   }else{
     return;

@@ -53,4 +53,4 @@ static void debug_draw_text(debug_data_t);
 
 void debug_draw_present();
 
-#endif 
+#endif

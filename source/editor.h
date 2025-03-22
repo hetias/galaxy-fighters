@@ -1,14 +1,22 @@
 #ifndef EDITOR_H
 #define EDITOR_H
 
-#include <SDL2/SDL_render.h>
-#include <SDL2/SDL_timer.h>
-#include<stdio.h>
-#include<stdlib.h>
-#include<stdbool.h>
+#include<SDL2/SDL_render.h>
+#include<SDL2/SDL_timer.h>
+#include <stdbool.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include <stdarg.h>
+#include <string.h>
+#include <math.h>
+#include <assert.h>
+#include <limits.h>
+#include <time.h>
 
-#include"SDL2/SDL.h"
-#include"SDL2/SDL_image.h"
+
+#include "SDL2/SDL.h"
+#include "SDL2/SDL_image.h"
 
 //Nuklear Immediate Mode GUI library
 #define NK_INCLUDE_FIXED_TYPES
@@ -23,11 +31,9 @@
 #include "nuklear.h"
 #include "demo/sdl_renderer/nuklear_sdl_renderer.h"
 
-#include"core/definitions.h"
-
+#include "core/definitions.h"
 #include "core/resources.h"
 #include "core/scene.h"
-#include "core/gg.h"
 #include "core/timing.h"
 
 bool editor_start(resources_t* game_resources, SDL_Window* window);

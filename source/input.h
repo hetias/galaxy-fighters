@@ -16,10 +16,10 @@ typedef struct keyinfo_s{
 }keyinfo_t;
 
 static keyinfo_t game_keys[] = {{SDL_SCANCODE_W, INPUT_NONE},
-						 {SDL_SCANCODE_S, INPUT_NONE},
-						 {SDL_SCANCODE_D, INPUT_NONE},
-						 {SDL_SCANCODE_A, INPUT_NONE},
-						 {SDL_SCANCODE_J, INPUT_NONE}};
+                                {SDL_SCANCODE_S, INPUT_NONE},
+                                {SDL_SCANCODE_D, INPUT_NONE},
+                                {SDL_SCANCODE_A, INPUT_NONE},
+                                {SDL_SCANCODE_J, INPUT_NONE}};
 
 void input_clear(keyinfo_t*);
 void input_update(keyinfo_t*);

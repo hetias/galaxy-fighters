@@ -1,4 +1,4 @@
-GAME_OBJS = container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o gg.o editor.o input.o debug_draw.o
+GAME_OBJS = container.o enemy.o player.o projectile.o scene.o ui.o timing.o spline.o keyframe.o editor.o input.o debug_draw.o
 
 CC = gcc
 
@@ -12,7 +12,7 @@ LINKER_FLAGS = -lSDL2main -lSDL2 -lSDL2_image -lSDL2_ttf -lm
 
 #BUILDING ACTUAL GAME APP
 all: main.o
-	$(CC) main.o $(GAME_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o main
+	$(CC) main.o $(GAME_OBJS) $(INCLUDE_PATHS) $(LIBRARY_PATHS) $(COMPILER_FLAGS) $(LINKER_FLAGS) -o bin/main
 
 main.o: source/main.c $(GAME_OBJS)
 	$(CC) $(INCLUDE_PATHS) -g -c source/main.c
@@ -20,8 +20,8 @@ main.o: source/main.c $(GAME_OBJS)
 debug_draw.o: source/core/debug_draw.h source/core/debug_draw.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/debug_draw.c
 
-gg.o: source/core/gg.h source/core/gg.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/core/gg.c
+##gg.o: source/core/gg.h source/core/gg.c
+##	$(CC) $(INCLUDE_PATHS) -g -c source/core/gg.c
 
 ui.o: source/core/ui.h source/core/ui.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/ui.c
@@ -58,3 +58,7 @@ input.o: source/input.h source/input.c
 
 clean:
 	rm *.o
+	rm	bin/main
+
+run:
+		bin/main

@@ -1,5 +1,4 @@
 #include"timing.h"
-#include <SDL2/SDL_timer.h>
 
 void timeframe_start(time_info* timing){
     timing->frame_start = SDL_GetTicks64();

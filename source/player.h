@@ -4,6 +4,7 @@
 #include<math.h>
 #include<SDL2/SDL.h>
 #include<SDL2/SDL_image.h>
+
 #include"core/definitions.h"
 #include"core/timing.h"
 
@@ -36,7 +37,7 @@ player_t* player_create(SDL_Texture*[]);
 
 //player update.
 //arguments are a player_t* and a reference to SDL_KeyboardState
-int player_update(player_t*,  const Uint8*, game_container*);
+int player_update(player_t*,  const Uint8*, array_list*);
 
 //player draw
 //Draw ship in player position

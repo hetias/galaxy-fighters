@@ -8,7 +8,6 @@
 
 #include"definitions.h"
 
-#include"gg.h"
 #include"container.h"
 #include"resources.h"
 #include"../player.h"
@@ -24,13 +23,13 @@
 typedef struct{
     //entities and containers
     player_t* player;
-    game_container projectiles_container;
-    game_container enemies_container;
+    array_list projectiles_container;
+    array_list enemies_container;
     int max_enemy_id;
 
     //resources
     resources_t *resources;
-    
+
     //scene and level data
     int tick;
 
@@ -51,11 +50,11 @@ scene_t* scene_create(resources_t*, const char*);
 int scene_update(scene_t*);
 int scene_draw(scene_t*, SDL_Renderer*);
 
-int scene_update_projectiles(game_container*, game_container*, player_t*);
-int scene_update_enemies(game_container*, game_container*);
+int scene_update_projectiles(array_list*, array_list*, player_t*);
+int scene_update_enemies(array_list*, array_list*);
 
-int scene_draw_projectiles(game_container*, SDL_Renderer*);
-int scene_draw_enemies(game_container*, SDL_Renderer*);
+int scene_draw_projectiles(array_list*, SDL_Renderer*);
+int scene_draw_enemies(array_list*, SDL_Renderer*);
 
 int scene_destroy(scene_t*);
 
