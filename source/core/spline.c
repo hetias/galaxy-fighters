@@ -142,6 +142,7 @@ void spline_draw_camera(spline_t _spline, SDL_Point camera, SDL_Renderer* render
 	maxit = _spline.total_points - 3.0f;
     }
     SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+    
     for(float j = 0.0f; j < maxit; j += +0.01f){
 	//SDL_FPoint p = to_worldCoords(spline_get_point(_spline, i));
 	SDL_FPoint p = spline_get_point(_spline, j);

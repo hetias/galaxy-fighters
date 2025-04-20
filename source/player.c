@@ -7,31 +7,31 @@
  */
 player_t* player_create(SDL_Texture **_textures_vector){
 
-    player_t* tmp_player = (player_t*)malloc(sizeof(player_t));
+    player_t*	tmp_player = (player_t*)malloc(sizeof(player_t));
 
-    SDL_Point dims = {0, 0};
+    SDL_Point	dims = {0, 0};
     SDL_QueryTexture(_textures_vector[TXT_PLAYER_BLUE],
 		     NULL,
 		     NULL,
 		     &dims.x,
 		     &dims.y);
 
-    tmp_player->hp        = 5;
+    tmp_player->hp = 5;
 
     tmp_player->position = (SDL_FPoint) {300.0f, 600.0f - dims.y};
 
     tmp_player->direction = (SDL_FPoint){0};
 
-    tmp_player->hitbox    = (SDL_FRect){
+    tmp_player->hitbox		  = (SDL_FRect){
 	tmp_player->position.x - (dims.x / 2),
 	tmp_player->position.y - (dims.y / 2),
 	(float)dims.x,
 	(float)dims.y};
-    tmp_player->shootDelay = SHOOT_FAST;
+    tmp_player->shootDelay	  = SHOOT_FAST;
     tmp_player->currentShootDelay = tmp_player->shootDelay;
-    tmp_player->speed     = 550.0f;
-
-    tmp_player->sprite = _textures_vector[TXT_PLAYER_BLUE];
+    tmp_player->speed		  = 550.0f;
+    
+    tmp_player->sprite		  = _textures_vector[TXT_PLAYER_BLUE];
     tmp_player->projectile_sprite = _textures_vector[TXT_LASER_BLUE];
 
     return tmp_player;
@@ -96,13 +96,13 @@ int player_update(player_t* _player, const Uint8* _keyboardState, array_list* pr
     }
 
     //check collision with enemy projectiles
-    if(container_empty(*projectiles_container) == false){
-
+    if(!container_empty(*projectiles_container)){
 	for(int i = 0; i < projectiles_container->len; i++){
 	    projectile_t *prj = container_get(projectiles_container, i);
-	    if(prj->isFriendly == false){
+	    if(!prj->isFriendly){
 		if(SDL_HasIntersectionF(&prj->hitbox, &_player->hitbox)){
 		    _player->hp -= 1;
+		    prj->alive = false;
 		}
 		continue;
 	    }

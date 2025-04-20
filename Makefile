@@ -20,9 +20,6 @@ main.o: source/main.c $(GAME_OBJS)
 debug_draw.o: source/core/debug_draw.h source/core/debug_draw.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/debug_draw.c
 
-##gg.o: source/core/gg.h source/core/gg.c
-##	$(CC) $(INCLUDE_PATHS) -g -c source/core/gg.c
-
 ui.o: source/core/ui.h source/core/ui.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/core/ui.c
 
@@ -53,8 +50,8 @@ timing.o: source/core/timing.h source/core/timing.c
 editor.o: source/editor.h source/editor.c
 	$(CC) $(INCLUDE_PATHS) -g -c source/editor.c
 
-input.o: source/input.h source/input.c
-	$(CC) $(INCLUDE_PATHS) -g -c source/input.c
+input.o: source/core/input.h source/core/input.c
+	$(CC) $(INCLUDE_PATHS) -g -c source/core/input.c
 
 clean:
 	rm *.o

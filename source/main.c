@@ -12,7 +12,6 @@
 
 //Game Internals
 #include"editor.h"
-#include"input.h"
 
 #include"core/global.h"
 #include"core/debug_draw.h"
@@ -107,12 +106,12 @@ int main(void){
 void game_loop(){
 
     SDL_Event e;
-
+    
     //main loop
     while(gIsGameRunning){
 
 	timeframe_start(&gametime);
-
+	
 	nk_input_begin(gui_context);
 	while(SDL_PollEvent(&e)){
 	    switch(e.type){
@@ -137,8 +136,7 @@ void game_loop(){
 	nk_sdl_handle_grab();
 	nk_input_end(gui_context);
 
-	const Uint8* keyboard_state = SDL_GetKeyboardState(NULL);
-
+	//Draw and update	
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0);
 	SDL_RenderClear(renderer);
 

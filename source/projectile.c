@@ -35,7 +35,7 @@ projectile_t projectile_create(SDL_FPoint _position, SDL_FPoint _direction, bool
 int projectile_update(projectile_t* _prj, array_list* _enemy_container, player_t* _player){
     if(_prj == NULL)
 	return -1;
-
+    
     //on bounds check
     if(_prj->position.x > 600 || _prj->position.x < 0 ||
        _prj->position.y > 600 || _prj->position.y < 0){
@@ -49,20 +49,6 @@ int projectile_update(projectile_t* _prj, array_list* _enemy_container, player_t
 	_prj->hitbox.y = _prj->position.y - (_prj->hitbox.h / 2);
     }
 
-    //check collision with enemies
-    for(int i = 0; i < _enemy_container->len; i++){
-	enemy_t* _enemy = container_get(_enemy_container, i);
-
-	if(SDL_HasIntersectionF(&_enemy->hitbox, &_prj->hitbox) && _prj->isFriendly == true){
-	    _prj->alive = false;
-	    break;
-	}
-    }
-
-    //check collision with player
-    if(SDL_HasIntersectionF(&_player->hitbox, &_prj->hitbox) && _prj->isFriendly == false){
-	_prj->alive = false;
-    }
     return 1;
 }
 

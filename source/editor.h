@@ -36,12 +36,18 @@
 #include "core/scene.h"
 #include "core/timing.h"
 
-bool editor_start(resources_t* game_resources, SDL_Window* window);
+typedef struct {
+    int spline_id;
+    int point_id;
+}spline_point_selected_t;
+
+bool editor_start();
 
 void editor_events(SDL_Event e);
 void editor_running(struct nk_context*);
 void editor_draw(SDL_Renderer* r);
 void editor_exit();
+static bool editor_save_to_file();
 
 //static bool is_hovering(SDL_Point, SDL_Rect);
 static int get_spline_count();

@@ -13,6 +13,8 @@ static const char* keyframe_type_names[] = {
 
 static SDL_Point window_size = {600, 600};
 
+static spline_point_selected_t spline_point_selected;
+
 static scene_t* editor_scene;
 
 static SDL_Point camera = {0, 0};
@@ -25,27 +27,31 @@ static bool mwheel_this_frame = false;
 
 static bool lclick_pressed = false;
 static bool rclick_pressed = false;
+
+static bool lclick_released = false;
+static bool rclick_released = false;
+
 static int selected_spline = -1;
+static int selected_spline_point = -1;
 
 static TTF_Font* ui_font = NULL;
 
 static int timeline_tick = 0;
 
-extern SDL_Window *window;
 extern struct nk_colorf bg;
 
-bool editor_start(resources_t* game_resources, SDL_Window* window){
+extern SDL_Window *window;
+extern resources_t game_resources;
+
+
+bool editor_start(){
     SDL_SetWindowResizable(window, SDL_TRUE);
     SDL_MaximizeWindow(window);
 
-    if(!game_resources){
-	return false;
-    }
-
-    editor_scene = scene_create(game_resources, "level.lvl");
-    ui_font = game_resources->font;
-
-#if DEBUG
+    editor_scene = scene_create(&game_resources, "level.lvl");
+    ui_font = game_resources.font;
+    
+#if 0
     const keyframe_t *keyframes = editor_scene->keyframes;
     const int keyframe_count = editor_scene->keyframe_count;
 
@@ -58,8 +64,8 @@ bool editor_start(resources_t* game_resources, SDL_Window* window){
 	printf("---action: %d\n", keyframes[i].action);
 	printf("\n");
     }
-
 #endif
+
 }
 
 void editor_running(struct nk_context *gui_context){
@@ -99,28 +105,57 @@ void editor_running(struct nk_context *gui_context){
 
     //GUI
     int widgets_parameters = NK_WINDOW_BORDER| NK_WINDOW_MINIMIZABLE|NK_WINDOW_TITLE;
-
+    
     int win_x = 0;
     int win_y = 0;
     SDL_GetWindowSize(window, &win_x, &win_y);
-
-    //TOP-BAR
-    struct nk_rect top_bar = nk_rect(0, 0, win_x, 30);
-    if(nk_begin(gui_context, "", top_bar, 0)){
-	nk_layout_row_static(gui_context, 15, 125, 4);
-	if(nk_button_label(gui_context, "archive")){
-
+    
+    //TOP-BAR    
+    #if 1
+    struct nk_rect top_bar = nk_rect(0, 0, win_x, 100);
+    nk_begin(gui_context,
+	     "menu",
+	     nk_rect(0, 0, win_x, win_y / 24),
+	     NK_WINDOW_NO_SCROLLBAR);
+    
+    nk_layout_row_static(gui_context, 20, 50, 3);
+    if(nk_menu_begin_label(gui_context, "File", NK_TEXT_CENTERED, nk_vec2(150, 400))){
+	nk_layout_row_dynamic(gui_context, 20, 1);
+	if(nk_button_label(gui_context, "New")){
+	    editor_scene->current_keyframe = 0;
+	    editor_scene->keyframe_count = 0;
+	    memset(editor_scene->keyframes, 0, sizeof(keyframe_t) * MAX_KEYFRAMES);
+	    
+	    editor_scene->spline_count = 0;
+	    memset(editor_scene->splines, 0, sizeof(spline_t) * MAX_SPLINES);
 	}
 
-	if(nk_button_label(gui_context, "options")){
-
+	if(nk_button_label(gui_context, "Save")){
+	    printf("level save\n");
+	    editor_save_to_file();
 	}
+	
+	if(nk_button_label(gui_context, "Load")){
+	    editor_scene = scene_create(&game_resources, "editor.lvl");
+	}
+	
+	nk_menu_end(gui_context);
     }
+
+    if(nk_menu_begin_label(gui_context, "Visual", NK_TEXT_LEFT, nk_vec2(150, 400))){
+	nk_layout_row_dynamic(gui_context, 20, 1);
+	nk_button_label(gui_context, "New");
+	nk_button_label(gui_context, "Save");
+	nk_button_label(gui_context, "Load");
+	nk_menu_end(gui_context);
+    }    
     nk_end(gui_context);
-
+    #endif
+    
     //SPLINE EDITOR
-    struct nk_rect spline_editor_rect = nk_rect(0, win_y / 24, win_x / 4, win_y);
-
+    #if 1
+    struct nk_rect spline_editor_rect = nk_rect(0, win_y / 24,
+						win_x / 5, win_y);
     if (nk_begin(gui_context, "spline editor", spline_editor_rect, widgets_parameters))
 	{
 	    nk_layout_row_dynamic(gui_context, 30, 2);
@@ -149,9 +184,13 @@ void editor_running(struct nk_context *gui_context){
 
 	}
     nk_end(gui_context);
+    #endif
 
+    
     //KEYFRAME EDITOR
-    struct nk_rect keyframe_editor_rect = nk_rect(win_x - (win_x / 4), 0, win_x / 4, win_y);
+    #if 1
+    struct nk_rect keyframe_editor_rect = nk_rect(win_x - (win_x / 5), win_y / 24,
+						  win_x / 5, win_y);
 
     if(nk_begin(gui_context, "keyframe editor", keyframe_editor_rect, widgets_parameters)){
 
@@ -180,26 +219,12 @@ void editor_running(struct nk_context *gui_context){
 	    }
 
 	    if(current_keyframe != NULL){
-		/* nk_bool active = true; */
-		/* if(nk_checkbox_label(gui_context, "sm", &active)){ */
-		/*   printf("radio\n"); */
-		/* } */
-
 		struct nk_vec2 size = {100, 100};
 		int type_selection = nk_combo(gui_context, keyframe_type_names, 3, current_keyframe->action, 12, size);
 		if(type_selection != current_keyframe->action){
 		    current_keyframe->action = type_selection;
 		    printf("change\n");
 		}
-
-		/* static char bff[32]; */
-		/* static int len = 0; */
-		/* nk_edit_string(gui_context, NK_EDIT_SIMPLE, bff, &len, 32, nk_filter_decimal); */
-
-		/* int num = atoi(bff); */
-		/* if(num > 10){ */
-		/*   printf("invalid number\n"); */
-		/* } */
 
 		//frame parameters
 		//we show parameters only if their supposed to be
@@ -224,20 +249,22 @@ void editor_running(struct nk_context *gui_context){
 		    nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
 		}
 	    }
-
 	}
 
     }
     nk_end(gui_context);
+    #endif
 
     //TIMELINE
-    struct nk_rect timeline_editor_rect = nk_rect(win_x / 4, win_y - (win_y / 3),
-						  (win_x / 4) * 2, win_y / 3);
+    #if 1
+    struct nk_rect timeline_editor_rect = nk_rect(win_x / 5, win_y - (win_y / 4),
+						  (win_x / 5) * 3, win_y / 4);
     if(nk_begin(gui_context, "timeline", timeline_editor_rect, widgets_parameters)){
 	//draw timeline
 	draw_timeline(gui_context);
     }
     nk_end(gui_context);
+    #endif 
 }
 
 void editor_draw(SDL_Renderer* renderer){
@@ -287,8 +314,8 @@ void editor_draw(SDL_Renderer* renderer){
 	const int size = 25;
 	SDL_Rect r = {0, 0, size, size};
 	for(int i = 0; i < s.total_points; i++){
-	    r = (SDL_Rect){(s.points[i].x * WINDOW_WIDTH) - camera.x,
-			   (s.points[i].y * WINDOW_HEIGHT) - camera.y,
+	    r = (SDL_Rect){(s.points[i].x * WINDOW_WIDTH) - camera.x - size / 2,
+			   (s.points[i].y * WINDOW_HEIGHT) - camera.y - size / 2,
 			   size, size};
 	    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
 	    SDL_RenderDrawRect(renderer, &r);
@@ -299,6 +326,8 @@ void editor_draw(SDL_Renderer* renderer){
     //editor_event_start() or something like that...;
     lclick_pressed = false;
     rclick_pressed = false;
+    lclick_released = false;
+    rclick_released = false;    
     mwheel_this_frame = false;
 }
 
@@ -328,18 +357,31 @@ void editor_events(SDL_Event event){
 	mwheel_this_frame = false;
     }
 
-    if(event.type == SDL_MOUSEBUTTONUP &&
-       event.button.button == SDL_BUTTON_LEFT
-       ){
-	lclick_pressed = true;
-    }
+    if(event.type == SDL_MOUSEBUTTONDOWN &&
+       event.button.button == SDL_BUTTON_LEFT)
+	{
+	    lclick_pressed = true;
+	}
+    
+    if(event.type == SDL_MOUSEBUTTONDOWN &&
+       event.button.button == SDL_BUTTON_RIGHT)
+	{
+	    rclick_pressed = true;
+	}
 
     if(event.type == SDL_MOUSEBUTTONUP &&
-       event.button.button == SDL_BUTTON_RIGHT
-       ){
-	rclick_pressed = true;
-    }
-
+       event.button.button == SDL_BUTTON_LEFT)
+	{
+	    lclick_released = true;
+	}
+    
+    if(event.type == SDL_MOUSEBUTTONUP &&
+       event.button.button == SDL_BUTTON_RIGHT)
+	{
+	    rclick_released = true;
+	}
+    
+    
 }
 
 static bool is_hovering(SDL_Point mouse, SDL_Rect rect){
@@ -410,87 +452,36 @@ static void spline_editor(int mouse_click, SDL_Keymod modState){
     spline_t* spline = &(get_splines()[selected_spline]);
     int point_count = spline->total_points;
     SDL_FPoint* points = spline->points;
-
-    ////modify points
-    const int size = 25;
-    SDL_Rect r = {0, 0, size, size};
-    int selected_point = -1;
+    
+    int hovering_point = -1;
+    int size = 25;
+    
+    //find the point being hovered
     for(int i = 0; i < point_count; i++){
-	r = (SDL_Rect){((points[i].x * WINDOW_WIDTH) - camera.x),
-		       ((points[i].y * WINDOW_HEIGHT) - camera.y),
-		       size, size};
-	if(is_hovering(mouse, r) && selected_point < 0){
-	    //if we want to hold, SDL_BUTTON()
-	    if(SDL_BUTTON(mouse_click) == 8 && modState == KMOD_LCTRL){
-		if(point_count > 4){
-		    spline_remove_point(spline, i);
-		}
-	    }else if(SDL_BUTTON(mouse_click) == SDL_BUTTON_LEFT){
-		points[i].x = ((float)(mouse.x - size / 2) + (float)camera.x) / (float)WINDOW_WIDTH;
-		points[i].y = ((float)(mouse.y - size / 2) + (float)camera.y) / (float)WINDOW_HEIGHT;
-		selected_point = i;
-	    }
+	SDL_Rect r = {0, 0, size, size};
+	r.x = (points[i].x * WINDOW_WIDTH) - camera.x - size / 2;
+	r.y = (points[i].y * WINDOW_WIDTH) - camera.y - size / 2;	
+	
+	if(is_hovering(mouse, r)){
+	    hovering_point = i;
 	}
     }
 
-    //if we only want mouse press, rclick_pressed/lclicl_pressed...
-    if(rclick_pressed && modState == KMOD_NONE){
-	SDL_FPoint p;
-	p.x = ((float)(mouse.x - size / 2) + (float)camera.x) /
-	    (float)WINDOW_WIDTH;
-	p.y = ((float)(mouse.y - size / 2) + (float)camera.y) /
-	    (float)WINDOW_HEIGHT;
-
-	if(point_count + 1 < MAX_POINTS){
-	    spline_add_point(&(get_splines()[selected_spline]), p);
-	}else{
-	    printf("no more points can be added\n");
-	}
-    }
-}
-
-//ui elements
-static bool ui_button(SDL_Rect rect, const char* text, SDL_Renderer* renderer){
-    bool clicked = false;
-    bool hover = false;
-
-    if(is_hovering(mouse, rect)){
-	hover = true;
-	if(lclick_pressed){
-	    clicked = true;
-	}
+    //given a point being hovered
+    //we want to save it if we click it
+    //or forget it if we release
+    if(hovering_point >= 0 && lclick_pressed){
+	selected_spline_point = hovering_point;	
+    }else if(hovering_point >= 0 && lclick_released){
+	selected_spline_point = -1;	
     }
 
-    if(clicked){
-	SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-    }else{
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+    //we update the hovered point's position if there's such selected
+    if(selected_spline_point >= 0){
+	spline->points[selected_spline_point].x = ((float)(mouse.x) + (float)camera.x) / (float)WINDOW_WIDTH;
+	spline->points[selected_spline_point].y = ((float)(mouse.y) + (float)camera.y) / (float)WINDOW_HEIGHT;
     }
-
-    if(hover){
-	SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-    }else{
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    }
-
-    SDL_RenderFillRect(renderer, &rect);
-
-    if(text){
-	SDL_Surface* sf = NULL;
-	SDL_Texture* tx = NULL;
-	SDL_Rect r = {0};
-	sf = TTF_RenderText_Solid(ui_font, text, (SDL_Color){0, 0, 0,});
-	tx = SDL_CreateTextureFromSurface(renderer, sf);
-
-	r = (SDL_Rect){rect.x + (rect.w / 2), rect.y + (rect.h / 2),
-		       sf->w, sf->h};
-
-	SDL_RenderCopy(renderer, tx, 0, &r);
-
-	SDL_FreeSurface(sf);
-	SDL_DestroyTexture(tx);
-    }
-    return clicked;
+    
 }
 
 static void draw_timeline(struct nk_context *gui_context){
@@ -525,10 +516,9 @@ static void draw_timeline(struct nk_context *gui_context){
 		timeline_tick = first_tick;
 		break;
 	    }
-
 	}
     }
-
+    
     if(nk_button_label(gui_context, "next")){
 	for(int i = 0; i < k_count-1; i++){
 
@@ -589,4 +579,65 @@ static bool on_keyframe(){
     }
 
     return false;
+}
+
+bool editor_save_to_file(){
+
+    /*
+    //we check if there is a file with that name
+    bool file_exists = false;
+    FILE *level_file = fopen("editor.lvl", "r");
+
+    if(level_file != NULL){
+	file_exists = true;
+	fclose(level_file);
+    }
+
+    //now we do real stuff
+    if(file_exists){
+	printf("file already exists\n");
+    }else{
+	printf("file doesn't exists\n");
+    }
+
+     */
+    
+    FILE* level_file = fopen("level.lvl", "wb");
+
+    
+    if(level_file == NULL){
+	printf("failed saving file\n");
+    }
+
+    fputs("PATHS\n", level_file);
+    for(int i = 0; i < editor_scene->spline_count; i++){
+	spline_t current_spline = editor_scene->splines[i];
+
+	//P mark for starting point	
+	fputs("P", level_file);
+	
+	//Write total points of spline
+	fwrite(&current_spline.total_points, sizeof(size_t), 1, level_file);
+	
+	//Write all points
+	fwrite(current_spline.points, sizeof(SDL_FPoint), current_spline.total_points, level_file );
+	
+	//Write if loop
+	fwrite(&current_spline.loop, sizeof(bool), 1, level_file);
+    }
+    
+    fputs("\nKEYFRAMES\n", level_file);
+    for(int i = 0; i < editor_scene->keyframe_count; i++){
+	keyframe_t current_keyframe = editor_scene->keyframes[i];
+	
+	//K mark for starting keyframe
+	fputs("K", level_file);
+
+	//Keyframe
+	fwrite(&current_keyframe, sizeof(keyframe_t), 1, level_file);
+    }
+    
+    fclose(level_file);
+    
+    return true;    
 }

@@ -28,8 +28,8 @@ enemy_t enemy_create(SDL_Texture** _texturesVector, int _id){
     enemy.projectile_texture   = _texturesVector[TXT_LASER_RED];
     enemy.hp       = 4;
     enemy.shootDelay = SHOOT_SLOW;
-    enemy.speed = 1.0f;
     enemy.currentDelay = enemy.shootDelay;
+    enemy.speed = 1.0f;
     enemy.path_time = 0.0f;
     enemy.path = NULL;
     enemy.path_state = PATH_STATE_FORWARD;
@@ -70,7 +70,7 @@ int enemy_update(enemy_t* _enemy, array_list* projectiles_container){
     //movin'
     //TODO:: Enemy doesn't have speed perse
     //becase of this there is no way to update
-    //it's position  with delta time on a straight
+    //it's position with delta time on a straight
     //forward way. How "fast" it moves it's determined
     //by spline_get_point and path_time.
     int up = enemy_update_path(_enemy);
@@ -79,23 +79,16 @@ int enemy_update(enemy_t* _enemy, array_list* projectiles_container){
     if(!container_empty(*projectiles_container)){
 	projectile_t *prj = NULL;
 
-
 	for(int i = 0; i < projectiles_container->len; i++){
 	    prj = container_get(projectiles_container, i);
 	    if(prj->isFriendly){
-
-		//for some reason i cant make a call for SDL_HasIntersectionF...so a little bit of magic here...
-		//TODO::Make good use of the float values here, maybe just implementing an aabb collision check
-		SDL_Rect a = {(int)prj->hitbox.x, (int)prj->hitbox.y, (int)prj->hitbox.w, (int)prj->hitbox.h};
-		SDL_Rect b = {(int)_enemy->hitbox.x, (int)_enemy->hitbox.y, (int)_enemy->hitbox.w, (int)_enemy->hitbox.h};
-		if(SDL_HasIntersection(&a, &b)){
+		if(SDL_HasIntersectionF(&_enemy->hitbox, &prj->hitbox)){
 		    _enemy->hp -= 1;
-		    container_remove(projectiles_container, i);
+		    prj->alive = false;
 		    if(_enemy->hp < 1)
 			return -2;
 		}
 	    }
-
 	}
     }
 

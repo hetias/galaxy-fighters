@@ -29,11 +29,6 @@ scene_t* scene_create(resources_t *_resources, const char* level_file){
 	new_scene->keyframe_count = 0;
     }
 
-#if DEBUG
-    printf("loaded %d paths from file\n", new_scene->spline_count);
-    printf("loaded %d keyframes from file\n", new_scene->keyframe_count);
-#endif
-
     //start ticks
     new_scene->tick = 0;
     return new_scene;
@@ -54,6 +49,11 @@ int scene_update(scene_t* _scene){
     //update scene
     scene_next_action(_scene);
 
+    //update projectiles
+    scene_update_projectiles(&_scene->projectiles_container,
+			     &_scene->enemies_container,
+			     _scene->player);
+    
     //update player
     if(_scene->player->hp > 0){
 	player_update(_scene->player,
@@ -64,12 +64,7 @@ int scene_update(scene_t* _scene){
     //update all enemies
     scene_update_enemies(&_scene->enemies_container,
 			 &_scene->projectiles_container);
-
-    //update projectiles
-    scene_update_projectiles(&_scene->projectiles_container,
-			     &_scene->enemies_container,
-			     _scene->player);
-
+    
     _scene->tick++;
 
     //print current tick as debug info
@@ -356,11 +351,6 @@ bool scene_load_level(const char* file_path, scene_t *_scene){
 	_scene->spline_count += 1;
 
 	c = getc(level_file);
-    }
-
-    //check section separator
-    if(c == '\n'){
-	printf("Section separator found\n");
     }
 
     //clean buffer
