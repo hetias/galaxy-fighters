@@ -261,9 +261,10 @@ void scene_next_action(scene_t* _scene){
 	case KEYFRAME_ENEMY_ADD:{
 	    //update max_enemy_id
 	    _scene->max_enemy_id += 1;
-
+	    
 	    //create enemy and assing max id to it
 	    enemy_t e = enemy_create(_scene->resources->textures, _scene->max_enemy_id);
+	    enemy_change_path(&e, &_scene->splines[current_keyframe.params.pathid]);
 	    container_add(&_scene->enemies_container, (void*)&e);
 	}break;
 

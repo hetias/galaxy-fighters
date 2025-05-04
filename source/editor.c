@@ -51,7 +51,7 @@ bool editor_start(){
     editor_scene = scene_create(&game_resources, "level.lvl");
     ui_font = game_resources.font;
     
-#if 0
+#if 1
     const keyframe_t *keyframes = editor_scene->keyframes;
     const int keyframe_count = editor_scene->keyframe_count;
 
@@ -142,11 +142,11 @@ void editor_running(struct nk_context *gui_context){
 	nk_menu_end(gui_context);
     }
 
-    if(nk_menu_begin_label(gui_context, "Visual", NK_TEXT_LEFT, nk_vec2(150, 400))){
+    if(nk_menu_begin_label(gui_context, "View", NK_TEXT_LEFT, nk_vec2(150, 400))){
 	nk_layout_row_dynamic(gui_context, 20, 1);
-	nk_button_label(gui_context, "New");
-	nk_button_label(gui_context, "Save");
-	nk_button_label(gui_context, "Load");
+	nk_button_label(gui_context, "1");
+	nk_button_label(gui_context, "2");
+	nk_button_label(gui_context, "3");
 	nk_menu_end(gui_context);
     }    
     nk_end(gui_context);
@@ -202,7 +202,7 @@ void editor_running(struct nk_context *gui_context){
 	    //frame tick
 	    snprintf(text_buffer, 64, "tick: %d", timeline_tick);
 	    nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
-
+	    
 	    //frame action
 	    keyframe_t *current_keyframe = NULL;
 	    for(int i = 0; i < k_count; i++){
@@ -217,8 +217,9 @@ void editor_running(struct nk_context *gui_context){
 		    break;
 		}
 	    }
-
+	    
 	    if(current_keyframe != NULL){
+		printf("path id: %d\n", current_keyframe->params.pathid);
 		struct nk_vec2 size = {100, 100};
 		int type_selection = nk_combo(gui_context, keyframe_type_names, 3, current_keyframe->action, 12, size);
 		if(type_selection != current_keyframe->action){
@@ -228,25 +229,84 @@ void editor_running(struct nk_context *gui_context){
 
 		//frame parameters
 		//we show parameters only if their supposed to be
-		//ussable for the current keyframe type
-		nk_label(gui_context, "+paramaters+ ", NK_TEXT_CENTERED);
+		//usable for the current keyframe type
+		nk_label(gui_context, "paramaters ", NK_TEXT_CENTERED);
+		static int dnc_edit_text_len = 0;
+		static char dnc_edit_text[32] = "";
 
+		static int anc_edit_text_len = 0;
+		static char anc_edit_text[32] = "";
+
+		static int a_edit_text_len = 0;
+		static char a_edit_text[32] = "";
+		
+		
 		if(current_keyframe->action == KEYFRAME_ENEMY_DESTROY ||
 		   current_keyframe->action == KEYFRAME_ENEMY_CHANGE_PATH){
-		    snprintf(text_buffer, 64, "id: %d", current_keyframe->params.id);
-		    nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
-
+		    
+		    nk_layout_row_dynamic(gui_context, 24, 3);
+		    nk_label(gui_context, "id: ", NK_TEXT_LEFT);
+		    
+		    nk_flags flags = nk_edit_string(gui_context, NK_EDIT_SIMPLE,
+						    dnc_edit_text, &dnc_edit_text_len,
+						    5, nk_filter_decimal);
+		    
+		    if(flags == 2){
+			//inactivo
+			snprintf(dnc_edit_text, 32, "%d", current_keyframe->params.id);
+			dnc_edit_text_len = strlen(dnc_edit_text);
+		    }
+		    
+		    if(nk_button_label(gui_context, "Ok")){
+			memset(dnc_edit_text + dnc_edit_text_len, 0, 32 - dnc_edit_text_len);
+			int numbero = atoi(dnc_edit_text);
+			printf("numbero: %d\n", numbero);
+			
+			current_keyframe->params.id = numbero;
+		    }
 		}
 
 		if(current_keyframe->action == KEYFRAME_ENEMY_ADD){
-		    snprintf(text_buffer, 64, "enemy type: %d", current_keyframe->params.enemy_type);
-		    nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+		    nk_layout_row_dynamic(gui_context, 24, 3);
+		    nk_label(gui_context, "Enemy type:", NK_TEXT_LEFT);
+
+		    nk_flags flag = nk_edit_string(gui_context, NK_EDIT_SIMPLE,
+						   a_edit_text, &a_edit_text_len,
+						   5, nk_filter_decimal);
+		    if(flag == 2){
+			snprintf(a_edit_text, 32, "%d", current_keyframe->params.enemy_type);
+			a_edit_text_len = strlen(a_edit_text);
+		    }
+
+		    if(nk_button_label(gui_context, "Ok")){
+			memset(a_edit_text + a_edit_text_len, 0, 32 - a_edit_text_len);
+			int numbero = atoi(a_edit_text);
+
+			current_keyframe->params.enemy_type = numbero;
+		    }
+		    
 		}
 
 		if(current_keyframe->action == KEYFRAME_ENEMY_ADD ||
 		   current_keyframe->action == KEYFRAME_ENEMY_CHANGE_PATH){
-		    snprintf(text_buffer, 64, "path id: %d", current_keyframe->params.pathid);
-		    nk_label(gui_context, text_buffer, NK_TEXT_LEFT);
+		    nk_layout_row_dynamic(gui_context, 24, 3);
+		    nk_label(gui_context, "Path id:", NK_TEXT_LEFT);
+
+		    nk_flags flag = nk_edit_string(gui_context, NK_EDIT_SIMPLE,
+						   anc_edit_text, &anc_edit_text_len,
+						   5, nk_filter_decimal);
+		    if(flag == 2){
+			snprintf(anc_edit_text, 32, "%d", current_keyframe->params.pathid);
+			anc_edit_text_len = strlen(anc_edit_text);
+		    }
+
+		    if(nk_button_label(gui_context, "Ok")){
+			memset(anc_edit_text + anc_edit_text_len, 0, 32 - anc_edit_text_len);
+			int numbero = atoi(anc_edit_text);
+
+			current_keyframe->params.pathid = numbero;
+			printf("new path id: %d\n", current_keyframe->params.pathid);
+		    }
 		}
 	    }
 	}
@@ -582,28 +642,7 @@ static bool on_keyframe(){
 }
 
 bool editor_save_to_file(){
-
-    /*
-    //we check if there is a file with that name
-    bool file_exists = false;
-    FILE *level_file = fopen("editor.lvl", "r");
-
-    if(level_file != NULL){
-	file_exists = true;
-	fclose(level_file);
-    }
-
-    //now we do real stuff
-    if(file_exists){
-	printf("file already exists\n");
-    }else{
-	printf("file doesn't exists\n");
-    }
-
-     */
-    
     FILE* level_file = fopen("level.lvl", "wb");
-
     
     if(level_file == NULL){
 	printf("failed saving file\n");

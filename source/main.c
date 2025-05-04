@@ -178,12 +178,11 @@ void game_loop(){
 	SDL_RenderPresent(renderer);
 
 	timeframe_end(&gametime);
-
+	
 	Uint64 elapsed = time_get_elapsed(&gametime);
-
+	
 	if(elapsed < 16)
 	    SDL_Delay(16 - elapsed);
-
     }
     scene_destroy(game_scene);
 }
