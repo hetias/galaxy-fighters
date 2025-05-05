@@ -684,8 +684,19 @@ static void draw_timeline(struct nk_context *gui_context){
     }
 
     if(nk_button_label(gui_context, "remove")){
-	if(!on_keyframe()){
-	    printf("cleaning keyframe\n");
+	if(on_keyframe()){
+	    //bool finished = false;
+	    for(int i = 0; i < k_count; i++){
+		if(all_keyframes[i].tick == timeline_tick){
+		    printf("keyframe index: %d\n", i);
+		    //make it pop out
+		    for(int j = i; j < k_count - 1; j++){
+			editor_scene->keyframes[j] = editor_scene->keyframes[j+1];
+		    }
+		}
+	    }
+
+	    editor_scene->keyframe_count -= 1;
 	}else{
 	    printf("no keyframe selected\n");
 	}
