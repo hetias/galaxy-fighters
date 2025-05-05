@@ -219,7 +219,6 @@ void editor_running(struct nk_context *gui_context){
 	    }
 	    
 	    if(current_keyframe != NULL){
-		printf("path id: %d\n", current_keyframe->params.pathid);
 		struct nk_vec2 size = {100, 100};
 		int type_selection = nk_combo(gui_context, keyframe_type_names, 3, current_keyframe->action, 12, size);
 		if(type_selection != current_keyframe->action){
@@ -286,7 +285,7 @@ void editor_running(struct nk_context *gui_context){
 		    }
 		    
 		}
-
+		
 		if(current_keyframe->action == KEYFRAME_ENEMY_ADD ||
 		   current_keyframe->action == KEYFRAME_ENEMY_CHANGE_PATH){
 		    nk_layout_row_dynamic(gui_context, 24, 3);
@@ -305,7 +304,6 @@ void editor_running(struct nk_context *gui_context){
 			int numbero = atoi(anc_edit_text);
 
 			current_keyframe->params.pathid = numbero;
-			printf("new path id: %d\n", current_keyframe->params.pathid);
 		    }
 		}
 	    }
@@ -608,8 +606,91 @@ static void draw_timeline(struct nk_context *gui_context){
     }
 
     if(nk_button_label(gui_context, "add")){
-	printf("add on current position\n");
+	if(!on_keyframe()){
+	    printf("adding a new keyframe\n");
+	    keyframe_params kp = {.id = -1, .enemy_type = -1, .pathid = -1, };
+	    keyframe_t k = {.tick = timeline_tick, .action = KEYFRAME_ENEMY_ADD, kp};
+
+	    if(k_count < MAX_KEYFRAMES){
+		editor_scene->keyframes[k_count] = k;
+		editor_scene->keyframe_count += 1;
+		k_count = get_keyframe_count();
+
+		#if 0
+		printf("ticks order: \n");
+		for(int i = 0; i < k_count; i++){
+		    printf("%d;", all_keyframes[i].tick);
+		}
+		printf("\n");
+		#endif
+		
+		//we gotta sort'em out
+		int i = 0;
+		bool swaped = false;
+		while(true){
+		    keyframe_t *current = &editor_scene->keyframes[i];
+		    
+		    //printf("%d", current->tick);
+		    //printf("[");
+		    for(int j = i ; j < k_count-1; j++){
+			keyframe_t *next = &editor_scene->keyframes[j+1];
+			//printf("%d;", next->tick);
+
+			if(current->tick > next->tick){
+			    //we gotta swap them
+			    //printf("\npre swap:\n");
+			    //printf("current: %d - next: %d\n", current->tick,
+			    //next->tick);
+			    
+			    swaped = true;
+			    keyframe_t tmp;
+			    tmp = *current;
+			    *current = *next;
+			    *next = tmp;
+			    //printf("\npost swap:\n");
+			    //printf("current: %d - next: %d\n", current->tick,
+			    //next->tick);			    
+			}
+		    }
+		    //printf("]\n");
+		    
+		    if(swaped == true){
+			swaped = false;
+			//printf("swaped\n");
+		    }else{
+			swaped = false;
+			i++;
+			//printf("not swaped\n");
+		    }
+		    if(i == k_count || i > MAX_KEYFRAMES * 2){
+			break;
+		    }
+		}
+
+		#if 0
+		printf("ticks: \n");
+		for(int i = 0; i < k_count; i++){
+		    printf("%d;", all_keyframes[i].tick);
+		}
+		printf("\n");
+		#endif
+	    }
+	    
+	    
+	}else{
+	    printf("cant add more keyframes on same tick\n");
+	}
+	
     }
+
+    if(nk_button_label(gui_context, "remove")){
+	if(!on_keyframe()){
+	    printf("cleaning keyframe\n");
+	}else{
+	    printf("no keyframe selected\n");
+	}
+	
+    }    
 
     nk_layout_row_begin(gui_context, NK_DYNAMIC, 25, 2);
 
